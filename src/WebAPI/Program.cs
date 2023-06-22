@@ -1,3 +1,4 @@
+using Application;
 using HealthChecks.UI.Client;
 using Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -5,8 +6,12 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddApplicationServices();
+
 var mongoDbConnStr = builder.Configuration.GetSection("MongoDbSettings:ConnectionURI").Get<string>();
 builder.Services.AddHealthChecks().AddMongoDb(mongoDbConnStr!,name:"MongoDB");
+
+
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddControllers();

@@ -12,7 +12,7 @@ public static class ServiceRegistration
     {
         services.Configure<MongoDbSettings>(configuration.GetSection("MongoDbSettings"));
         
-        services.AddScoped(typeof(IMongoCollectionService<>), typeof(MongoCollectionService<>));
+        services.AddScoped(typeof(IMongoService<>), typeof(MongoService<>));
 
         services.AddSingleton<IJwtHelper, JwtHelper>();
 

@@ -39,7 +39,8 @@ public sealed class JwtHelper : IJwtHelper
             tokenOptions.Audience,
             expires: _accessTokenExpiration,
             notBefore: DateTime.Now,
-            signingCredentials: signingCredentials
+            signingCredentials: signingCredentials,
+            claims:SetClaims(user)
         );
         return jwt;
     }
