@@ -1,0 +1,48 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A9AC01D7-B129-40A0-87DC-A7FCB98931AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "src\Domain\Domain.csproj", "{7D1D4EE7-E9B9-4341-A364-33AEA620E73B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "src\Infrastructure\Infrastructure.csproj", "{199FA90E-28A9-4B34-83E9-171FB264122F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "src\Application\Application.csproj", "{DA1A7D3D-D88E-473C-9FC4-9D0ED4B04A59}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI", "src\WebAPI\WebAPI.csproj", "{9B91FC1D-E109-4475-BCAF-BFA66A782565}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{2D173F4D-F948-4792-938F-2EAB66D7F3CB}"
+	ProjectSection(SolutionItems) = preProject
+		docker\docker-compose.yml = docker\docker-compose.yml
+		docker\mongo-init.js = docker\mongo-init.js
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7D1D4EE7-E9B9-4341-A364-33AEA620E73B} = {A9AC01D7-B129-40A0-87DC-A7FCB98931AA}
+		{199FA90E-28A9-4B34-83E9-171FB264122F} = {A9AC01D7-B129-40A0-87DC-A7FCB98931AA}
+		{DA1A7D3D-D88E-473C-9FC4-9D0ED4B04A59} = {A9AC01D7-B129-40A0-87DC-A7FCB98931AA}
+		{9B91FC1D-E109-4475-BCAF-BFA66A782565} = {A9AC01D7-B129-40A0-87DC-A7FCB98931AA}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7D1D4EE7-E9B9-4341-A364-33AEA620E73B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D1D4EE7-E9B9-4341-A364-33AEA620E73B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D1D4EE7-E9B9-4341-A364-33AEA620E73B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D1D4EE7-E9B9-4341-A364-33AEA620E73B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{199FA90E-28A9-4B34-83E9-171FB264122F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{199FA90E-28A9-4B34-83E9-171FB264122F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{199FA90E-28A9-4B34-83E9-171FB264122F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{199FA90E-28A9-4B34-83E9-171FB264122F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA1A7D3D-D88E-473C-9FC4-9D0ED4B04A59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA1A7D3D-D88E-473C-9FC4-9D0ED4B04A59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA1A7D3D-D88E-473C-9FC4-9D0ED4B04A59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA1A7D3D-D88E-473C-9FC4-9D0ED4B04A59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B91FC1D-E109-4475-BCAF-BFA66A782565}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B91FC1D-E109-4475-BCAF-BFA66A782565}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B91FC1D-E109-4475-BCAF-BFA66A782565}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B91FC1D-E109-4475-BCAF-BFA66A782565}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
