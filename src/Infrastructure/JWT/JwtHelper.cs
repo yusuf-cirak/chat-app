@@ -27,7 +27,6 @@ public sealed class JwtHelper : IJwtHelper
         JwtSecurityToken jwt = CreateJwtSecurityToken(_tokenOptions, user, signingCredentials);
         JwtSecurityTokenHandler jwtSecurityTokenHandler = new();
         string? token = jwtSecurityTokenHandler.WriteToken(jwt);
-
         return new AccessToken(token, _accessTokenExpiration);
     }
 
@@ -40,7 +39,7 @@ public sealed class JwtHelper : IJwtHelper
             expires: _accessTokenExpiration,
             notBefore: DateTime.Now,
             signingCredentials: signingCredentials,
-            claims:SetClaims(user)
+            claims: SetClaims(user)
         );
         return jwt;
     }

@@ -1,15 +1,17 @@
 using System.Reflection;
+using Application.Common.Behaviors;
 using Application.Common.Rules;
+using FluentValidation;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application;
 
 public static class ServiceRegistration
 {
-    public static IServiceCollection AddBusinessRuleServices(this IServiceCollection services,Func<IServiceCollection,Type,IServiceCollection>? addWithLifeCycle=null)
+    public static void AddBusinessRuleServices(this IServiceCollection services,Assembly assembly,Func<IServiceCollection,Type,IServiceCollection>? addWithLifeCycle=null)
     {
         var typeOfBusinessRules = typeof(BaseBusinessRules);
-        var assembly = Assembly.GetExecutingAssembly();
         var types = assembly.GetTypes().Where(t => t.IsSubclassOf(typeOfBusinessRules) && typeOfBusinessRules != t);
 
         if (addWithLifeCycle is null)
@@ -26,17 +28,20 @@ public static class ServiceRegistration
                 addWithLifeCycle(services, businessRuleType);
             }
         }
-        
-        return services;
 
     }
     
     public static void AddApplicationServices(this IServiceCollection services)
     {
-        AddBusinessRuleServices(services);
-
         var executingAssembly = Assembly.GetExecutingAssembly();
+
+        AddBusinessRuleServices(services,executingAssembly);
+
         services.AddMediatR(e=>e.RegisterServicesFromAssembly(executingAssembly));
+        
+        // FluentValidation dependency injection
+        services.AddValidatorsFromAssembly(executingAssembly);
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestValidationBehavior<,>));;
     }
     
 }

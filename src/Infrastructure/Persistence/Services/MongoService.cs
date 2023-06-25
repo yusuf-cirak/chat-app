@@ -8,7 +8,7 @@ namespace Infrastructure.Persistence.Services;
 public sealed class MongoService<T> : IMongoService<T>
     where T : BaseEntity, new()
 {
-    public IMongoCollection<T> Collection { get; set; }
+    public IMongoCollection<T> Collection { get; }
 
     public MongoService(IOptions<MongoDbSettings> mongoDbSettings)
     {

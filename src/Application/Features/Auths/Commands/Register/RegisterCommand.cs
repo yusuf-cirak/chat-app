@@ -4,7 +4,6 @@ using Infrastructure.Hashing;
 using Infrastructure.JWT;
 using Infrastructure.Persistence.Services;
 using MediatR;
-using MongoDB.Driver;
 
 namespace Application.Features.Auths.Commands.Register;
 
