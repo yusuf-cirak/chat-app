@@ -1,10 +1,10 @@
 ﻿using Domain.Common;
 using MongoDB.Driver;
 
-namespace Infrastructure.Persistence.Services;
+namespace Application.Services.Abstractions;
 
 public interface IMongoService<T>
     where T : BaseEntity, new()
 {
-     IMongoCollection<T> Collection { get; }
+    IMongoCollection<T> Collection { get; }
 }

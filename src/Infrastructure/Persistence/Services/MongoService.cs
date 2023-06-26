@@ -1,19 +1,20 @@
-﻿using Domain.Common;
+﻿using Application.Services.Abstractions;
+using Domain.Common;
 using Infrastructure.Dtos;
-using MongoDB.Driver;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 namespace Infrastructure.Persistence.Services;
 
 public sealed class MongoService<T> : IMongoService<T>
     where T : BaseEntity, new()
 {
-    public IMongoCollection<T> Collection { get; }
-
     public MongoService(IOptions<MongoDbSettings> mongoDbSettings)
     {
         MongoClient client = new(mongoDbSettings.Value.ConnectionUri);
         IMongoDatabase db = client.GetDatabase(mongoDbSettings.Value.DatabaseName);
         Collection = db.GetCollection<T>(typeof(T).Name);
     }
+
+    public IMongoCollection<T> Collection { get; }
 }

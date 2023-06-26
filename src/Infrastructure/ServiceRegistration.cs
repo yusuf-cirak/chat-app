@@ -1,4 +1,5 @@
-﻿using Infrastructure.Dtos;
+﻿using Application.Services.Abstractions;
+using Infrastructure.Dtos;
 using Infrastructure.JWT;
 using Infrastructure.Persistence.Services;
 using Microsoft.Extensions.Configuration;
@@ -8,13 +9,12 @@ namespace Infrastructure;
 
 public static class ServiceRegistration
 {
-    public static void AddInfrastructureServices(this IServiceCollection services,IConfiguration configuration)
+    public static void AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<MongoDbSettings>(configuration.GetSection("MongoDbSettings"));
-        
+
         services.AddScoped(typeof(IMongoService<>), typeof(MongoService<>));
 
         services.AddSingleton<IJwtHelper, JwtHelper>();
-
     }
 }

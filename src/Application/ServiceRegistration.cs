@@ -9,7 +9,8 @@ namespace Application;
 
 public static class ServiceRegistration
 {
-    public static void AddBusinessRuleServices(this IServiceCollection services,Assembly assembly,Func<IServiceCollection,Type,IServiceCollection>? addWithLifeCycle=null)
+    public static void AddBusinessRuleServices(this IServiceCollection services, Assembly assembly,
+        Func<IServiceCollection, Type, IServiceCollection>? addWithLifeCycle = null)
     {
         var typeOfBusinessRules = typeof(BaseBusinessRules);
         var types = assembly.GetTypes().Where(t => t.IsSubclassOf(typeOfBusinessRules) && typeOfBusinessRules != t);
@@ -28,20 +29,22 @@ public static class ServiceRegistration
                 addWithLifeCycle(services, businessRuleType);
             }
         }
-
     }
-    
+
     public static void AddApplicationServices(this IServiceCollection services)
     {
         var executingAssembly = Assembly.GetExecutingAssembly();
 
-        AddBusinessRuleServices(services,executingAssembly);
+        AddBusinessRuleServices(services, executingAssembly);
 
-        services.AddMediatR(e=>e.RegisterServicesFromAssembly(executingAssembly));
-        
+        services.AddMediatR(cfg => { cfg.RegisterServicesFromAssembly(executingAssembly); });
+
+
+        // PerformanceBehavior dependency injection
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformanceBehavior<,>));
+
         // FluentValidation dependency injection
         services.AddValidatorsFromAssembly(executingAssembly);
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestValidationBehavior<,>));;
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestValidationBehavior<,>));
     }
-    
 }

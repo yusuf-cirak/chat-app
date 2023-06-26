@@ -1,5 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Application.Common.Models;
+using Application.Services.Abstractions;
 using Domain.Entities;
 using Infrastructure.Security.Encryption;
 using Microsoft.Extensions.Configuration;
@@ -9,7 +11,6 @@ namespace Infrastructure.JWT;
 
 public sealed class JwtHelper : IJwtHelper
 {
-    private IConfiguration Configuration { get; }
     private readonly TokenOptions _tokenOptions;
     private DateTime _accessTokenExpiration;
 
@@ -18,6 +19,8 @@ public sealed class JwtHelper : IJwtHelper
         Configuration = configuration;
         _tokenOptions = Configuration.GetSection("TokenOptions").Get<TokenOptions>()!;
     }
+
+    private IConfiguration Configuration { get; }
 
     public AccessToken CreateToken(User user)
     {
