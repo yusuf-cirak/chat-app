@@ -1,0 +1,49 @@
+<div class="flex-auto px-4 lg:px-10 py-10 pt-0">
+  <div class="text-gray-500 text-center mb-3 font-bold">
+    <h1>Register a new account</h1>
+  </div>
+  <form>
+    <div class="relative w-full mb-3">
+      <label
+        class="block uppercase text-gray-700 text-xs font-bold mb-2"
+        for="grid-password"
+        >Username</label
+      ><input
+        type="text"
+        class="border-0 px-3 py-3 placeholder-gray-400 text-gray-700 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+        placeholder="Username"
+        style="transition: all 0.15s ease 0s"
+      />
+    </div>
+    <div class="relative w-full mb-3">
+      <label
+        class="block uppercase text-gray-700 text-xs font-bold mb-2"
+        for="grid-password"
+        >Password</label
+      ><input
+        type="password"
+        class="border-0 px-3 py-3 placeholder-gray-400 text-gray-700 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+        placeholder="Password"
+        style="transition: all 0.15s ease 0s"
+      />
+    </div>
+    <div>
+      <label class="inline-flex items-center cursor-pointer"
+        ><span
+          class="ml-2 text-sm font-semibold text-gray-700 active:text-wp-blue underline"
+          [routerLink]="['/login']"
+          >I have an account</span
+        ></label
+      >
+    </div>
+    <div class="text-center mt-6">
+      <button
+        class="bg-wp-blue text-white active:bg-opacity-50 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full"
+        type="button"
+        style="transition: all 0.15s ease 0s"
+      >
+        Register
+      </button>
+    </div>
+  </form>
+</div>

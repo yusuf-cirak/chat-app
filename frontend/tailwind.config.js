@@ -5,7 +5,12 @@ module.exports = {
     content: ["./src/**/*.{html,ts}"],
   },
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        "wp-blue": "#00a884",
+        "wp-gray": "#d1d7db",
+      },
+    },
   },
   plugins: [require("@tailwindcss/forms")],
 };
