@@ -25,14 +25,24 @@ import { InputComponent } from 'src/app/shared/components/input/input.component'
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent {
-  formGroup: FormGroup;
+  formGroup!: FormGroup;
   isFormSubmitted: WritableSignal<boolean> = signal(false);
 
-  constructor(private formBuilder: FormBuilder) {
-    this.formGroup = formBuilder.group({
+  constructor(private formBuilder: FormBuilder) {}
+
+  ngOnInit() {
+    this.formGroup = this.formBuilder.group({
       username: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
+  }
+
+  getFormControl(name: string): FormControl {
+    const control = this.formGroup.get(name);
+    if (!control) {
+      throw new Error(`FormControl ${name} not found`);
+    }
+    return control as FormControl;
   }
 
   submitForm() {

@@ -7,11 +7,15 @@
       label="Username"
       placeholder="Username"
       inputType="text"
+      [parentGroup]="formGroup"
+      controlName="username"
     ></app-input>
     <app-input
       label="Password"
       placeholder="Password"
       inputType="password"
+      [parentGroup]="formGroup"
+      controlName="password"
     ></app-input>
     <div>
       <label class="inline-flex items-center cursor-pointer"
