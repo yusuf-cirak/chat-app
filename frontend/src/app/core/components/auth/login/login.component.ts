@@ -37,14 +37,6 @@ export class LoginComponent {
     });
   }
 
-  getFormControl(name: string): FormControl {
-    const control = this.formGroup.get(name);
-    if (!control) {
-      throw new Error(`FormControl ${name} not found`);
-    }
-    return control as FormControl;
-  }
-
   submitForm() {
     this.isFormSubmitted.set(true);
     console.log('click');

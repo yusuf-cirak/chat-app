@@ -6,11 +6,13 @@ import {
   Validators,
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { ButtonComponent } from 'src/app/shared/components/button/button.component';
+import { InputComponent } from 'src/app/shared/components/input/input.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule],
+  imports: [RouterLink, ReactiveFormsModule, ButtonComponent, InputComponent],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
 })
