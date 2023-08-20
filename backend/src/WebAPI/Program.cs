@@ -1,7 +1,6 @@
 using Application;
 using HealthChecks.UI.Client;
 using Infrastructure;
-using Infrastructure.Dtos;
 using Infrastructure.SignalR;
 using Infrastructure.SignalR.Hubs;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;

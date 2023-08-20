@@ -6,6 +6,11 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./core/layouts/auth/auth.routes').then((c) => c.authRoutes),
   },
+  {
+    path: 'chat',
+    loadChildren: () =>
+      import('./core/layouts/chat/chat.routes').then((c) => c.chatRoutes),
+  },
   // TODO: Write welcome component, and add canActivate guard if user not logged in
   // { path: 'chat', canActivate: [true] }, // TODO: Write chat component, and add canActivate guard if user logged in
   {
