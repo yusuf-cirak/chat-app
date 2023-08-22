@@ -11,8 +11,47 @@
     <div id="sidebar-container" class="w-[32%] h-full bg-white flex flex-col">
       <div
         id="user-profile-header"
-        class="w-full h-[9%] bg-wp-panel-background border-r-wp-panel-r-border border-r"
-      ></div>
+        class="w-full h-[7%] bg-wp-panel-background border-r-wp-panel-r-border border-r flex items-center justify-between px-4"
+      >
+        <span id="profile-picture" class="w-[40px] h-[40px] flex">
+          <img
+            src="../../../../assets/images/noPic.svg"
+            alt="Profile Picture"
+          />
+        </span>
+
+        <div class="flex gap-5">
+          <span
+            id="community-tab"
+            class="w-7 h-7 flex center hover:cursor-pointer"
+            ><img
+              src="../../../../assets/images/community-tab.svg"
+              alt="Community Tab"
+              type="image/svg+xml"
+          /></span>
+
+          <span id="status" class="w-7 h-7 flex center hover:cursor-pointer"
+            ><img
+              src="../../../../assets/images/status.svg"
+              alt="Status"
+              type="image/svg+xml"
+          /></span>
+
+          <span id="status" class="w-7 h-7 flex center hover:cursor-pointer"
+            ><img
+              src="../../../../assets/images/new-chat.svg"
+              alt="Status"
+              type="image/svg+xml"
+          /></span>
+
+          <span id="menu" class="w-7 h-7 flex center hover:cursor-pointer"
+            ><img
+              src="../../../../assets/images/menu.svg"
+              alt="Menu"
+              type="image/svg+xml"
+          /></span>
+        </div>
+      </div>
       <div
         id="search"
         class="w-full h-[6%] bg-white flex justify-evenly items-center border-b border-b-wp-b-panel-border border-r border-r-wp-panel-r-border"
@@ -26,20 +65,23 @@
           /></span>
           <input
             id="search-input"
-            class="w-[75%] h-[70%] bg-wp-panel-background border-transparent focus:border-transparent focus:ring-0"
+            class="w-[100%] h-[100%] bg-wp-panel-background border-transparent focus:border-transparent focus:ring-0 justify-center"
             type="text"
             placeholder="Search or start new chat"
           />
         </div>
-        <span id="attached" class="w-5 h-5">
+        <span id="filter" class="w-5 h-5 hover:cursor-pointer">
           <img
-            src="../../../../assets/images/smileIcon.svg"
-            alt="Attached"
-            srcset=""
+            src="../../../../assets/images/filter.svg"
+            alt="Filter"
+            type="image/svg+xml"
           />
         </span>
       </div>
-      <div id="chats" class="w-full h-[85%] bg-white flex"></div>
+      <div
+        id="chats"
+        class="w-full h-[90%] bg-white flex border-r border-r-wp-panel-r-border"
+      ></div>
     </div>
     <div
       id="chatbox-container"
