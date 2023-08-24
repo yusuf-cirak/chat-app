@@ -68,6 +68,7 @@
             class="w-[100%] h-[100%] bg-wp-panel-background border-transparent focus:border-transparent focus:ring-0 justify-center"
             type="text"
             placeholder="Search or start new chat"
+            [(ngModel)]="searchInput"
           />
         </div>
         <span id="filter" class="w-5 h-5 hover:cursor-pointer">
@@ -80,8 +81,35 @@
       </div>
       <div
         id="chats"
-        class="w-full h-[90%] bg-white flex border-r border-r-wp-panel-r-border"
-      ></div>
+        class="w-full h-[90%] bg-white grid border-r border-r-wp-panel-r-border overflow-auto"
+      >
+        <div
+          class="chat-container hover:bg-[#f0f2f5]"
+          *ngFor="let user of sideBarChatUsers"
+        >
+          <div id="chat" class="w-full h-[72px] chat-grid cursor-pointer">
+            <div class="profile-picture flex items-center justify-center">
+              <span class="w-[49px] h-[49px] flex"
+                ><img
+                  src="../../../../assets/images/noPic.svg"
+                  alt="Profile Picture"
+              /></span>
+            </div>
+
+            <div
+              class="user-chat flex flex-col justify-center gap-2 border-b border-b-wp-panel-b-border"
+            >
+              <span class="user-name font-mono font-normal">{{
+                user.name
+              }}</span>
+              <span class="user-message text-[#667781] font-mono">
+                {{ user.lastMessage }}
+              </span>
+            </div>
+            <div class="chat-info border-b-wp-panel-b-border border-b"></div>
+          </div>
+        </div>
+      </div>
     </div>
     <div
       id="chatbox-container"
