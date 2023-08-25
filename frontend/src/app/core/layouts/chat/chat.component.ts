@@ -1,7 +1,6 @@
-import { CommonModule, NgFor } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { Component, WritableSignal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterOutlet } from '@angular/router';
 
 interface SidebarChatUser {
   profilePicture: string;
@@ -14,7 +13,7 @@ interface SidebarChatUser {
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [NgFor, FormsModule],
+  imports: [NgIf, NgFor, FormsModule],
   templateUrl: './chat.component.html',
 })
 export class ChatComponent {

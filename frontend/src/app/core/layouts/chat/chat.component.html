@@ -106,7 +106,7 @@
                 {{ user.lastMessage }}
               </span>
             </div>
-            <div class="chat-info border-b-wp-panel-b-border border-b"></div>
+            <!-- <div class="chat-info"></div> -->
           </div>
         </div>
       </div>
@@ -115,7 +115,60 @@
       id="chatbox-container"
       class="w-[68%] h-[100%] flex flex-col bg-wp-panel-background"
     >
-      <div id="chat-user" class="w-full h-[10%] bg-wp-panel-background"></div>
+      <div id="user-chat" class="w-full h-[100%]" *ngIf="true">
+        <div
+          id="chat-user-profile-header"
+          class="w-full h-[7%] bg-wp-panel-background flex flex-col border-b border-b-slate-950"
+        >
+          <div
+            class="user-photo-header w-full h-[100%] bg-wp-panel-background grid"
+          >
+            <div
+              id="chat"
+              class="w-full h-[100%] profile-detail-grid cursor-pointer"
+            >
+              <div
+                class="profile-detail-picture flex flex-col items-center justify-center w-full h-full"
+              >
+                <span class="w-[40px] h-[40px] flex"
+                  ><img
+                    src="../../../../assets/images/noPic.svg"
+                    alt="Profile Picture"
+                /></span>
+              </div>
+
+              <div class="profile-info flex flex-col justify-center">
+                <span class="user-name font-mono font-normal">{{
+                  "user.name"
+                }}</span>
+              </div>
+              <div
+                class="profile-detail-buttons flex flex-row justify-evenly items-center pr-2"
+              >
+                <span
+                  id="search"
+                  class="w-7 h-7 flex center hover:cursor-pointer"
+                  ><img
+                    src="../../../../assets/images/searchIcon.svg"
+                    alt="Search"
+                    type="image/svg+xml"
+                /></span>
+                <span id="menu" class="w-7 h-7 flex center hover:cursor-pointer"
+                  ><img
+                    src="../../../../assets/images/menu.svg"
+                    alt="Menu"
+                    type="image/svg+xml"
+                /></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="messages" class="w-full h-[86%] bg-slate-100"></div>
+        <div
+          id="user-chat-input-container"
+          class="w-full h-[7%] bg-slate-500"
+        ></div>
+      </div>
     </div>
   </section>
 </div>
