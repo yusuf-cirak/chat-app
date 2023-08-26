@@ -1,4 +1,4 @@
-import { NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, WritableSignal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
@@ -13,12 +13,17 @@ interface SidebarChatUser {
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [NgIf, NgFor, FormsModule],
+  imports: [NgIf, NgFor, NgClass, FormsModule],
   templateUrl: './chat.component.html',
 })
 export class ChatComponent {
+  private _selectedChatIndex: WritableSignal<number> = signal(-1);
+  get selectedChatIndex(): number {
+    return this._selectedChatIndex();
+  }
   sideBarChatUsers: SidebarChatUser[] = [];
   searchInput = '';
+  messageInput = '';
 
   constructor() {
     this.sideBarChatUsers = [
@@ -131,4 +136,8 @@ export class ChatComponent {
   }
 
   ngOnInit() {}
+
+  onChatClick(index: number) {
+    this._selectedChatIndex.set(index);
+  }
 }

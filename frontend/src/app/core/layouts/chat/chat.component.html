@@ -1,14 +1,18 @@
 <div class="flex flex-col items-center w-full h-full">
+  <!-- Green background -->
   <section
     id="landing-header"
     class="w-full h-[8%] sm:h-[30%] bg-wp-blue items-center justify-center absolute"
   ></section>
 
+  <!-- Chat -->
   <section
     id="chat"
     class="relative w-[85%] h-[90%] top-[5%] flex items-start justify-start bg-slate-600"
   >
+    <!-- Sidebar Chat Container -->
     <div id="sidebar-container" class="w-[32%] h-full bg-white flex flex-col">
+      <!-- User Profile Header -->
       <div
         id="user-profile-header"
         class="w-full h-[7%] bg-wp-panel-background border-r-wp-panel-r-border border-r flex items-center justify-between px-4"
@@ -52,6 +56,7 @@
           /></span>
         </div>
       </div>
+      <!-- Sidebar Search Container -->
       <div
         id="search"
         class="w-full h-[6%] bg-white flex justify-evenly items-center border-b border-b-wp-b-panel-border border-r border-r-wp-panel-r-border"
@@ -79,15 +84,19 @@
           />
         </span>
       </div>
+      <!-- Sidebar Chats Container -->
       <div
         id="chats"
         class="w-full h-[90%] bg-white grid border-r border-r-wp-panel-r-border overflow-auto"
       >
+        <!-- Sidebar All Chats -->
         <div
-          class="chat-container hover:bg-[#f0f2f5]"
-          *ngFor="let user of sideBarChatUsers"
+          class="chat-container hover:bg-[#f0f2f5] prevent-select"
+          *ngFor="let user of sideBarChatUsers; let i = index"
+          (click)="onChatClick(i)"
+          [ngClass]="{ 'bg-[#f0f2f5]': i === selectedChatIndex }"
         >
-          <div id="chat" class="w-full h-[72px] chat-grid cursor-pointer">
+          <div id="chat" class="w-full h-[74px] chat-grid cursor-pointer">
             <div class="profile-picture flex items-center justify-center">
               <span class="w-[49px] h-[49px] flex"
                 ><img
@@ -96,6 +105,7 @@
               /></span>
             </div>
 
+            <!-- Sidebar User Name and Last Message -->
             <div
               class="user-chat flex flex-col justify-center gap-2 border-b border-b-wp-panel-b-border"
             >
@@ -111,14 +121,20 @@
         </div>
       </div>
     </div>
+    <!-- Chat Container -->
     <div
       id="chatbox-container"
       class="w-[68%] h-[100%] flex flex-col bg-wp-panel-background"
     >
-      <div id="user-chat" class="w-full h-[100%]" *ngIf="true">
+      <!-- Chat Header -->
+      <div
+        id="user-chat"
+        class="w-full h-[100%]"
+        *ngIf="selectedChatIndex > -1"
+      >
         <div
           id="chat-user-profile-header"
-          class="w-full h-[7%] bg-wp-panel-background flex flex-col border-b border-b-slate-950"
+          class="w-full h-[7%] bg-wp-panel-background flex flex-col"
         >
           <div
             class="user-photo-header w-full h-[100%] bg-wp-panel-background grid"
@@ -163,11 +179,43 @@
             </div>
           </div>
         </div>
-        <div id="messages" class="w-full h-[86%] bg-slate-100"></div>
+        <!-- Message Container -->
+        <div id="messages" class="w-full h-[86%] wp-bg-image"></div>
+        <!-- Chat Input Container -->
         <div
           id="user-chat-input-container"
-          class="w-full h-[7%] bg-slate-500"
-        ></div>
+          class="w-full h-[7%] bg-wp-panel-background flex items-center justify-start"
+        >
+          <div
+            id="chat-emoji"
+            class="flex flex-row w-[10%] h-full justify-evenly items-center hover:cursor-pointer gap-2"
+          >
+            <span id="emoji" class="w-[25px] h-[25px] flex">
+              <img
+                src="../../../../assets/images/smile-icon.svg"
+                alt="Smile Icon"
+              />
+            </span>
+            <span id="plus" class="w-[25px] h-[25px] flex">
+              <img src="../../../../assets/images/plus.svg" alt="Plus Icon" />
+            </span>
+          </div>
+          <input
+            type="text"
+            id="chat-input"
+            class="w-[85%] h-[75%] bg-white flex items-center rounded-lg border-transparent focus:border-transparent focus:ring-0 justify-center"
+            placeholder="Type a message"
+            [(ngModel)]="messageInput"
+          />
+          <div
+            id="chat-send"
+            class="flex flex-row w-[6%] h-full justify-center items-center hover:cursor-pointer"
+          >
+            <span id="send" class="w-[25px] h-[25px] flex">
+              <img src="../../../../assets/images/send.svg" alt="Send Icon" />
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   </section>
