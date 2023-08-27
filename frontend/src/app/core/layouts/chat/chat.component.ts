@@ -1,6 +1,7 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, WritableSignal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { InputComponent } from 'src/app/shared/components/input/input.component';
 
 interface SidebarChatUser {
   profilePicture: string;
@@ -13,20 +14,20 @@ interface SidebarChatUser {
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, FormsModule],
+  imports: [NgIf, NgFor, NgClass],
   templateUrl: './chat.component.html',
 })
 export class ChatComponent {
-  private _selectedChatIndex: WritableSignal<number> = signal(-1);
-  get selectedChatIndex(): number {
-    return this._selectedChatIndex();
-  }
-  sideBarChatUsers: SidebarChatUser[] = [];
-  searchInput = '';
-  messageInput = '';
+  selectedChatIndex: WritableSignal<number> = signal(-1);
+
+  searchInput: WritableSignal<string> = signal('');
+
+  chatMessageInput: WritableSignal<string> = signal('');
+
+  sideBarChatUsers: WritableSignal<SidebarChatUser[]> = signal([]);
 
   constructor() {
-    this.sideBarChatUsers = [
+    this.sideBarChatUsers.set([
       {
         profilePicture: 'assets/images/noPic.svg',
         name: 'John Doe',
@@ -132,12 +133,18 @@ export class ChatComponent {
         lastMessageTime: '45 min ago',
         unreadMessages: 0,
       },
-    ];
+    ]);
   }
 
   ngOnInit() {}
 
   onChatClick(index: number) {
-    this._selectedChatIndex.set(index);
+    this.selectedChatIndex.set(index);
+    this.chatMessageInput.set('');
+  }
+
+  onChatInput(value: string) {
+    console.log(value);
+    this.chatMessageInput.set(value);
   }
 }

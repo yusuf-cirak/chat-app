@@ -73,7 +73,7 @@
             class="w-[100%] h-[100%] bg-wp-panel-background border-transparent focus:border-transparent focus:ring-0 justify-center"
             type="text"
             placeholder="Search or start new chat"
-            [(ngModel)]="searchInput"
+            (change)="searchInput.set($any($event.target).value)"
           />
         </div>
         <span id="filter" class="w-5 h-5 hover:cursor-pointer">
@@ -92,9 +92,9 @@
         <!-- Sidebar All Chats -->
         <div
           class="chat-container hover:bg-[#f0f2f5] prevent-select"
-          *ngFor="let user of sideBarChatUsers; let i = index"
+          *ngFor="let user of sideBarChatUsers(); let i = index"
           (click)="onChatClick(i)"
-          [ngClass]="{ 'bg-[#f0f2f5]': i === selectedChatIndex }"
+          [ngClass]="{ 'bg-[#f0f2f5]': i === selectedChatIndex() }"
         >
           <div id="chat" class="w-full h-[74px] chat-grid cursor-pointer">
             <div class="profile-picture flex items-center justify-center">
@@ -130,7 +130,7 @@
       <div
         id="user-chat"
         class="w-full h-[100%]"
-        *ngIf="selectedChatIndex > -1"
+        *ngIf="selectedChatIndex() > -1"
       >
         <div
           id="chat-user-profile-header"
@@ -205,7 +205,8 @@
             id="chat-input"
             class="w-[85%] h-[75%] bg-white flex items-center rounded-lg border-transparent focus:border-transparent focus:ring-0 justify-center"
             placeholder="Type a message"
-            [(ngModel)]="messageInput"
+            autofocus
+            (change)="chatMessageInput.set($any($event.target).value)"
           />
           <div
             id="chat-send"
