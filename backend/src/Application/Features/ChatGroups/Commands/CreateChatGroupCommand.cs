@@ -10,9 +10,9 @@ public readonly record struct CreateChatRoomCommandRequest
 
 public sealed class CreateChatRoomCommandHandler : IRequestHandler<CreateChatRoomCommandRequest, string>
 {
-    private readonly IMongoService<ChatGroup> _mongoService;
+    private readonly IMongoService _mongoService;
 
-    public CreateChatRoomCommandHandler(IMongoService<ChatGroup> mongoService)
+    public CreateChatRoomCommandHandler(IMongoService mongoService)
     {
         _mongoService = mongoService;
     }

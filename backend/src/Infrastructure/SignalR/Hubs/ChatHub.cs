@@ -1,10 +1,11 @@
 ﻿using Application.Abstractions.Services.Chat;
+using Infrastructure.Extensions;
 using Microsoft.AspNetCore.SignalR;
 using MongoDB.Bson;
 
 namespace Infrastructure.SignalR.Hubs;
 
-public sealed class ChatHub : Hub
+public sealed class ChatHub : Hub<IChatHub>
 {
     private readonly IChat _chat;
 
@@ -15,15 +16,18 @@ public sealed class ChatHub : Hub
 
     public override async Task OnConnectedAsync()
     {
-        await Groups.AddToGroupAsync(Context.ConnectionId, SignalRConstants.ChatUsers);
-        _chat.AddUser(ObjectId.Parse(Context.UserIdentifier));
-        _chat.AddUserConnectionId(ObjectId.Parse(Context.UserIdentifier), Context.ConnectionId);
+        _chat.AddUser(Context.User.GetUserId(), Context.ConnectionId);
         await base.OnConnectedAsync();
     }
 
     public override async Task OnDisconnectedAsync(Exception exception)
     {
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, SignalRConstants.ChatUsers);
+        _chat.RemoveUser(Context.User.GetUserId());
         await base.OnDisconnectedAsync(exception);
+    }
+
+    public async Task SendMessage(string message)
+    {
+        // await Clients.All.ReceiveMessage(Context.User.GetUserId(), message);
     }
 }

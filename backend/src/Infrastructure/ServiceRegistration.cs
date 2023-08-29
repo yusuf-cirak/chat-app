@@ -4,6 +4,7 @@ using Application.Abstractions.Services.Chat;
 using Infrastructure.Dtos;
 using Infrastructure.Helpers.Hashing;
 using Infrastructure.Helpers.JWT;
+using Infrastructure.Persistence;
 using Infrastructure.Services;
 using Infrastructure.Services.Chat;
 using Microsoft.Extensions.Configuration;
@@ -17,7 +18,7 @@ public static class ServiceRegistration
     {
         services.Configure<MongoDbSettings>(configuration.GetSection("MongoDbSettings"));
 
-        services.AddScoped(typeof(IMongoService<>), typeof(MongoService<>));
+        services.AddScoped<IMongoService, MongoService>();
 
         services.AddSingleton<IJwtHelper, JwtHelper>();
         services.AddSingleton<IHashingHelper, HashingHelper>();

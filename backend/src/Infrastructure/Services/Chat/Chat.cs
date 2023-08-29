@@ -12,31 +12,26 @@ public sealed class Chat : IChat
         _chatService = chatService;
     }
     
-    public bool AddUser(ObjectId userId)
+    public bool AddUser(string userId,string connectionId)
     {
-        return _chatService.AddUser(userId);
+        return _chatService.AddUser(userId, connectionId);
     }
-    public bool AddUserConnectionId(ObjectId userId, string connectionId)
-    {
-        return _chatService.AddUserConnectionId(userId, connectionId);
-    }
-
-    public bool RemoveUser(ObjectId userId)
+    public bool RemoveUser(string userId)
     {
         return _chatService.RemoveUser(userId);
     }
 
-    public ObjectId GetUserId(string connectionId)
+    public string GetUserId(string connectionId)
     {
         return _chatService.GetUserId(connectionId);
     }
 
-    public string GetConnectionId(ObjectId userId)
+    public string GetConnectionId(string userId)
     {
         return _chatService.GetConnectionId(userId);
     }
 
-    public List<ObjectId> GetOnlineUsers()
+    public List<string> GetOnlineUsers()
     {
         return _chatService.GetOnlineUsers();
     }

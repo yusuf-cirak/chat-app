@@ -14,9 +14,9 @@ public sealed class RegisterUserCommandHandler : IRequestHandler<RegisterCommand
     private readonly IJwtHelper _jwtHelper;
     private readonly IHashingHelper _hashingHelper;
 
-    private readonly IMongoService<User> _mongoService;
+    private readonly IMongoService _mongoService;
 
-    public RegisterUserCommandHandler(IMongoService<User> mongoService, AuthBusinessRules authBusinessRules,
+    public RegisterUserCommandHandler(IMongoService mongoService, AuthBusinessRules authBusinessRules,
         IJwtHelper jwtHelper, IHashingHelper hashingHelper)
     {
         _mongoService = mongoService;
@@ -38,7 +38,7 @@ public sealed class RegisterUserCommandHandler : IRequestHandler<RegisterCommand
             PasswordSalt = passwordSalt
         };
 
-        await _mongoService.Collection.InsertOneAsync(newUser, cancellationToken: cancellationToken);
+        await _mongoService.GetCollection<User>().InsertOneAsync(newUser, cancellationToken: default);
 
         return _jwtHelper.CreateToken(newUser).Token;
     }

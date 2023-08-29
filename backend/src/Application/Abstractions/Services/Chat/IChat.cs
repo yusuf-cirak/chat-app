@@ -4,12 +4,11 @@ namespace Application.Abstractions.Services.Chat;
 
 public interface IChat
 {
-    bool AddUser(ObjectId userId);
-    bool AddUserConnectionId(ObjectId userId, string connectionId);
-    bool RemoveUser(ObjectId userId);
-    ObjectId GetUserId(string connectionId);
-    string GetConnectionId(ObjectId userId);
-    List<ObjectId> GetOnlineUsers();
+    bool AddUser(string userId, string connectionId);
+    bool RemoveUser(string userId);
+    string GetUserId(string connectionId);
+    string GetConnectionId(string userId);
+    List<string> GetOnlineUsers();
     
 }
 

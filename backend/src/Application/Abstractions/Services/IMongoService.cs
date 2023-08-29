@@ -3,8 +3,7 @@ using MongoDB.Driver;
 
 namespace Application.Abstractions.Services;
 
-public interface IMongoService<T>
-    where T : BaseEntity, new()
+public interface IMongoService
 {
-    IMongoCollection<T> Collection { get; }
+    public IMongoCollection<T> GetCollection<T>();
 }

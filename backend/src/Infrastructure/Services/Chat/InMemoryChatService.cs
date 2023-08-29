@@ -5,26 +5,17 @@ namespace Infrastructure.Services.Chat;
 
 public sealed class InMemoryChatService : IChatService
 {
-    private readonly Dictionary<ObjectId, string> _users = new();
+    private readonly Dictionary<string, string> _users = new();
 
-    public bool AddUser(ObjectId userId)
+    public bool AddUser(string userId,string connectionId)
     {
         lock (_users)
         {
-            foreach (var user in _users)
-            {
-                if (user.Key == userId)
-                {
-                    return false;
-                }
-            }
-
-            _users.Add(userId, "");
-            return true;
+            return _users.TryAdd(userId, connectionId);
         }
     }
 
-    public bool AddUserConnectionId(ObjectId userId, string connectionId)
+    public bool AddUserConnectionId(string userId, string connectionId)
     {
         lock (_users)
         {
@@ -38,7 +29,7 @@ public sealed class InMemoryChatService : IChatService
         }
     }
 
-    public bool RemoveUser(ObjectId userId)
+    public bool RemoveUser(string userId)
     {
         lock (_users)
         {
@@ -47,23 +38,23 @@ public sealed class InMemoryChatService : IChatService
     }
 
 
-    public ObjectId GetUserId(string connectionId)
+    public string GetUserId(string connectionId)
     {
         lock (_users)
         {
-            return _users.Where(u => u.Value == connectionId).Select(u => u.Key).FirstOrDefault();
+            return _users.Where(u => u.Value == connectionId).Select(u => u.Key).FirstOrDefault()!;
         }
     }
 
-    public string GetConnectionId(ObjectId userId)
+    public string GetConnectionId(string userId)
     {
         lock (_users)
         {
-            return _users.Where(u => u.Key == userId).Select(u => u.Value).FirstOrDefault() ?? "";
+            return _users.Where(u => u.Key == userId).Select(u => u.Value).SingleOrDefault()!;
         }
     }
 
-    public List<ObjectId> GetOnlineUsers()
+    public List<string> GetOnlineUsers()
     {
         lock (_users)
         {

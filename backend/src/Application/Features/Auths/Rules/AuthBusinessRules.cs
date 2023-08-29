@@ -9,10 +9,10 @@ namespace Application.Features.Auths.Rules;
 
 public sealed class AuthBusinessRules : BaseBusinessRules
 {
-    private readonly IMongoService<User> _mongoService;
+    private readonly IMongoService _mongoService;
     private readonly IHashingHelper _hashingHelper;
 
-    public AuthBusinessRules(IMongoService<User> mongoService, IHashingHelper hashingHelper)
+    public AuthBusinessRules(IMongoService mongoService, IHashingHelper hashingHelper)
     {
         _mongoService = mongoService;
         _hashingHelper = hashingHelper;
@@ -20,7 +20,7 @@ public sealed class AuthBusinessRules : BaseBusinessRules
 
     public async Task UserNameCannotBeDuplicatedBeforeRegistered(string userName)
     {
-        User? user = await _mongoService.Collection.Find(u => u.UserName == userName).FirstOrDefaultAsync();
+        User? user = await _mongoService.GetCollection<User>().Find(u => u.UserName == userName).FirstOrDefaultAsync();
 
         if (user != null)
         {
@@ -39,7 +39,7 @@ public sealed class AuthBusinessRules : BaseBusinessRules
 
     public async Task<User> UserShouldExistBeforeLogin(string userName)
     {
-        User? user = await _mongoService.Collection.Find(u => u.UserName == userName).FirstOrDefaultAsync();
+        User? user = await _mongoService.GetCollection<User>().Find(u => u.UserName == userName).FirstOrDefaultAsync();
 
         if (user is null)
         {
