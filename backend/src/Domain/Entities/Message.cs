@@ -1,8 +1,9 @@
 ﻿namespace Domain.Entities;
-public class Message : BaseEntity
+public sealed class Message : BaseEntity
 {
     public ObjectId UserId { get; set; }
-    public string Content { get; set; } = default!;
+    public ObjectId ChatGroupId { get; set; }
+    public string Body { get; init; }
     public DateTime CreatedAt { get; set; }
 
 
@@ -11,10 +12,11 @@ public class Message : BaseEntity
         
     }
 
-    public Message(ObjectId userId, string content, DateTime createdAt)
+    public Message(ObjectId userId,ObjectId chatGroupId, string body, DateTime createdAt)
     {
         UserId = userId;
-        Content = content;
+        ChatGroupId = chatGroupId;
+        Body = body;
         CreatedAt = createdAt;
     }
 }
