@@ -26,6 +26,8 @@ export class ChatComponent {
 
   sideBarChatUsers: WritableSignal<SidebarChatUser[]> = signal([]);
 
+  chats: WritableSignal<string[]> = signal([]);
+
   constructor() {
     this.sideBarChatUsers.set([
       {
