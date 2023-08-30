@@ -3,19 +3,20 @@
 public sealed class RefreshToken : BaseEntity
 {
     public ObjectId UserId { get; set; }
-    public string TokenHash { get; set; }
-    public string TokenSalt { get; set; }
+    public string CreatedByIp { get; set; }
     public DateTime ExpiresAt { get; set; }
+    public string Token { get; set; }
 
     public RefreshToken()
     {
         
     }
 
-    public RefreshToken(string tokenHash, string tokenSalt, DateTime expiresAt)
+    public RefreshToken(string token,ObjectId userId,string createdByIp, DateTime expiresAt)
     {
-        TokenHash = tokenHash;
-        TokenSalt = tokenSalt;
+        Token = token;
+        UserId = userId;
+        CreatedByIp = createdByIp;
         ExpiresAt = expiresAt;
     }
 }

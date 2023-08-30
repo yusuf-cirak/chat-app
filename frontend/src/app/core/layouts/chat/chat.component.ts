@@ -1,7 +1,5 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, WritableSignal, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { InputComponent } from 'src/app/shared/components/input/input.component';
 
 interface SidebarChatUser {
   profilePicture: string;
@@ -10,6 +8,8 @@ interface SidebarChatUser {
   lastMessageTime: string;
   unreadMessages: number;
 }
+
+interface ChatMessage {}
 
 @Component({
   selector: 'app-chat',

@@ -6,7 +6,7 @@ using MongoDB.Bson;
 namespace Application.Features.ChatGroups.Commands;
 
 public readonly record struct CreateChatRoomCommandRequest
-    (string? Name, bool IsPrivate, List<ObjectId> UserIds) : IRequest<string>;
+    (ObjectId participantUserId) : IRequest<string>;
 
 public sealed class CreateChatRoomCommandHandler : IRequestHandler<CreateChatRoomCommandRequest, string>
 {

@@ -29,11 +29,13 @@ public sealed class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavior
 
         var elapsedMilliseconds = _timer.ElapsedMilliseconds;
 
+        if (elapsedMilliseconds > 500)
+        {
+            string requestName = typeof(TRequest).Name;
 
-        var requestName = typeof(TRequest).Name;
-
-        _logger.LogWarning("Request: {Name} ({ElapsedMilliseconds} milliseconds)",
-            requestName, elapsedMilliseconds);
+            _logger.LogWarning("Request: {Name} ({ElapsedMilliseconds} milliseconds)",
+                requestName, elapsedMilliseconds);
+        }
 
         return response;
     }

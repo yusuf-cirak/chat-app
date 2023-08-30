@@ -1,17 +1,22 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using Application.Abstractions.Helpers;
 using Application.Common.Models;
 using Domain.Entities;
 using Infrastructure.Helpers.Security.Encryption;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Bson;
 
 namespace Infrastructure.Helpers.JWT;
 
 public sealed class JwtHelper : IJwtHelper
 {
+    private IConfiguration Configuration { get; }
+
     private readonly TokenOptions _tokenOptions;
+
     private DateTime _accessTokenExpiration;
 
     public JwtHelper(IConfiguration configuration)
@@ -20,9 +25,8 @@ public sealed class JwtHelper : IJwtHelper
         _tokenOptions = Configuration.GetSection("TokenOptions").Get<TokenOptions>()!;
     }
 
-    private IConfiguration Configuration { get; }
 
-    public AccessToken CreateToken(User user)
+    public AccessToken CreateAccessToken(User user)
     {
         _accessTokenExpiration = DateTime.Now.AddMinutes(_tokenOptions.AccessTokenExpiration);
         SecurityKey securityKey = SecurityKeyHelper.CreateSecurityKey(_tokenOptions.SecurityKey);
@@ -50,9 +54,31 @@ public sealed class JwtHelper : IJwtHelper
     private IEnumerable<Claim> SetClaims(User user)
     {
         List<Claim> claims = new(2);
-        claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
+        claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()!));
         claims.Add(new Claim(ClaimTypes.Name, user.UserName));
 
         return claims;
+    }
+
+    public RefreshToken CreateRefreshToken(User user,string ipAddress)
+    {
+        var secureRandomBytes = new byte[64];
+
+        using var randomNumberGenerator = RandomNumberGenerator.Create();
+
+        randomNumberGenerator.GetBytes(secureRandomBytes);
+
+        return new RefreshToken
+        {
+            UserId = user.Id,
+            ExpiresAt = _accessTokenExpiration.AddDays(7),
+            Token = Convert.ToBase64String(secureRandomBytes),
+            CreatedByIp = ipAddress
+        };
+    }
+
+    public bool ValidateRefreshToken(string remoteIpAddress, RefreshToken refreshToken)
+    {
+        return false;
     }
 }

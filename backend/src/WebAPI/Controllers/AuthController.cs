@@ -1,4 +1,5 @@
 using Application.Features.Auths.Commands.Login;
+using Application.Features.Auths.Commands.Refresh;
 using Application.Features.Auths.Commands.Register;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +20,13 @@ public sealed class AuthController : BaseController
     public async Task<IActionResult> Login(LoginCommandRequest loginCommandRequest)
     {
         var response = await Mediator.Send(loginCommandRequest);
+        return Ok(response);
+    }
+    
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshToken(RefreshTokenCommandRequest refreshTokenCommandRequest)
+    {
+        var response = await Mediator.Send(refreshTokenCommandRequest);
         return Ok(response);
     }
 }

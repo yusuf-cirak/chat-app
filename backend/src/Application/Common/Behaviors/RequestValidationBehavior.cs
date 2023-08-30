@@ -25,7 +25,7 @@ public sealed class RequestValidationBehavior<TRequest, TResponse> : IPipelineBe
             .Where(failure => failure != null)
             .ToList();
         
-        if (failures.Any())
+        if (failures.Count > 0)
         {
             throw new ValidationException(failures);
         }

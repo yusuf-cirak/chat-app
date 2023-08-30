@@ -3,19 +3,24 @@ using Application.Abstractions.Services;
 using Application.Common.Exceptions;
 using Application.Common.Rules;
 using Domain.Entities;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Application.Features.Auths.Rules;
 
 public sealed class AuthBusinessRules : BaseBusinessRules
 {
+    
+    // FromServices attribute could be used instead of constructor injection
     private readonly IMongoService _mongoService;
     private readonly IHashingHelper _hashingHelper;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public AuthBusinessRules(IMongoService mongoService, IHashingHelper hashingHelper)
+    public AuthBusinessRules(IMongoService mongoService, IHashingHelper hashingHelper, IHttpContextAccessor httpContextAccessor)
     {
         _mongoService = mongoService;
         _hashingHelper = hashingHelper;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task UserNameCannotBeDuplicatedBeforeRegistered(string userName)
@@ -24,7 +29,7 @@ public sealed class AuthBusinessRules : BaseBusinessRules
 
         if (user != null)
         {
-            throw new BusinessException("A user already exists with that email");
+            throw new BusinessException("A user already exists with that username");
         }
     }
 
@@ -47,5 +52,19 @@ public sealed class AuthBusinessRules : BaseBusinessRules
         }
 
         return user;
+    }
+    
+    public async Task GetAndVerifyUserRefreshToken(ObjectId userId,string refreshTokenFromRequest)
+    {
+        var refreshToken = await _mongoService.GetCollection<RefreshToken>()
+            .Find(rt => rt.UserId == userId)
+            .FirstOrDefaultAsync(cancellationToken: default);
+        
+        var ipAdress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
+        
+        if (refreshToken is null ||refreshToken.Token !=refreshTokenFromRequest || refreshToken.CreatedByIp != ipAdress || refreshToken.ExpiresAt < DateTime.Now)
+        {
+            throw new BusinessException("Refresh token is not valid");
+        }
     }
 }

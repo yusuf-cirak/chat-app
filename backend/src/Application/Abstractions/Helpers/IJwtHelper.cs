@@ -5,5 +5,7 @@ namespace Application.Abstractions.Helpers;
 
 public interface IJwtHelper
 {
-    AccessToken CreateToken(User user);
+    AccessToken CreateAccessToken(User user);
+    RefreshToken CreateRefreshToken(User user,string ipAddress);
+
 }

@@ -1,5 +1,4 @@
 using Application.Abstractions.Services.Chat;
-using MongoDB.Bson;
 
 namespace Infrastructure.Services.Chat;
 
@@ -42,7 +41,7 @@ public sealed class InMemoryChatService : IChatService
     {
         lock (_users)
         {
-            return _users.Where(u => u.Value == connectionId).Select(u => u.Key).FirstOrDefault()!;
+            return _users.Where(u => u.Value == connectionId).Select(u => u.Value).SingleOrDefault()!;
         }
     }
 
