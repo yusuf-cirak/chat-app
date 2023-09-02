@@ -35,7 +35,7 @@ public sealed class ChatHub : Hub<IChatHub>
         string senderUserId = Context.User.GetUserId();
 
         Message messageObj = new(userId: ObjectId.Parse(senderUserId), chatGroupId: ObjectId.Parse(chatGroupId),
-            body: message, createdAt: DateTime.Now);
+            body: message, sentAt: DateTime.Now);
 
         await _mongoService.GetCollection<Message>().InsertOneAsync(messageObj);
 

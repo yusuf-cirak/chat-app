@@ -8,7 +8,7 @@ namespace Application;
 
 public static class ServiceRegistration
 {
-    public static void AddBusinessRuleServices(this IServiceCollection services, Assembly assembly,
+    private static void AddBusinessRuleServices(this IServiceCollection services, Assembly assembly,
         Func<IServiceCollection, Type, IServiceCollection>? addWithLifeCycle = null)
     {
         var typeOfBusinessRules = typeof(BaseBusinessRules);

@@ -7,10 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Features\ChatGroups\Queries\" />
-    </ItemGroup>
-
-    <ItemGroup>
         <PackageReference Include="FluentValidation" Version="11.5.2" />
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.5.2" />
         <PackageReference Include="MediatR" Version="12.0.1" />
@@ -22,6 +18,11 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Domain\Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Features\ChatGroups\" />
+      <Folder Include="Features\PrivateChatGroups\Dtos\" />
     </ItemGroup>
 
 </Project>

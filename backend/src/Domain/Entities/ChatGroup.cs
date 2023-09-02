@@ -2,16 +2,9 @@
 
 public sealed class ChatGroup : BaseAuditableEntity
 {
-    public string? Name { get; set; }
+    public string Name { get; set; }
     
-    public List<ObjectId> UserIds { get; set; }
-    
-    public ChatGroup()
-    {
-        UserIds = new();
-    }
-
-    public ChatGroup(string? name) : this()
+    public ChatGroup(string? name)
     {
         Name = name;
     }

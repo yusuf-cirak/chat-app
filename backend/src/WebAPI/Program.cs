@@ -1,7 +1,6 @@
 using Application;
 using HealthChecks.UI.Client;
 using Infrastructure;
-using Infrastructure.Constants;
 using Infrastructure.SignalR.Hubs;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using WebAPI.Extensions;
@@ -29,6 +28,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddSwaggerGenServices(); // From WebAPI\Extensions\SwaggerExtensions.cs
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 app.UseResponseCompression();
@@ -55,6 +56,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHub<ChatHub>(SignalRConstant.ChatHubUrl);
+app.MapHub<ChatHub>("/_chat");
 
 app.Run();
