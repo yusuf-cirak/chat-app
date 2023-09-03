@@ -1,10 +1,6 @@
 using Application.Abstractions.Helpers;
-using Application.Abstractions.Services;
 using Application.Features.Auths.Dtos;
 using Application.Features.Auths.Rules;
-using Domain.Entities;
-using MediatR;
-using Microsoft.AspNetCore.Http;
 
 namespace Application.Features.Auths.Commands.Login;
 

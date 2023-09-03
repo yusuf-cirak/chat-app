@@ -1,6 +1,8 @@
 ﻿using Application.Features.Auths.Commands.Login;
 using Application.Features.Auths.Commands.Refresh;
 using Application.Features.Auths.Commands.Register;
+using Application.Features.ChatGroups.Commands.Create;
+using Application.Features.ChatGroups.Queries.GetAll;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers;
@@ -9,24 +11,17 @@ namespace WebAPI.Controllers;
 [ApiController]
 public sealed class ChatGroupsController : BaseController
 {
-    [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterCommandRequest registerCommandRequest)
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
     {
-        var response = await Mediator.Send(registerCommandRequest);
-        return Ok(response);
-    }
-
-    [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginCommandRequest loginCommandRequest)
-    {
-        var response = await Mediator.Send(loginCommandRequest);
+        var response = await Mediator.Send(new GetAllChatGroupsQueryRequest());
         return Ok(response);
     }
     
-    [HttpPost("refresh")]
-    public async Task<IActionResult> RefreshToken(RefreshTokenCommandRequest refreshTokenCommandRequest)
+    [HttpPost]
+    public async Task<IActionResult> Create(CreateChatGroupCommandRequest createChatGroupCommandRequest)
     {
-        var response = await Mediator.Send(refreshTokenCommandRequest);
+        var response = await Mediator.Send(createChatGroupCommandRequest);
         return Ok(response);
     }
 }

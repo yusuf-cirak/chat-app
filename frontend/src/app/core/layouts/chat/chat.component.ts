@@ -1,8 +1,8 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, WritableSignal, signal } from '@angular/core';
+import { InputComponent } from 'src/app/shared/components/input/input.component';
 
 interface SidebarChatUser {
-  profilePicture: string;
   name: string;
   lastMessage: string;
   lastMessageTime: string;
@@ -31,105 +31,90 @@ export class ChatComponent {
   constructor() {
     this.sideBarChatUsers.set([
       {
-        profilePicture: 'assets/images/noPic.svg',
         name: 'John Doe',
         lastMessage: 'Hey, how are you?',
         lastMessageTime: '5 min ago',
         unreadMessages: 2,
       },
       {
-        profilePicture: 'assets/images/noPic.svg',
         name: 'Jane Doe',
         lastMessage: 'Can we meet today?',
         lastMessageTime: '10 min ago',
         unreadMessages: 1,
       },
       {
-        profilePicture: 'assets/images/noPic.svg',
         name: 'John Doe',
         lastMessage: "Don't forget to call me.",
         lastMessageTime: '15 min ago',
         unreadMessages: 0,
       },
       {
-        profilePicture: 'assets/images/noPic.svg',
         name: 'Jane Doe',
         lastMessage: 'Good job!',
         lastMessageTime: '20 min ago',
         unreadMessages: 0,
       },
       {
-        profilePicture: 'assets/images/noPic.svg',
         name: 'John Doe',
         lastMessage: 'Hey, how are you?',
         lastMessageTime: '25 min ago',
         unreadMessages: 0,
       },
       {
-        profilePicture: 'assets/images/noPic.svg',
         name: 'Jane Doe',
         lastMessage: 'Can we meet today?',
         lastMessageTime: '30 min ago',
         unreadMessages: 0,
       },
       {
-        profilePicture: 'assets/images/noPic.svg',
         name: 'John Doe',
         lastMessage: "Don't forget to call me.",
         lastMessageTime: '35 min ago',
         unreadMessages: 0,
       },
       {
-        profilePicture: 'assets/images/noPic.svg',
         name: 'Jane Doe',
         lastMessage: 'Good job!',
         lastMessageTime: '40 min ago',
         unreadMessages: 0,
       },
       {
-        profilePicture: 'assets/images/noPic.svg',
         name: 'John Doe',
         lastMessage: 'Hey, how are you?',
         lastMessageTime: '45 min ago',
         unreadMessages: 0,
       },
       {
-        profilePicture: 'assets/images/noPic.svg',
         name: 'John Doe',
         lastMessage: 'Hey, how are you?',
         lastMessageTime: '45 min ago',
         unreadMessages: 0,
       },
       {
-        profilePicture: 'assets/images/noPic.svg',
         name: 'John Doe',
         lastMessage: 'Hey, how are you?',
         lastMessageTime: '45 min ago',
         unreadMessages: 0,
       },
       {
-        profilePicture: 'assets/images/noPic.svg',
         name: 'John Doe',
         lastMessage: 'Hey, how are you?',
         lastMessageTime: '45 min ago',
         unreadMessages: 0,
       },
       {
-        profilePicture: 'assets/images/noPic.svg',
         name: 'John Doe',
         lastMessage: 'Hey, how are you?',
         lastMessageTime: '45 min ago',
         unreadMessages: 0,
       },
       {
-        profilePicture: 'assets/images/noPic.svg',
         name: 'John Doe',
         lastMessage: 'Hey, how are you?',
         lastMessageTime: '45 min ago',
         unreadMessages: 0,
       },
       {
-        profilePicture: 'assets/images/noPic.svg',
         name: 'Yusuf',
         lastMessage: 'Hey, how are you?',
         lastMessageTime: '45 min ago',

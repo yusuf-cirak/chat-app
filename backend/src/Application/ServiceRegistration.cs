@@ -36,7 +36,7 @@ public static class ServiceRegistration
 
         AddBusinessRuleServices(services, executingAssembly);
 
-        services.AddMediatR(cfg => { cfg.RegisterServicesFromAssembly(executingAssembly); });
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(executingAssembly));
 
 
         // AuthorizationBehavior dependency injection

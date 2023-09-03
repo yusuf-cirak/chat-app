@@ -1,6 +1,13 @@
-﻿namespace Application.Features.Messages.Rules;
+﻿using Application.Common.Rules;
 
-public class MessageBusinessRules
+namespace Application.Features.Messages.Rules;
+
+public sealed class MessageBusinessRules : BaseBusinessRules
 {
-    
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public MessageBusinessRules(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
 }

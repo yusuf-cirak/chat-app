@@ -5,10 +5,6 @@ public sealed class Message : BaseEntity
     public ObjectId ChatGroupId { get; set; }
     public string Body { get; init; }
     public DateTime SentAt { get; set; }
-    public DateTime? DeliveredAt { get; set; }
-    public DateTime? SeenAt { get; set; }
-
-
 
     public Message()
     {

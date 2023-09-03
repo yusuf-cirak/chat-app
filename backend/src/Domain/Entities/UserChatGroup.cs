@@ -4,7 +4,7 @@ public sealed class UserChatGroup : BaseEntity
 {
     public ObjectId UserId { get; set; }
     public ObjectId ChatGroupId { get; set; }
-    
+
     public UserChatGroup()
     {
         

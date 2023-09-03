@@ -113,3 +113,9 @@ pre {
   -ms-user-select: none; /* IE 10 and IE 11 */
   user-select: none; /* Standard syntax */
 }
+
+::ng-deep {
+  .chat-input-class {
+    @apply w-[85%] h-[75%] bg-white flex items-center rounded-lg border-transparent focus:border-transparent focus:ring-0 justify-center;
+  }
+}
