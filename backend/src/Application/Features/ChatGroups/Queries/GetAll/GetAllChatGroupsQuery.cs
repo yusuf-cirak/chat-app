@@ -5,9 +5,9 @@ using MongoDB.Driver;
 
 namespace Application.Features.ChatGroups.Queries.GetAll;
 
-public readonly record struct GetAllChatGroupsQueryRequest : IRequest<List<GetAllChatGroupDto>>,ISecuredRequest;
+public readonly record struct GetAllChatGroupsQueryRequest : IRequest<List<GetChatGroupDto>>,ISecuredRequest;
 
-public sealed class GetAllChatGroupsQueryHandler : IRequestHandler<GetAllChatGroupsQueryRequest, List<GetAllChatGroupDto>>
+public sealed class GetAllChatGroupsQueryHandler : IRequestHandler<GetAllChatGroupsQueryRequest, List<GetChatGroupDto>>
 {
     private readonly IMongoService _mongoService;
     private readonly IHttpContextAccessor _httpContextAccessor;
@@ -18,19 +18,16 @@ public sealed class GetAllChatGroupsQueryHandler : IRequestHandler<GetAllChatGro
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<List<GetAllChatGroupDto>> Handle(GetAllChatGroupsQueryRequest request, CancellationToken cancellationToken)
+    public async Task<List<GetChatGroupDto>> Handle(GetAllChatGroupsQueryRequest request, CancellationToken cancellationToken)
     {
         var userId = ObjectId.Parse(_httpContextAccessor.HttpContext?.User.Claims.First(e=>e.Type==ClaimTypes.NameIdentifier).Value);
-
-        var userChatGroupProjection = Builders<UserChatGroup>.Projection
-            .Include(e => e.Id);
-        var userChatGroups = _mongoService.GetCollection<UserChatGroup>().Find(e => e.UserId == userId).Project<ObjectId>(userChatGroupProjection)
-            .ToList();
         
-        var chatGroups = await _mongoService.GetCollection<ChatGroup>().Find(e => userChatGroups.Contains(e.Id)).ToListAsync(cancellationToken: cancellationToken);
+        var chatGroupProjection = Builders<ChatGroup>.Projection
+            .Include(e => e.Id)
+            .Include(e => e.Name);
         
-        var chatGroupDtos = chatGroups.Select(chatGroup => new GetAllChatGroupDto(chatGroup.Id,chatGroup.Name)).ToList();
+        var chatGroupsDto = await _mongoService.GetCollection<ChatGroup>().Find(e => e.UserIds.Contains(userId)).Project<GetChatGroupDto>(chatGroupProjection).ToListAsync(cancellationToken: cancellationToken);
 
-        return chatGroupDtos;
+        return chatGroupsDto;
     }
 }

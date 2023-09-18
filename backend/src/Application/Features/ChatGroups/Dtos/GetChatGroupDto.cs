@@ -1,15 +1,15 @@
 ﻿namespace Application.Features.ChatGroups.Dtos;
 
-public sealed class GetAllChatGroupDto
+public sealed class GetChatGroupDto
 {
     public ObjectId Id { get; set; }
     public string Name { get; set; }
     
-    public GetAllChatGroupDto()
+    public GetChatGroupDto()
     {
         
     }
-    public GetAllChatGroupDto(ObjectId id, string name)
+    public GetChatGroupDto(ObjectId id, string name)
     {
         Id = id;
         Name = name;

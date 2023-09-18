@@ -25,7 +25,7 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
         if (request.Name == default!)
         {
             // Scenario 1: Users already have a chat group together
-            var chatGroupId = await FindExistingChatGroupIdAsync(request.ParticipantUserIds, cancellationToken);
+            var chatGroupId = FindExistingChatGroupIdAsync(request.ParticipantUserIds, cancellationToken);
 
             if (chatGroupId.HasValue)
             {
@@ -40,15 +40,14 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
         return await CreateNamedChatGroupAsync(request.Name!, request.ParticipantUserIds, cancellationToken);
     }
 
-    private async Task<ObjectId?> FindExistingChatGroupIdAsync(List<ObjectId> participantUserIds,
+    private ObjectId? FindExistingChatGroupIdAsync(List<ObjectId> participantUserIds,
         CancellationToken cancellationToken)
     {
-        var usersChatGroups = await _mongoService.GetCollection<UserChatGroup>()
-            .Find(e => participantUserIds.Contains(e.UserId))
-            .ToListAsync(cancellationToken: cancellationToken);
-
-        var chatGroupId = usersChatGroups.GroupBy(e => e.ChatGroupId)
-            .FirstOrDefault(e => e.Count() == 2)?.Key;
+        var userChatGroupProjection = Builders<ChatGroup>.Projection
+            .Include(e => e.Id);
+        var chatGroupId = _mongoService.GetCollection<ChatGroup>()
+            .Find(cg => cg.UserIds.Count == 2 && cg.UserIds.All(participantUserIds.Contains))
+            .Project<ObjectId?>(userChatGroupProjection).First();
 
         return chatGroupId;
     }
@@ -56,16 +55,10 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
     private async Task<ObjectId> CreatePrivateChatGroupAsync(List<ObjectId> participantUserIds,
         CancellationToken cancellationToken)
     {
-        var newChatGroup = new ChatGroup();
+        var newChatGroup = new ChatGroup(participantUserIds);
 
-        var userChatGroups = participantUserIds.Select(userId => new UserChatGroup(userId, newChatGroup.Id)).ToList();
-
-        var createChatGroupTask = _mongoService.GetCollection<ChatGroup>()
+        await _mongoService.GetCollection<ChatGroup>()
             .InsertOneAsync(newChatGroup, cancellationToken: cancellationToken);
-        var createUserChatGroupsTask = _mongoService.GetCollection<UserChatGroup>()
-            .InsertManyAsync(userChatGroups, cancellationToken: cancellationToken);
-
-        await Task.WhenAll(new Task[] { createChatGroupTask, createUserChatGroupsTask });
 
         return newChatGroup.Id;
     }
@@ -73,24 +66,11 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
     private async Task<ObjectId> CreateNamedChatGroupAsync(string groupName, List<ObjectId> participantUserIds,
         CancellationToken cancellationToken)
     {
-        var tasks = new List<Task>();
-        var newChatGroup = new ChatGroup(groupName);
+        var newChatGroup = new ChatGroup(groupName, participantUserIds);
 
-        var createChatGroupTask = _mongoService.GetCollection<ChatGroup>()
+        await _mongoService.GetCollection<ChatGroup>()
             .InsertOneAsync(newChatGroup, cancellationToken: cancellationToken);
-
-        tasks.Add(createChatGroupTask);
-
-        var userChatGroupCollection = _mongoService.GetCollection<UserChatGroup>();
-
-        var addUserTasks = participantUserIds.Select(userId =>
-            userChatGroupCollection.InsertOneAsync(new UserChatGroup(userId, newChatGroup.Id),
-                cancellationToken: cancellationToken));
-
-        tasks.AddRange(addUserTasks);
-
-        await Task.WhenAll(tasks);
-
+        
         return newChatGroup.Id;
     }
 }
