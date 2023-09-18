@@ -21,4 +21,8 @@
     </ItemGroup>
 
 
+    <ItemGroup>
+      <Folder Include="Features\Users\Rules\" />
+    </ItemGroup>
+
 </Project>

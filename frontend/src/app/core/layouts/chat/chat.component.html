@@ -2,7 +2,7 @@
   <!-- Green background -->
   <section
     id="landing-header"
-    class="w-full h-[8%] sm:h-[30%] bg-wp-blue items-center justify-center absolute"
+    class="w-full h-[8%] sm:h-[30%] bg-wp-green items-center justify-center absolute"
   ></section>
 
   <!-- Chat -->
@@ -25,6 +25,18 @@
         </span>
 
         <div class="flex gap-5">
+          <div class="relative inline-block text-left">
+            <!--
+    Dropdown menu, show/hide based on menu state.
+
+    Entering: "transition ease-out duration-100"
+      From: "transform opacity-0 scale-95"
+      To: "transform opacity-100 scale-100"
+    Leaving: "transition ease-in duration-75"
+      From: "transform opacity-100 scale-100"
+      To: "transform opacity-0 scale-95"
+  -->
+          </div>
           <span
             id="community-tab"
             class="w-7 h-7 flex center hover:cursor-pointer"
@@ -48,12 +60,61 @@
               type="image/svg+xml"
           /></span>
 
-          <span id="menu" class="w-7 h-7 flex center hover:cursor-pointer"
+          <span
+            #showMenuRef
+            id="menu"
+            class="w-7 h-7 flex center hover:cursor-pointer"
+            (click)="showMenu = !showMenu; ($event.stopPropagation)"
+            [ngClass]="{
+              'bg-wp-panel-active-bg': showMenu,
+              'rounded-xl': showMenu
+            }"
             ><img
               src="../../../../assets/images/menu.svg"
               alt="Menu"
               type="image/svg+xml"
-          /></span>
+            />
+          </span>
+          <div
+            *ngIf="showMenu"
+            class="absolute z-10 -ml-12 mt-8 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+            role="menu"
+            aria-orientation="vertical"
+            aria-labelledby="menu-button"
+            tabindex="-1"
+          >
+            <div class="py-1" role="none">
+              <a
+                class="text-gray-700 block px-4 py-2 text-sm hover:bg-wp-panel-background hover:cursor-pointer"
+                role="menuitem"
+                tabindex="-1"
+                id="menu-item-2"
+                >New Chat</a
+              >
+            </div>
+            <div
+              class="py-1"
+              role="none"
+              (click)="createChatModalVisible = !createChatModalVisible"
+            >
+              <a
+                class="text-gray-700 block px-4 py-2 text-sm hover:bg-wp-panel-background hover:cursor-pointer"
+                role="menuitem"
+                tabindex="-1"
+                id="menu-item-4"
+                >New Group Chat</a
+              >
+            </div>
+            <div class="py-1" role="none">
+              <a
+                class="text-gray-700 block px-4 py-2 text-sm hover:bg-wp-panel-background hover:cursor-pointer"
+                role="menuitem"
+                tabindex="-1"
+                id="menu-item-6"
+                >Logout</a
+              >
+            </div>
+          </div>
         </div>
       </div>
       <!-- Sidebar Search Container -->
@@ -87,14 +148,14 @@
       <!-- Sidebar Chats Container -->
       <div
         id="chats"
-        class="w-full h-[90%] bg-white grid border-r border-r-wp-panel-r-border overflow-auto"
+        class="w-full h-max bg-white grid border-r border-r-wp-panel-r-border overflow-auto"
       >
         <!-- Sidebar All Chats -->
         <div
           class="chat-container hover:bg-[#f0f2f5] prevent-select"
-          *ngFor="let user of sideBarChatUsers(); let i = index"
-          (click)="onChatClick(i)"
-          [ngClass]="{ 'bg-[#f0f2f5]': i === selectedChatIndex() }"
+          *ngFor="let group of sidebarChatGroups; let i = index"
+          (click)="onChatClick(group, i)"
+          [ngClass]="{ 'bg-[#f0f2f5]': i === selectedChat.index }"
         >
           <div id="chat" class="w-full h-[74px] chat-grid cursor-pointer">
             <div class="profile-picture flex items-center justify-center">
@@ -110,10 +171,10 @@
               class="user-chat flex flex-col justify-center gap-2 border-b border-b-wp-panel-b-border"
             >
               <span class="user-name font-mono font-normal">{{
-                user.name
+                group.name
               }}</span>
               <span class="user-message text-[#667781] font-mono">
-                {{ user.lastMessage }}
+                {{ group.lastMessage }}
               </span>
             </div>
             <!-- <div class="chat-info"></div> -->
@@ -130,7 +191,7 @@
       <div
         id="user-chat"
         class="w-full h-[100%]"
-        *ngIf="selectedChatIndex() > -1"
+        *ngIf="selectedChat.index > -1"
       >
         <div
           id="chat-user-profile-header"
@@ -155,7 +216,7 @@
 
               <div class="profile-info flex flex-col justify-center">
                 <span class="user-name font-mono font-normal">{{
-                  "user.name"
+                  selectedChat.name
                 }}</span>
               </div>
               <div
@@ -180,7 +241,115 @@
           </div>
         </div>
         <!-- Message Container -->
-        <div id="messages" class="w-full h-[86%] wp-bg-image"></div>
+        <div
+          #messagesContainerRef
+          id="messages"
+          class="w-full h-[86%] wp-bg-image grid grid-rows-1 grid-flow-row overflow-y-scroll py-4 pt-16 px-12 items-end gap-y-[2.3rem]"
+        >
+          <!-- Group Chat -->
+          <ng-container *ngIf="!selectedChat.isPrivate; else privateChat">
+            <ng-container
+              *ngFor="let chatMessage of chatMessages[selectedChat.id]"
+            >
+              <div
+                id="chat-group-message-container"
+                class="w-max min-h-[2rem] flex justify-self-start rounded-lg"
+                [ngClass]="{
+                  'justify-self-end': chatMessage.isMe,
+                  'bg-wp-my-message-background': chatMessage.isMe
+                }"
+              >
+                <!-- My message -->
+                <ng-container *ngIf="chatMessage.isMe; else otherUserMessage">
+                  <div
+                    id="message-detail-container"
+                    class="grid min-h-[1rem] px-2 py-2 gap-1"
+                  >
+                    <div class="flex">
+                      <span
+                        id="chat-message"
+                        class="max-w-[20rem] justify-self-start text-sm break-words"
+                        >{{ chatMessage.body }}
+                      </span>
+                      <span
+                        id="date"
+                        class="w-fit h-fit text-xs self-end pt-2 pl-2 text-wp-message-date-color"
+                        >{{ chatMessage.date | date : "H:mm" }}</span
+                      >
+                    </div>
+                  </div>
+                </ng-container>
+                <!-- Other users messages -->
+                <ng-template #otherUserMessage>
+                  <span id="profile-picture" class="grid w-[28px] h-[28px]">
+                    <img
+                      type="image/svg+xml"
+                      src="../../../../assets/images/noPic.svg"
+                    />
+                  </span>
+                  <span id="tail" class="w-2 h-3 flex relative">
+                    <img
+                      type="image/svg+xml"
+                      [src]="'../../../../assets/images/tail-in.svg'"
+                      class="rotate-[94deg]"
+                    />
+                  </span>
+                  <div
+                    id="message-detail-container"
+                    class="grid bg-white rounded-lg min-h-[1rem] px-2 py-2 gap-1"
+                  >
+                    <span
+                      id="user-or-group-name"
+                      class="text-black text-sm font-semibold w-full"
+                      >{{ chatMessage.senderUsername }}</span
+                    >
+
+                    <div class="flex">
+                      <span
+                        id="chat-message"
+                        class="max-w-[20rem] justify-self-start text-sm break-words"
+                        >{{ chatMessage.body }}
+                      </span>
+                      <span
+                        id="date"
+                        class="w-fit h-fit text-xs self-end pt-2 pl-2 text-wp-message-date-color"
+                        >{{ chatMessage.date | date : "H:mm" }}</span
+                      >
+                    </div>
+                  </div>
+                </ng-template>
+              </div>
+            </ng-container>
+          </ng-container>
+          <!-- TODO: Private chat -->
+          <ng-template #privateChat>
+            <ng-container
+              *ngFor="let chatMessage of chatMessages[selectedChat.id]"
+            >
+              <div
+                id="message-detail-container"
+                class="grid bg-white justify-self-start min-h-[1rem] px-2 py-2 gap-1 rounded-lg"
+                [ngClass]="{
+                  'justify-self-end': chatMessage.isMe,
+                  'bg-wp-my-message-background': chatMessage.isMe
+                }"
+              >
+                <div class="flex">
+                  <span
+                    id="chat-message"
+                    class="max-w-[20rem] justify-self-start text-sm break-words"
+                    >{{ chatMessage.body }}
+                  </span>
+                  <span
+                    id="date"
+                    class="w-fit h-fit text-xs self-end justify-self-end pt-2 pl-2 text-wp-message-date-color"
+                    >{{ chatMessage.date | date : "H:mm" }}</span
+                  >
+                </div>
+              </div>
+            </ng-container>
+          </ng-template>
+        </div>
         <!-- Chat Input Container -->
         <div
           id="user-chat-input-container"
@@ -201,12 +370,14 @@
             </span>
           </div>
           <input
+            #chatMessageInputRef
             type="text"
             id="chat-input"
             class="w-[85%] h-[75%] bg-white flex items-center rounded-lg border-transparent focus:border-transparent focus:ring-0 justify-center"
             placeholder="Type a message"
             autofocus
             (change)="chatMessageInput.set($any($event.target).value)"
+            [value]="chatMessageInput()"
           />
           <div
             id="chat-send"
@@ -220,4 +391,65 @@
       </div>
     </div>
   </section>
+</div>
+
+<div class="modal" *ngIf="createChatModalVisible">
+  <article class="modal-container">
+    <header class="modal-container-header">
+      <h1 class="modal-container-title">
+        <img src="../../../../assets/images/user-plus.svg" class="w-6 h6" />
+        Create Group Chat
+      </h1>
+      <button class="icon-button" (click)="createChatModalVisible = false">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+        >
+          <path fill="none" d="M0 0h24v24H0z" />
+          <path
+            fill="currentColor"
+            d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95L7.05 5.636z"
+          />
+        </svg>
+      </button>
+    </header>
+    <form
+      class="modal-container-body rtf flex flex-col items-center justify-center"
+      [formGroup]="groupChatForm"
+      (ngSubmit)="createChat()"
+    >
+      <app-input
+        inputType="text"
+        label="Group name"
+        controlName="groupName"
+        [parentGroup]="groupChatForm"
+        placeholder="Enter a group name"
+      ></app-input>
+
+      <app-input
+        inputType="text"
+        label="Search"
+        placeholder="Search for users"
+        [dropdownVisible]="true"
+        [suggestions]="suggestions"
+        [parentGroup]="groupChatForm"
+        controlName="userSearchInput"
+        (onSuggestionClick)="onSuggestionClick($event)"
+      ></app-input>
+      <div id="chip-container" class="w-full min-h-[2rem]">
+        <app-chip-list
+          [chipItems]="groupChatForm.get('selectedUsers')!.value!"
+          (onChipRemoveClick)="removeChip($event)"
+        ></app-chip-list>
+      </div>
+      <app-button
+        label="Start Chat"
+        class="focus:outline-none rounded text-black bg-wp-green hover:opacity-90 w-full h-10"
+        buttonType="submit"
+        [disabled]="!groupChatForm.valid"
+      ></app-button>
+    </form>
+  </article>
 </div>
