@@ -1,6 +1,11 @@
 import { NgFor, NgIf } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  AbstractControl,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { LookupItem } from '../../api/lookup-item';
 
 @Component({
@@ -20,9 +25,6 @@ export class InputComponent {
   @Input() placeholder?: string | undefined;
   @Input() inputType?: 'text' | 'number' | 'password';
   @Input() inputClass?: string = '';
-  @Input() parentGroup?: FormGroup;
-
-  @Input() controlName?: string;
 
   @Input() dropdownVisible = false;
   @Input() suggestions: LookupItem[] = [];
@@ -32,6 +34,7 @@ export class InputComponent {
     this.suggestions = arr;
     this.dropdownVisible = !!arr.length;
   }
+  @Input() control?: FormControl;
 
   currentValueOf(item: {}, selector: string): any {
     return item[selector as keyof typeof item];

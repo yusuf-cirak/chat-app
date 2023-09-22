@@ -27,16 +27,14 @@
             <polyline points="3 7 12 13 21 7" />
           </svg> -->
       </div>
-      <ng-container *ngIf="parentGroup && controlName; else default">
-        <div [formGroup]="parentGroup">
-          <input
-            #inputElementRef
-            [id]="name"
-            class="text-gray-600 dark:text-gray-400 focus:outline-none focus:border dark:border-gray-700 dark:bg-gray-800 bg-white font-normal w-64 h-10 flex items-center pl-12 text-sm border-gray-300 rounded border shadow disabled:opacity-40"
-            [formControlName]="controlName"
-            [placeholder]="placeholder || ''"
-          />
-        </div>
+      <ng-container *ngIf="control; else default">
+        <input
+          #inputElementRef
+          [id]="name"
+          class="text-gray-600 dark:text-gray-400 focus:outline-none focus:border dark:border-gray-700 dark:bg-gray-800 bg-white font-normal w-64 h-10 flex items-center pl-12 text-sm border-gray-300 rounded border shadow disabled:opacity-40"
+          [formControl]="control"
+          [placeholder]="placeholder || ''"
+        />
       </ng-container>
       <ng-template #default>
         <input
