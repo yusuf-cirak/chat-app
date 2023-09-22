@@ -173,7 +173,9 @@
               <span class="user-name font-mono font-normal">{{
                 group.name
               }}</span>
-              <span class="user-message text-[#667781] font-mono">
+              <span
+                class="user-message text-[#667781] font-mono text-ellipsis whitespace-nowrap overflow-hidden"
+              >
                 {{ group.lastMessage }}
               </span>
             </div>
@@ -382,6 +384,13 @@
           <div
             id="chat-send"
             class="flex flex-row w-[6%] h-full justify-center items-center hover:cursor-pointer"
+            (click)="
+              sendMessage(
+                chatMessageInput(),
+                selectedChat.id,
+                selectedChat.index
+              )
+            "
           >
             <span id="send" class="w-[25px] h-[25px] flex">
               <img src="../../../../assets/images/send.svg" alt="Send Icon" />
@@ -423,9 +432,8 @@
       <app-input
         inputType="text"
         label="Group name"
-        controlName="groupName"
-        [parentGroup]="groupChatForm"
         placeholder="Enter a group name"
+        [control]="groupChatForm.controls['groupName']"
       ></app-input>
 
       <app-input
@@ -434,8 +442,7 @@
         placeholder="Search for users"
         [dropdownVisible]="true"
         [suggestions]="suggestions"
-        [parentGroup]="groupChatForm"
-        controlName="userSearchInput"
+        [control]="groupChatForm.controls['userSearchInput']"
         (onSuggestionClick)="onSuggestionClick($event)"
       ></app-input>
       <div id="chip-container" class="w-full min-h-[2rem]">

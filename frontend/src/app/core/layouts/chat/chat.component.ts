@@ -16,14 +16,15 @@ import { HttpClientService } from 'src/app/shared/services/http-client.service';
 import { InputComponent } from 'src/app/shared/components/input/input.component';
 import { ButtonComponent } from 'src/app/shared/components/button/button.component';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
+  NonNullableFormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
 import { LookupItem } from 'src/app/shared/api/lookup-item';
 import { ChipListComponent } from 'src/app/shared/components/chip-list/chip-list.component';
+import { ChatService } from '../../services/chat.service';
+import { CreateChatGroupDto } from '../../dtos/create-chat-group-dto';
+import { SendMessageDto } from '../../dtos/send-message-dto';
 
 interface SidebarChatGroup {
   id: string;
@@ -75,23 +76,23 @@ type CreateChatForm = {
     ReactiveFormsModule,
     ChipListComponent,
   ],
+  providers: [ChatService],
   templateUrl: './chat.component.html',
 })
 export class ChatComponent implements OnInit {
   // Inject dependencies
   private readonly _httpClientService = inject(HttpClientService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _formBuilder = inject(NonNullableFormBuilder);
+  private readonly chatService = inject(ChatService);
 
-  groupChatForm = new FormGroup({
-    groupName: new FormControl<string>('', [
-      Validators.required,
-      Validators.minLength(3),
-    ]),
-    selectedUsers: new FormControl<LookupItem[]>([] as LookupItem[], [
-      Validators.minLength(1),
-      Validators.required,
-    ]),
-    userSearchInput: new FormControl<string>(''),
+  groupChatForm = this._formBuilder.group({
+    groupName: ['', [Validators.required, Validators.minLength(3)]],
+    selectedUsers: [
+      [] as LookupItem[],
+      [Validators.required, Validators.minLength(1)],
+    ],
+    userSearchInput: [''],
   });
 
   // UI States
@@ -103,16 +104,6 @@ export class ChatComponent implements OnInit {
 
   set showMenu(value: boolean) {
     this._showMenu.set(value);
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent) {
-    if (
-      !this.showMenuRef.nativeElement.contains(event.target) &&
-      this.showMenu
-    ) {
-      this.showMenu = false;
-    }
   }
 
   // Chat States
@@ -407,11 +398,35 @@ export class ChatComponent implements OnInit {
   chatMessageInput: WritableSignal<string> = signal('');
 
   // HTML Element references
-  @ViewChild('chatMessageInputRef') private chatMessageInputRef!: ElementRef;
+  @ViewChild('chatMessageInputRef')
+  private chatMessageInputRef!: ElementRef;
 
   @ViewChild('messagesContainerRef') private messagesContainerRef!: ElementRef;
 
   @ViewChild('showMenuRef') private showMenuRef!: ElementRef;
+
+  // Event listeners
+  @HostListener('document:keyup.enter', ['$event'])
+  onEnter() {
+    const message = this.chatMessageInput();
+    if (message.length > 0) {
+      this.sendMessage(
+        this.chatMessageInput(),
+        this.selectedChat.id,
+        this.selectedChat.index
+      );
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (
+      !this.showMenuRef.nativeElement.contains(event.target) &&
+      this.showMenu
+    ) {
+      this.showMenu = false;
+    }
+  }
 
   ngOnInit() {
     // forkJoin([this._httpClientService.get({})])
@@ -429,10 +444,7 @@ export class ChatComponent implements OnInit {
     });
     this.chatMessageInput.set('');
     this.chatMessageInputRef.nativeElement?.focus();
-    this.messagesContainerRef.nativeElement?.scrollTo({
-      top: this.messagesContainerRef.nativeElement.scrollHeight,
-      behavior: 'smooth',
-    });
+    this.scrollToBottom();
   }
 
   onChatInput(value: string) {
@@ -472,13 +484,10 @@ export class ChatComponent implements OnInit {
   onSuggestionClick(userLookup: LookupItem) {
     this.suggestions = [];
     const selectedUsers = this.groupChatForm.get('selectedUsers');
+    const value = selectedUsers?.value;
 
-    if (selectedUsers?.value) {
-      if (
-        !(selectedUsers!.value as LookupItem[]).find(
-          (s) => s.key === userLookup.key
-        )
-      ) {
+    if (value) {
+      if (!(value as LookupItem[]).find((s) => s.key === userLookup.key)) {
         selectedUsers.setValue([...selectedUsers.value, userLookup]);
       }
     }
@@ -493,9 +502,21 @@ export class ChatComponent implements OnInit {
   createChat() {
     // TODO: Create chat group with API
     const formValues = this.groupChatForm.value as any as CreateChatForm;
+
+    const chatObj: CreateChatGroupDto = {
+      name: formValues.groupName,
+      participantUserIds: formValues.selectedUsers.map(
+        (s: LookupItem) => s.value as string
+      ),
+    };
+
+    this.chatService
+      .createChatGroup(chatObj)
+      .pipe(takeUntilDestroyed(this._destroyRef));
+
     const newChatGroup: SidebarChatGroup = {
       name: formValues.groupName,
-      isPrivate: false,
+      isPrivate: !!formValues.groupName.length,
       id: '4',
       lastMessage: '',
       // selectedUsers: formValues.selectedUsers.map((s: LookupItem) => s.value),
@@ -507,6 +528,49 @@ export class ChatComponent implements OnInit {
     // update sidebar chat groups
     this.createChatModalVisible = false;
     this.groupChatForm.reset();
-    this.groupChatForm.get('selectedUsers')?.setValue([]);
+  }
+
+  sendMessage(message: string, chatId: string, index: number) {
+    const messageObj: SendMessageDto = {
+      content: message,
+      chatGroupId: chatId,
+    };
+
+    this.chatService
+      .sendMessage(messageObj)
+      .pipe(takeUntilDestroyed(this._destroyRef));
+
+    this._sidebarChatGroups.mutate((groups) => {
+      groups[index].lastMessage = 'You: ' + message;
+    });
+
+    this._chatMessages.mutate((messages) => {
+      messages[chatId].push({
+        id: '1',
+        senderId: '1',
+        senderUsername: 'John Doe',
+        body: message,
+        date: new Date(),
+        isMe: true,
+      });
+    });
+
+    this.chatMessageInput.set('');
+
+    this.scrollToBottom();
+  }
+
+  private scrollToBottom() {
+    setTimeout(() => {
+      const messageContainerRef = this.messagesContainerRef
+        .nativeElement as HTMLElement;
+
+      if (messageContainerRef) {
+        messageContainerRef.scrollTo({
+          top: 10000,
+          behavior: 'instant',
+        });
+      }
+    }, 0);
   }
 }
