@@ -1,15 +1,17 @@
+import { RegisterUserDto } from './../../../dtos/register-user-dto';
 import { NgIf } from '@angular/common';
-import { Component, WritableSignal, signal } from '@angular/core';
+import { Component, WritableSignal, inject, signal } from '@angular/core';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
+  NonNullableFormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { AppState } from 'src/app/app.state';
 import { ButtonComponent } from 'src/app/shared/components/button/button.component';
 import { InputComponent } from 'src/app/shared/components/input/input.component';
+import { loginAction } from 'src/app/shared/states/user/user.actions';
 
 @Component({
   selector: 'app-login',
@@ -25,20 +27,21 @@ import { InputComponent } from 'src/app/shared/components/input/input.component'
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent {
-  formGroup!: FormGroup;
+  // Form states
   isFormSubmitted: WritableSignal<boolean> = signal(false);
 
-  constructor(private formBuilder: FormBuilder) {}
+  private readonly formBuilder = inject(NonNullableFormBuilder);
+  formGroup = this.formBuilder.group({
+    userName: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
+  });
 
-  ngOnInit() {
-    this.formGroup = this.formBuilder.group({
-      username: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-    });
-  }
+  // Global state
+  private readonly store = inject(Store<AppState>);
 
-  submitForm() {
+  submitForm(formValues: RegisterUserDto) {
     this.isFormSubmitted.set(true);
-    console.log('click');
+
+    this.store.dispatch(loginAction({ user: formValues as any }));
   }
 }

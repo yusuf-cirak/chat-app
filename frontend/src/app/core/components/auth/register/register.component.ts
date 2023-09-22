@@ -1,7 +1,8 @@
-import { Component, WritableSignal, signal } from '@angular/core';
+import { Component, WritableSignal, inject, signal } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
+  NonNullableFormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
@@ -17,17 +18,14 @@ import { InputComponent } from 'src/app/shared/components/input/input.component'
   styleUrls: ['./register.component.scss'],
 })
 export class RegisterComponent {
-  formGroup!: FormGroup;
   isFormSubmitted: WritableSignal<boolean> = signal(false);
 
-  constructor(private formBuilder: FormBuilder) {}
+  formBuilder = inject(NonNullableFormBuilder);
 
-  ngOnInit() {
-    this.formGroup = this.formBuilder.group({
-      username: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-    });
-  }
+  formGroup = this.formBuilder.group({
+    username: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
+  });
 
   submitForm() {
     this.isFormSubmitted.set(true);

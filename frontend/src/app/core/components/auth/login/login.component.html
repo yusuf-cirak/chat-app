@@ -4,22 +4,20 @@
   </div>
   <form
     [formGroup]="formGroup"
-    (ngSubmit)="submitForm()"
+    (ngSubmit)="submitForm(formGroup.getRawValue())"
     class="flex flex-col items-center"
   >
     <app-input
       label="Username"
       placeholder="Username"
       inputType="text"
-      [parentGroup]="formGroup"
-      controlName="username"
+      [control]="formGroup.controls['userName']"
     ></app-input>
     <app-input
       label="Password"
       placeholder="Password"
       inputType="password"
-      [parentGroup]="formGroup"
-      controlName="password"
+      [control]="formGroup.controls['password']"
     ></app-input>
     <div class="flex items-start self-start pb-4">
       <label class="inline-flex cursor-pointer"
