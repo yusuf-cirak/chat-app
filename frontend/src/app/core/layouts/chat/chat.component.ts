@@ -523,6 +523,9 @@ export class ChatComponent implements OnInit {
     };
 
     this._sidebarChatGroups.set([...this._sidebarChatGroups(), newChatGroup]);
+    this._chatMessages.mutate((chatMessages) => {
+      chatMessages[newChatGroup.id] = [];
+    });
     // TODO: Notify users with socket
 
     // update sidebar chat groups

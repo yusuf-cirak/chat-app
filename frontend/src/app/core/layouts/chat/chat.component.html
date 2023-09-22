@@ -246,7 +246,10 @@
         <div
           #messagesContainerRef
           id="messages"
-          class="w-full h-[86%] wp-bg-image grid grid-rows-1 grid-flow-row overflow-y-scroll py-4 pt-16 px-12 items-end gap-y-[2.3rem]"
+          class="w-full h-[86%] wp-bg-image grid grid-rows-1 grid-flow-row overflow-y-scroll py-4 pt-16 px-12 items-end gap-y-4"
+          [ngClass]="{
+            'gap-y-8': selectedChat.isPrivate
+          }"
         >
           <!-- Group Chat -->
           <ng-container *ngIf="!selectedChat.isPrivate; else privateChat">
