@@ -32,23 +32,11 @@ export class LoginComponent {
   formGroup = this.formBuilder.group({
     userName: [
       '',
-      [
-        minLength(
-          3,
-          'minLength',
-          'Username must be at least 3 characters long'
-        ),
-      ],
+      [minLength(3, 'Username must be at least 3 characters long')],
     ],
     password: [
       '',
-      [
-        minLength(
-          6,
-          'minLength',
-          'Password must be at least 6 characters long'
-        ),
-      ],
+      [minLength(6, 'Password must be at least 6 characters long')],
     ],
   });
 
