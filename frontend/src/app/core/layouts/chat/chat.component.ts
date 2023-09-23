@@ -401,7 +401,7 @@ export class ChatComponent implements OnInit {
   @ViewChild('chatMessageInputRef')
   private chatMessageInputRef!: ElementRef;
 
-  @ViewChild('messagesContainerRef') private messagesContainerRef!: ElementRef;
+  @ViewChild('messagesWrapperRef') private messagesWrapperRef!: ElementRef;
 
   @ViewChild('showMenuRef') private showMenuRef!: ElementRef;
 
@@ -565,8 +565,8 @@ export class ChatComponent implements OnInit {
 
   private scrollToBottom() {
     setTimeout(() => {
-      const messageContainerRef = this.messagesContainerRef
-        .nativeElement as HTMLElement;
+      const messageContainerRef =
+        (this.messagesWrapperRef.nativeElement as HTMLDivElement) || null;
 
       if (messageContainerRef) {
         messageContainerRef.scrollTo({

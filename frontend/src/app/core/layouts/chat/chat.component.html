@@ -244,116 +244,121 @@
         </div>
         <!-- Message Container -->
         <div
-          #messagesContainerRef
           id="messages"
-          class="w-full h-[86%] max-h-[86%] wp-bg-image flex flex-col justify-end overflow-y-scroll py-4 pt-16 px-12 items-end gap-y-8"
+          class="w-full h-[86%] wp-bg-image"
           [ngClass]="{
             'gap-y-4': !selectedChat.isPrivate
           }"
         >
-          <!-- Group Chat -->
-          <ng-container *ngIf="!selectedChat.isPrivate; else privateChat">
-            <ng-container
-              *ngFor="let chatMessage of chatMessages[selectedChat.id]"
-            >
-              <div
-                id="chat-group-message-container"
-                class="w-max min-h-[2rem] flex self-start rounded-lg"
-                [ngClass]="{
-                  'self-end': chatMessage.isMe,
-                  'bg-wp-my-message-background': chatMessage.isMe
-                }"
+          <div
+            id="messages-wrapper"
+            class="flex flex-col overflow-y-scroll w-full h-full max-h-[auto] py-4 pt-16 px-12 gap-y-3"
+            #messagesWrapperRef
+          >
+            <!-- Group Chat -->
+            <ng-container *ngIf="!selectedChat.isPrivate; else privateChat">
+              <ng-container
+                *ngFor="let chatMessage of chatMessages[selectedChat.id]"
               >
-                <!-- My message -->
-                <ng-container *ngIf="chatMessage.isMe; else otherUserMessage">
-                  <div
-                    id="message-detail-container"
-                    class="grid min-h-[1rem] px-2 py-2 gap-1"
-                  >
-                    <div class="flex">
-                      <span
-                        id="chat-message"
-                        class="max-w-[20rem] justify-self-start text-sm break-words"
-                        >{{ chatMessage.body }}
-                      </span>
-                      <span
-                        id="date"
-                        class="w-fit h-fit text-xs self-end pt-2 pl-2 text-wp-message-date-color"
-                        >{{ chatMessage.date | date : "H:mm" }}</span
-                      >
-                    </div>
-                  </div>
-                </ng-container>
-                <!-- Other users messages -->
-                <ng-template #otherUserMessage>
-                  <span id="profile-picture" class="grid w-[28px] h-[28px]">
-                    <img
-                      type="image/svg+xml"
-                      src="../../../../assets/images/noPic.svg"
-                    />
-                  </span>
-                  <span id="tail" class="w-2 h-3 flex relative">
-                    <img
-                      type="image/svg+xml"
-                      [src]="'../../../../assets/images/tail-in.svg'"
-                      class="rotate-[94deg]"
-                    />
-                  </span>
-                  <div
-                    id="message-detail-container"
-                    class="grid bg-white rounded-lg min-h-[1rem] px-2 py-2 gap-1"
-                  >
-                    <span
-                      id="user-or-group-name"
-                      class="text-black text-sm font-semibold w-full"
-                      >{{ chatMessage.senderUsername }}</span
+                <div
+                  id="chat-group-message-container"
+                  class="flex self-start w-fit min-h-[2rem] rounded-lg"
+                  [ngClass]="{
+                    'self-end': chatMessage.isMe,
+                    'bg-wp-my-message-background': chatMessage.isMe
+                  }"
+                >
+                  <!-- My message -->
+                  <ng-container *ngIf="chatMessage.isMe; else otherUserMessage">
+                    <div
+                      id="message-detail-container"
+                      class="grid min-h-[1rem] px-2 py-2 gap-1"
                     >
-
-                    <div class="flex">
-                      <span
-                        id="chat-message"
-                        class="max-w-[20rem] justify-self-start text-sm break-words"
-                        >{{ chatMessage.body }}
-                      </span>
-                      <span
-                        id="date"
-                        class="w-fit h-fit text-xs self-end pt-2 pl-2 text-wp-message-date-color"
-                        >{{ chatMessage.date | date : "H:mm" }}</span
-                      >
+                      <div class="flex">
+                        <span
+                          id="chat-message"
+                          class="max-w-[20rem] justify-self-start text-sm break-words"
+                          >{{ chatMessage.body }}
+                        </span>
+                        <span
+                          id="date"
+                          class="w-fit h-fit text-xs self-end pt-2 pl-2 text-wp-message-date-color"
+                          >{{ chatMessage.date | date : "H:mm" }}</span
+                        >
+                      </div>
                     </div>
-                  </div>
-                </ng-template>
-              </div>
-            </ng-container>
-          </ng-container>
-          <!-- TODO: Private chat -->
-          <ng-template #privateChat>
-            <ng-container
-              *ngFor="let chatMessage of chatMessages[selectedChat.id]"
-            >
-              <div
-                id="message-detail-container"
-                class="grid bg-white justify-self-start min-h-[1rem] px-2 py-2 gap-1 rounded-lg"
-                [ngClass]="{
-                  'justify-self-end': chatMessage.isMe,
-                  'bg-wp-my-message-background': chatMessage.isMe
-                }"
-              >
-                <div class="flex">
-                  <span
-                    id="chat-message"
-                    class="max-w-[20rem] justify-self-start text-sm break-words"
-                    >{{ chatMessage.body }}
-                  </span>
-                  <span
-                    id="date"
-                    class="w-fit h-fit text-xs self-end justify-self-end pt-2 pl-2 text-wp-message-date-color"
-                    >{{ chatMessage.date | date : "H:mm" }}</span
-                  >
+                  </ng-container>
+                  <!-- Other users messages -->
+                  <ng-template #otherUserMessage>
+                    <span id="profile-picture" class="grid w-[28px] h-[28px]">
+                      <img
+                        type="image/svg+xml"
+                        src="../../../../assets/images/noPic.svg"
+                      />
+                    </span>
+                    <span id="tail" class="w-2 h-3 flex relative">
+                      <img
+                        type="image/svg+xml"
+                        [src]="'../../../../assets/images/tail-in.svg'"
+                        class="rotate-[94deg]"
+                      />
+                    </span>
+                    <div
+                      id="message-detail-container"
+                      class="grid bg-white rounded-lg min-h-[1rem] px-2 py-2 gap-1"
+                    >
+                      <span
+                        id="user-or-group-name"
+                        class="text-black text-sm font-semibold w-full"
+                        >{{ chatMessage.senderUsername }}</span
+                      >
+
+                      <div class="flex">
+                        <span
+                          id="chat-message"
+                          class="max-w-[20rem] justify-self-start text-sm break-words"
+                          >{{ chatMessage.body }}
+                        </span>
+                        <span
+                          id="date"
+                          class="w-fit h-fit text-xs self-end pt-2 pl-2 text-wp-message-date-color"
+                          >{{ chatMessage.date | date : "H:mm" }}</span
+                        >
+                      </div>
+                    </div>
+                  </ng-template>
                 </div>
-              </div>
+              </ng-container>
             </ng-container>
-          </ng-template>
+            <!-- TODO: Private chat -->
+            <ng-template #privateChat>
+              <ng-container
+                *ngFor="let chatMessage of chatMessages[selectedChat.id]"
+              >
+                <div
+                  id="message-detail-container"
+                  class="flex bg-white self-start w-fit min-h-[auto] px-2 py-2 gap-1 rounded-lg"
+                  [ngClass]="{
+                    'self-end': chatMessage.isMe,
+                    'bg-wp-my-message-background': chatMessage.isMe
+                  }"
+                >
+                  <div class="flex">
+                    <span
+                      id="chat-message"
+                      class="max-w-[20rem] justify-self-start text-sm break-words"
+                      >{{ chatMessage.body }}
+                    </span>
+                    <span
+                      id="date"
+                      class="w-fit h-fit text-xs self-end justify-self-end pt-2 pl-2 text-wp-message-date-color"
+                      >{{ chatMessage.date | date : "H:mm" }}</span
+                    >
+                  </div>
+                </div>
+              </ng-container>
+            </ng-template>
+          </div>
         </div>
         <!-- Chat Input Container -->
         <div
