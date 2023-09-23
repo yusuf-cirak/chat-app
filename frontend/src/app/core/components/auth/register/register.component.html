@@ -4,14 +4,14 @@
   </div>
   <form
     [formGroup]="formGroup"
-    (ngSubmit)="submitForm()"
+    (ngSubmit)="register(formGroup.valid, formGroup.getRawValue())"
     class="flex flex-col items-center"
   >
     <app-input
       label="Username"
       placeholder="Username"
       inputType="text"
-      [control]="formGroup.controls['username']"
+      [control]="formGroup.controls['userName']"
     ></app-input>
     <app-input
       label="Password"
@@ -35,7 +35,7 @@
       label="Register"
       buttonType="submit"
       [disabled]="isFormSubmitted()"
-      [showIconAndHideLabelWhenDisabled]="true"
+      [showIconAndHideLabelWhenDisabled]="isFormSubmitted()"
     >
       <svg iconRef class="h-5 w-6 animate-spin" viewBox="3 3 18 18">
         <path

@@ -1,23 +1,17 @@
-import { NgFor, NgIf } from '@angular/common';
+import { KeyValuePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import {
-  AbstractControl,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { LookupItem } from '../../api/lookup-item';
 
 @Component({
   selector: 'app-input',
   standalone: true,
-  imports: [NgIf, NgFor, ReactiveFormsModule],
+  imports: [NgIf, NgFor, ReactiveFormsModule, NgClass, KeyValuePipe],
   templateUrl: './input.component.html',
 })
 export class InputComponent {
   // Inputs
   @Input() label?: string;
-  @Input() name?: string;
   @Input() autocomplete?: string;
   @Input() required?: boolean;
   @Input() disabled: boolean = false;

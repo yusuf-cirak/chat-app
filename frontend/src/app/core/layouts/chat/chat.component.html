@@ -246,9 +246,9 @@
         <div
           #messagesContainerRef
           id="messages"
-          class="w-full h-[86%] wp-bg-image grid grid-rows-1 grid-flow-row overflow-y-scroll py-4 pt-16 px-12 items-end gap-y-4"
+          class="w-full h-[86%] max-h-[86%] wp-bg-image flex flex-col justify-end overflow-y-scroll py-4 pt-16 px-12 items-end gap-y-8"
           [ngClass]="{
-            'gap-y-8': selectedChat.isPrivate
+            'gap-y-4': !selectedChat.isPrivate
           }"
         >
           <!-- Group Chat -->
@@ -258,9 +258,9 @@
             >
               <div
                 id="chat-group-message-container"
-                class="w-max min-h-[2rem] flex justify-self-start rounded-lg"
+                class="w-max min-h-[2rem] flex self-start rounded-lg"
                 [ngClass]="{
-                  'justify-self-end': chatMessage.isMe,
+                  'self-end': chatMessage.isMe,
                   'bg-wp-my-message-background': chatMessage.isMe
                 }"
               >

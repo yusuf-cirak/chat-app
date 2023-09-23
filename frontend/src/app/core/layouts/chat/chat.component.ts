@@ -122,19 +122,19 @@ export class ChatComponent implements OnInit {
   private _sidebarChatGroups: WritableSignal<SidebarChatGroup[]> = signal([
     {
       id: '1',
-      name: 'John Doe',
+      name: 'private1',
       isPrivate: true,
       lastMessage: 'Hello, how are you?',
     },
     {
       id: '2',
-      name: 'John Doe',
+      name: 'private2',
       isPrivate: true,
       lastMessage: 'Hello, how are you?',
     },
     {
       id: '3',
-      name: 'John Doe',
+      name: 'group1',
       isPrivate: false,
       lastMessage: 'Hello, how are you?',
     },

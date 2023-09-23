@@ -4,7 +4,7 @@
   </div>
   <form
     [formGroup]="formGroup"
-    (ngSubmit)="submitForm(formGroup.getRawValue())"
+    (ngSubmit)="login(formGroup.valid, formGroup.getRawValue())"
     class="flex flex-col items-center"
   >
     <app-input
@@ -32,10 +32,10 @@
       [class]="
         'bg-wp-green text-white active:bg-opacity-50 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-64 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none flex items-center justify-center'
       "
-      label="Sign In"
+      label="Login"
       buttonType="submit"
       [disabled]="isFormSubmitted()"
-      [showIconAndHideLabelWhenDisabled]="true"
+      [showIconAndHideLabelWhenDisabled]="isFormSubmitted()"
     >
       <svg iconRef class="h-5 w-6 animate-spin" viewBox="3 3 18 18">
         <path
