@@ -15,18 +15,14 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { HttpClientService } from 'src/app/shared/services/http-client.service';
 import { InputComponent } from 'src/app/shared/components/input/input.component';
 import { ButtonComponent } from 'src/app/shared/components/button/button.component';
-import {
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { LookupItem } from 'src/app/shared/api/lookup-item';
 import { ChipListComponent } from 'src/app/shared/components/chip-list/chip-list.component';
 import { ChatService } from '../../services/chat.service';
 import { CreateChatGroupDto } from '../../dtos/create-chat-group-dto';
 import { SendMessageDto } from '../../dtos/send-message-dto';
-import { required } from 'src/app/shared/validators/required';
 import { minLength } from 'src/app/shared/validators/min.length';
+import { length } from 'src/app/shared/validators/length';
 
 interface SidebarChatGroup {
   id: string;
@@ -52,6 +48,8 @@ interface Messages {
     isMe: boolean;
   }[];
 }
+
+type ChatType = 'private' | 'group';
 
 // Chat Group Info { id, name } - Group or user name - One API call to receive chat groups of user
 // Chat Message Info { id, chatGroupId,senderId, date, message } - One API call to receive chat messages of user
@@ -104,6 +102,8 @@ export class ChatComponent implements OnInit {
     ],
     userSearchInput: [''],
   });
+
+  _selectedChatTypeForCreate = signal<ChatType>('private');
 
   // UI States
   private _showMenu: WritableSignal<boolean> = signal(false);
@@ -393,16 +393,6 @@ export class ChatComponent implements OnInit {
     this._createChatModalVisible.set(value);
   }
 
-  private _selectedUsersToChat: WritableSignal<LookupItem[]> = signal([]);
-
-  get selectedUsersToChat() {
-    return this._selectedUsersToChat();
-  }
-
-  set selectedUsersToChat(values: LookupItem[]) {
-    this._selectedUsersToChat.set(values);
-  }
-
   // Input states
   searchInput: WritableSignal<string> = signal('');
   chatMessageInput: WritableSignal<string> = signal('');
@@ -442,6 +432,8 @@ export class ChatComponent implements OnInit {
     // forkJoin([this._httpClientService.get({})])
     //   .pipe(takeUntilDestroyed(this._destroyRef))
     //   .subscribe();
+
+    // Register selected chat type change to update form
 
     // Register search input debounce
     this.registerSearchInputDebounce();
@@ -515,11 +507,16 @@ export class ChatComponent implements OnInit {
     // TODO: Create chat group with API
     const formValues = this.chatForm.value as any as CreateChatForm;
 
+    const isChatTypePrivate = this._selectedChatTypeForCreate() === 'private';
+
+    formValues.groupName = formValues?.groupName?.trim() || '';
+
     const chatObj: CreateChatGroupDto = {
       name: formValues.groupName,
       participantUserIds: formValues.selectedUsers.map(
         (s: LookupItem) => s.value as string
       ),
+      isPrivate: isChatTypePrivate,
     };
 
     this.chatService
@@ -527,8 +524,8 @@ export class ChatComponent implements OnInit {
       .pipe(takeUntilDestroyed(this._destroyRef));
 
     const newChatGroup: SidebarChatGroup = {
-      name: formValues.groupName,
-      isPrivate: !!formValues.groupName.length,
+      name: isChatTypePrivate ? formValues.selectedUsers[0].key : chatObj.name,
+      isPrivate: isChatTypePrivate,
       id: '4',
       lastMessage: '',
       // selectedUsers: formValues.selectedUsers.map((s: LookupItem) => s.value),
@@ -587,5 +584,47 @@ export class ChatComponent implements OnInit {
         });
       }
     }, 0);
+  }
+
+  openCreateChatModal(chatType: ChatType) {
+    this._selectedChatTypeForCreate.set(chatType);
+    this.updateForm(chatType);
+    this.createChatModalVisible = true;
+  }
+
+  updateForm(chatType: ChatType) {
+    if (chatType === 'private') {
+      this.chatForm.controls.groupName.setValidators(null);
+
+      this.chatForm.controls.groupName.disable();
+
+      this.chatForm.controls.selectedUsers.setValidators(
+        length(1, 'You must select a user to chat.')
+      );
+
+      // Update validation of controls
+      this.chatForm.controls.groupName.updateValueAndValidity();
+
+      this.chatForm.controls.selectedUsers.updateValueAndValidity();
+    } else {
+      this.chatForm.controls.groupName.enable();
+
+      this.chatForm.controls.groupName.setValidators([
+        minLength(
+          3,
+          'Group name is required and should be at least 3 character long.'
+        ),
+      ]);
+
+      this.chatForm.controls.selectedUsers.setValidators(
+        minLength(1, 'You must select at least one user for your chat group.')
+      );
+
+      // Update validation of controls
+
+      this.chatForm.controls.groupName.updateValueAndValidity();
+
+      this.chatForm.controls.selectedUsers.updateValueAndValidity();
+    }
   }
 }

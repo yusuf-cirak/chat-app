@@ -10,18 +10,36 @@ import { LookupItem } from '../../api/lookup-item';
   templateUrl: './input.component.html',
 })
 export class InputComponent {
-  // Inputs
   @Input() label?: string;
+
   @Input() autocomplete?: string;
+
   @Input() required?: boolean;
+
   @Input() disabled: boolean = false;
+
+  @Input('disabled') set disabledSetter(value: boolean) {
+    this.disabled = value;
+    if (this.control) {
+      if (value) {
+        this.control.disable();
+      } else {
+        this.control.enable();
+      }
+    }
+  }
   @Input() readonly?: boolean;
+
   @Input() placeholder?: string | undefined;
+
   @Input() inputType?: 'text' | 'number' | 'password';
+
   @Input() inputClass?: string = '';
 
   @Input() dropdownVisible = false;
+
   @Input() suggestions: LookupItem[] = [];
+
   @Input() suggestionShowProperty: string = 'key';
 
   @Input('suggestions') set suggestionsSetter(arr: LookupItem[]) {

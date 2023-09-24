@@ -34,6 +34,7 @@
           class="text-gray-600 dark:text-gray-400 focus:outline-none focus:border dark:border-gray-700 dark:bg-gray-800 bg-white font-normal w-64 h-10 flex items-center pl-12 text-sm border-gray-300 rounded border shadow disabled:opacity-40 border-transparent"
           [formControl]="control"
           [placeholder]="placeholder || ''"
+          [disabled]="disabled"
         />
         <ng-container
           *ngIf="
@@ -54,6 +55,7 @@
           #inputElementRef
           class="text-gray-600 dark:text-gray-400 focus:outline-none focus:border dark:border-gray-700 dark:bg-gray-800 bg-white font-normal w-64 h-10 flex items-center pl-12 text-sm border-gray-300 rounded border shadow disabled:opacity-40"
           [placeholder]="placeholder || ''"
+          [disabled]="disabled"
         />
       </ng-template>
     </div>

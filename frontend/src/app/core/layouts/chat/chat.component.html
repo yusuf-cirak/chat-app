@@ -83,7 +83,11 @@
             aria-labelledby="menu-button"
             tabindex="-1"
           >
-            <div class="py-1" role="none">
+            <div
+              class="py-1"
+              role="none"
+              (click)="openCreateChatModal('private')"
+            >
               <a
                 class="text-gray-700 block px-4 py-2 text-sm hover:bg-wp-panel-background hover:cursor-pointer"
                 role="menuitem"
@@ -95,7 +99,7 @@
             <div
               class="py-1"
               role="none"
-              (click)="createChatModalVisible = !createChatModalVisible"
+              (click)="openCreateChatModal('group')"
             >
               <a
                 class="text-gray-700 block px-4 py-2 text-sm hover:bg-wp-panel-background hover:cursor-pointer"
@@ -133,7 +137,7 @@
             id="search-input"
             class="w-[100%] h-[100%] bg-wp-panel-background border-transparent focus:border-transparent focus:ring-0 justify-center"
             type="text"
-            placeholder="Search or start new chat"
+            placeholder="Search"
             (change)="searchInput.set($any($event.target).value)"
           />
         </div>
@@ -411,7 +415,7 @@
     <header class="modal-container-header">
       <h1 class="modal-container-title">
         <img src="../../../../assets/images/user-plus.svg" class="w-6 h6" />
-        Create Group Chat
+        Create Chat
       </h1>
       <button class="icon-button" (click)="createChatModalVisible = false">
         <svg
@@ -439,6 +443,7 @@
         label="Group name"
         placeholder="Enter a group name"
         [control]="chatForm.controls['groupName']"
+        *ngIf="chatForm.controls['groupName'].enabled"
       ></app-input>
 
       <app-input
@@ -449,6 +454,10 @@
         [suggestions]="suggestions"
         [control]="chatForm.controls['userSearchInput']"
         (onSuggestionClick)="onSuggestionClick($event)"
+        [disabled]="
+          _selectedChatTypeForCreate() === 'private' &&
+          chatForm.controls['selectedUsers'].value.length === 1
+        "
       ></app-input>
       <div id="chip-container" class="w-full min-h-[2rem]">
         <app-chip-list

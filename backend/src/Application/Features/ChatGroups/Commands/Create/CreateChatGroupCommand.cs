@@ -5,7 +5,7 @@ using MongoDB.Driver;
 namespace Application.Features.ChatGroups.Commands.Create;
 
 public readonly record struct CreateChatGroupCommandRequest
-    (List<ObjectId> ParticipantUserIds, string Name = default!) : IRequest<ObjectId>, ISecuredRequest;
+    (List<ObjectId> ParticipantUserIds, string Name,bool IsPrivate) : IRequest<ObjectId>, ISecuredRequest;
 
 public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGroupCommandRequest, ObjectId>
 {
@@ -22,7 +22,7 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
     {
         _chatGroupBusinessRules.UserMustExistInParticipantsBeforeCreatingChatGroup(request.ParticipantUserIds);
         // Chat group is private if it has only 2 participants and has no name
-        if (request.Name == default!)
+        if (request.IsPrivate)
         {
             // Scenario 1: Users already have a chat group together
             var chatGroupId = FindExistingChatGroupIdAsync(request.ParticipantUserIds, cancellationToken);
@@ -37,7 +37,7 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
         }
 
         // Scenario 3: Creating a chat group with a specified name
-        return await CreateNamedChatGroupAsync(request.Name!, request.ParticipantUserIds, cancellationToken);
+        return await CreateNamedChatGroupAsync(request.Name, request.ParticipantUserIds, cancellationToken);
     }
 
     private ObjectId? FindExistingChatGroupIdAsync(List<ObjectId> participantUserIds,
