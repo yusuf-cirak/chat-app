@@ -23,6 +23,7 @@ import { CreateChatGroupDto } from '../../dtos/create-chat-group-dto';
 import { SendMessageDto } from '../../dtos/send-message-dto';
 import { minLength } from 'src/app/shared/validators/min.length';
 import { length } from 'src/app/shared/validators/length';
+import { Router } from '@angular/router';
 
 interface SidebarChatGroup {
   id: string;
@@ -92,6 +93,7 @@ export class ChatComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _formBuilder = inject(NonNullableFormBuilder);
   private readonly chatService = inject(ChatService);
+  private readonly _router = inject(Router);
 
   chatForm = this._formBuilder.group({
     groupName: [
@@ -668,5 +670,10 @@ export class ChatComponent implements OnInit {
       return 'YESTERDAY';
     }
     return date.getMonth() + 1 + '/' + date.getDate();
+  }
+
+  logout() {
+    // this.authService.logout();
+    this._router.navigate(['/login']);
   }
 }
