@@ -4,8 +4,14 @@ using Infrastructure;
 using Infrastructure.SignalR.Hubs;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using WebAPI.Extensions;
+using WebAPI.Infrastructure.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped<GlobalExceptionHandlerMiddleware>();
+
+// Accept anything from header, accept any method. Only on localhost:4200 and http & https protocol 
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.WithOrigins("http://localhost:4200", "https://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
 builder.Services.AddResponseCompressionServices(); // From WebAPI\Extensions\ResponseCompressionExtensions.cs
 
@@ -41,6 +47,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseHealthChecks("/_health", new HealthCheckOptions
@@ -49,6 +56,8 @@ app.UseHealthChecks("/_health", new HealthCheckOptions
     
 }
 ); // RequireAuthorization, RequireCors, RequireHost possible for limiting calls for /_health endpoint.
+
+app.UseCors();
 
 app.UseAuthentication();
 
