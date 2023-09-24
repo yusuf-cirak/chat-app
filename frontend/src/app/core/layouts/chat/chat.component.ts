@@ -38,13 +38,20 @@ interface SelectedChat {
   isPrivate: boolean;
 }
 
+interface ChatDateBadge {
+  [chatId: string]: {
+    date: Date;
+    displayBeforeChatIndex: number;
+  }[];
+}
+
 interface Messages {
   [chatId: string]: {
     id: string;
     senderId: string;
     senderUsername: string;
     body: string;
-    date: string | Date;
+    date: Date;
     isMe: boolean;
   }[];
 }
@@ -393,6 +400,31 @@ export class ChatComponent implements OnInit {
     this._createChatModalVisible.set(value);
   }
 
+  private _chatBadges = signal<ChatDateBadge>({
+    '1': [
+      {
+        date: new Date(),
+        displayBeforeChatIndex: 0,
+      },
+    ],
+    '2': [
+      {
+        date: new Date(),
+        displayBeforeChatIndex: 0,
+      },
+    ],
+    '3': [
+      {
+        date: new Date(),
+        displayBeforeChatIndex: 0,
+      },
+    ],
+  });
+
+  get chatBadges() {
+    return this._chatBadges();
+  }
+
   // Input states
   searchInput: WritableSignal<string> = signal('');
   chatMessageInput: WritableSignal<string> = signal('');
@@ -626,5 +658,15 @@ export class ChatComponent implements OnInit {
 
       this.chatForm.controls.selectedUsers.updateValueAndValidity();
     }
+  }
+
+  displayChatDateBadge(date: Date): string {
+    const today = new Date().getDate();
+    if (today === date.getDate()) {
+      return 'TODAY';
+    } else if (today - date.getDate() === 1) {
+      return 'YESTERDAY';
+    }
+    return date.getMonth() + 1 + '/' + date.getDate();
   }
 }

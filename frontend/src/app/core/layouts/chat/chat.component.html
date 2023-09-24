@@ -259,8 +259,25 @@
             <!-- Group Chat -->
             <ng-container *ngIf="!selectedChat.isPrivate; else privateChat">
               <ng-container
-                *ngFor="let chatMessage of chatMessages[selectedChat.id]"
+                *ngFor="
+                  let chatMessage of chatMessages[selectedChat.id];
+                  let chatMessageIndex = index
+                "
               >
+                <ng-container
+                  *ngFor="let chatBadge of chatBadges[selectedChat.id]"
+                >
+                  <span
+                    id="chat-date-badge"
+                    class="w-14 max-w-[5rem] h-7 bg-white rounded-md self-center text-wp-badge-text text-center text-sm"
+                    *ngIf="
+                      (chatBadge.date | date : 'dd/MM') ===
+                        (chatMessage.date | date : 'dd/MM') &&
+                      chatBadge.displayBeforeChatIndex === chatMessageIndex
+                    "
+                    >{{ displayChatDateBadge(chatBadge.date) }}</span
+                  >
+                </ng-container>
                 <div
                   id="chat-group-message-container"
                   class="flex self-start w-fit rounded-lg"
@@ -333,8 +350,25 @@
             <!-- TODO: Private chat -->
             <ng-template #privateChat>
               <ng-container
-                *ngFor="let chatMessage of chatMessages[selectedChat.id]"
+                *ngFor="
+                  let chatMessage of chatMessages[selectedChat.id];
+                  let chatMessageIndex = index
+                "
               >
+                <ng-container
+                  *ngFor="let chatBadge of chatBadges[selectedChat.id]"
+                >
+                  <span
+                    id="chat-date-badge"
+                    class="w-14 max-w-[5rem] h-7 bg-white rounded-md self-center text-wp-badge-text text-center text-sm"
+                    *ngIf="
+                      (chatBadge.date | date : 'dd/MM') ===
+                        (chatMessage.date | date : 'dd/MM') &&
+                      chatBadge.displayBeforeChatIndex === chatMessageIndex
+                    "
+                    >{{ displayChatDateBadge(chatBadge.date) }}</span
+                  >
+                </ng-container>
                 <div
                   id="message-detail-container"
                   class="flex bg-white self-start w-fit min-h-[auto] px-2 py-2 gap-1 rounded-lg"

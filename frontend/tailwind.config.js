@@ -15,6 +15,7 @@ module.exports = {
         "wp-my-message-background": "#dcfcd4",
         "wp-message-date-color": "#6d6c6b",
         "wp-panel-active-bg": "#d9dbdf",
+        "wp-badge-text": "#54656f",
       },
     },
   },
