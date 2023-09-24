@@ -25,6 +25,8 @@ import { ChipListComponent } from 'src/app/shared/components/chip-list/chip-list
 import { ChatService } from '../../services/chat.service';
 import { CreateChatGroupDto } from '../../dtos/create-chat-group-dto';
 import { SendMessageDto } from '../../dtos/send-message-dto';
+import { required } from 'src/app/shared/validators/required';
+import { minLength } from 'src/app/shared/validators/min.length';
 
 interface SidebarChatGroup {
   id: string;
@@ -86,11 +88,19 @@ export class ChatComponent implements OnInit {
   private readonly _formBuilder = inject(NonNullableFormBuilder);
   private readonly chatService = inject(ChatService);
 
-  groupChatForm = this._formBuilder.group({
-    groupName: ['', [Validators.required, Validators.minLength(3)]],
+  chatForm = this._formBuilder.group({
+    groupName: [
+      '',
+      [
+        minLength(
+          3,
+          'Group name is required and should be at least 3 character long.'
+        ),
+      ],
+    ],
     selectedUsers: [
       [] as LookupItem[],
-      [Validators.required, Validators.minLength(1)],
+      [minLength(1, 'Please select at least one user.')],
     ],
     userSearchInput: [''],
   });
@@ -355,7 +365,7 @@ export class ChatComponent implements OnInit {
         id: '3',
         senderId: '3',
         senderUsername: 'John Doe',
-        body: 'Hello, how are you?',
+        body: 'Hello, how are you? ',
         date: new Date(),
         isMe: false,
       },
@@ -459,8 +469,9 @@ export class ChatComponent implements OnInit {
   ];
 
   suggestions: LookupItem[] = [];
+
   registerSearchInputDebounce() {
-    const userSearchInput = this.groupChatForm.get('userSearchInput');
+    const userSearchInput = this.chatForm.get('userSearchInput');
 
     if (userSearchInput) {
       userSearchInput.valueChanges
@@ -483,7 +494,7 @@ export class ChatComponent implements OnInit {
 
   onSuggestionClick(userLookup: LookupItem) {
     this.suggestions = [];
-    const selectedUsers = this.groupChatForm.get('selectedUsers');
+    const selectedUsers = this.chatForm.get('selectedUsers');
     const value = selectedUsers?.value;
 
     if (value) {
@@ -494,14 +505,15 @@ export class ChatComponent implements OnInit {
   }
 
   removeChip(chip: LookupItem) {
-    this.selectedUsersToChat = this.selectedUsersToChat.filter(
-      (s) => s.key !== chip.key
-    );
+    const values = this.chatForm.controls.selectedUsers.value as LookupItem[];
+    this.chatForm.controls.selectedUsers.setValue([
+      ...values.filter((s) => s.key !== chip.key),
+    ]);
   }
 
   createChat() {
     // TODO: Create chat group with API
-    const formValues = this.groupChatForm.value as any as CreateChatForm;
+    const formValues = this.chatForm.value as any as CreateChatForm;
 
     const chatObj: CreateChatGroupDto = {
       name: formValues.groupName,
@@ -530,7 +542,7 @@ export class ChatComponent implements OnInit {
 
     // update sidebar chat groups
     this.createChatModalVisible = false;
-    this.groupChatForm.reset();
+    this.chatForm.reset();
   }
 
   sendMessage(message: string, chatId: string, index: number) {

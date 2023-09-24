@@ -243,17 +243,14 @@
           </div>
         </div>
         <!-- Message Container -->
-        <div
-          id="messages"
-          class="w-full h-[86%] wp-bg-image"
-          [ngClass]="{
-            'gap-y-4': !selectedChat.isPrivate
-          }"
-        >
+        <div id="messages" class="w-full h-[86%] wp-bg-image">
           <div
             id="messages-wrapper"
-            class="flex flex-col overflow-y-scroll w-full h-full max-h-[auto] py-4 pt-16 px-12 gap-y-3"
+            class="flex flex-col overflow-y-scroll w-full h-full max-h-[auto] py-4 pt-16 px-12 gap-y-4"
             #messagesWrapperRef
+            [ngClass]="{
+              'justify-end': chatMessages[selectedChat.id].length <= 12
+            }"
           >
             <!-- Group Chat -->
             <ng-container *ngIf="!selectedChat.isPrivate; else privateChat">
@@ -262,30 +259,29 @@
               >
                 <div
                   id="chat-group-message-container"
-                  class="flex self-start w-fit min-h-[2rem] rounded-lg"
+                  class="flex self-start w-fit rounded-lg"
                   [ngClass]="{
                     'self-end': chatMessage.isMe,
-                    'bg-wp-my-message-background': chatMessage.isMe
                   }"
                 >
                   <!-- My message -->
                   <ng-container *ngIf="chatMessage.isMe; else otherUserMessage">
                     <div
-                      id="message-detail-container"
-                      class="grid min-h-[1rem] px-2 py-2 gap-1"
+                      class="flex min-h-[2rem] h-auto px-2 py-2 gap-1 rounded-lg"
+                      [ngClass]="{
+                      'bg-wp-my-message-background': chatMessage.isMe,
+                    }"
                     >
-                      <div class="flex">
-                        <span
-                          id="chat-message"
-                          class="max-w-[20rem] justify-self-start text-sm break-words"
-                          >{{ chatMessage.body }}
-                        </span>
-                        <span
-                          id="date"
-                          class="w-fit h-fit text-xs self-end pt-2 pl-2 text-wp-message-date-color"
-                          >{{ chatMessage.date | date : "H:mm" }}</span
-                        >
-                      </div>
+                      <span
+                        id="chat-message"
+                        class="max-w-[20rem] justify-self-start text-sm break-words"
+                        >{{ chatMessage.body }}
+                      </span>
+                      <span
+                        id="date"
+                        class="w-fit h-fit text-xs self-end pt-2 pl-2 text-wp-message-date-color"
+                        >{{ chatMessage.date | date : "H:mm" }}</span
+                      >
                     </div>
                   </ng-container>
                   <!-- Other users messages -->
@@ -305,7 +301,7 @@
                     </span>
                     <div
                       id="message-detail-container"
-                      class="grid bg-white rounded-lg min-h-[1rem] px-2 py-2 gap-1"
+                      class="grid bg-white rounded-lg min-h-[1rem] h-fit px-2 py-2 gap-1"
                     >
                       <span
                         id="user-or-group-name"
@@ -432,16 +428,17 @@
         </svg>
       </button>
     </header>
+
     <form
       class="modal-container-body rtf flex flex-col items-center justify-center"
-      [formGroup]="groupChatForm"
+      [formGroup]="chatForm"
       (ngSubmit)="createChat()"
     >
       <app-input
         inputType="text"
         label="Group name"
         placeholder="Enter a group name"
-        [control]="groupChatForm.controls['groupName']"
+        [control]="chatForm.controls['groupName']"
       ></app-input>
 
       <app-input
@@ -450,12 +447,12 @@
         placeholder="Search for users"
         [dropdownVisible]="true"
         [suggestions]="suggestions"
-        [control]="groupChatForm.controls['userSearchInput']"
+        [control]="chatForm.controls['userSearchInput']"
         (onSuggestionClick)="onSuggestionClick($event)"
       ></app-input>
       <div id="chip-container" class="w-full min-h-[2rem]">
         <app-chip-list
-          [chipItems]="groupChatForm.get('selectedUsers')!.value!"
+          [chipItems]="chatForm.get('selectedUsers')!.value!"
           (onChipRemoveClick)="removeChip($event)"
         ></app-chip-list>
       </div>
@@ -463,7 +460,7 @@
         label="Start Chat"
         class="focus:outline-none rounded text-black bg-wp-green hover:opacity-90 w-full h-10"
         buttonType="submit"
-        [disabled]="!groupChatForm.valid"
+        [disabled]="!chatForm.valid"
       ></app-button>
     </form>
   </article>

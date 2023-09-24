@@ -43,7 +43,7 @@
         >
           <span
             *ngFor="let error of control.errors | keyvalue"
-            class="flex items-center font-medium tracking-wide text-red-500 text-xs mt-3 ml-1 w-full h-0"
+            class="flex items-center font-medium tracking-wide text-red-500 text-xs mt-3 ml-1 max-w-[16rem] h-0 pt-1 max-h-fit"
           >
             {{ error.value }}
           </span>
