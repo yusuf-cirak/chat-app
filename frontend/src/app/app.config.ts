@@ -1,23 +1,26 @@
-import {
-  ApplicationConfig,
-  importProvidersFrom,
-  isDevMode,
-} from '@angular/core';
+import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
-import { provideHttpClient } from '@angular/common/http';
-import { StoreModule } from '@ngrx/store';
-import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-import { appReducer } from './app.reducer';
+import { HTTP_INTERCEPTORS, provideHttpClient } from '@angular/common/http';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideToastr } from 'ngx-toastr';
+import { HttpRequestInterceptor } from './core/interceptors/http-request.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideHttpClient(),
-    importProvidersFrom(
-      StoreModule.forRoot(appReducer),
-      StoreDevtoolsModule.instrument({ maxAge: 25, logOnly: isDevMode() })
-    ),
+    provideAnimations(),
+    provideToastr({
+      timeOut: 5000,
+      positionClass: 'toast-top-right',
+      preventDuplicates: true,
+    }),
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: HttpRequestInterceptor,
+      multi: true,
+    },
   ],
 };
