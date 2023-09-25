@@ -24,6 +24,7 @@ import { SendMessageDto } from '../../dtos/send-message-dto';
 import { minLength } from 'src/app/shared/validators/min.length';
 import { length } from 'src/app/shared/validators/length';
 import { Router } from '@angular/router';
+import { TokenService } from '../../services/token.service';
 
 interface SidebarChatGroup {
   id: string;
@@ -93,6 +94,7 @@ export class ChatComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _formBuilder = inject(NonNullableFormBuilder);
   private readonly chatService = inject(ChatService);
+  private readonly tokenService = inject(TokenService);
   private readonly _router = inject(Router);
 
   chatForm = this._formBuilder.group({
@@ -673,7 +675,7 @@ export class ChatComponent implements OnInit {
   }
 
   logout() {
-    // this.authService.logout();
+    this.tokenService.removeTokens();
     this._router.navigate(['/login']);
   }
 }

@@ -1,6 +1,7 @@
 using Application.Abstractions.Helpers;
 using Application.Features.Auths.Dtos;
 using Application.Features.Auths.Rules;
+using MongoDB.Driver;
 
 namespace Application.Features.Auths.Commands.Login;
 
@@ -32,14 +33,13 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommandRequest, T
         AccessToken accessToken = _jwtHelper.CreateAccessToken(user);
         RefreshToken refreshToken = _jwtHelper.CreateRefreshToken(user,userIpAddress);
         
-        var tasks = new List<Task>(2);
         
-        tasks.Add(_mongoService.GetCollection<User>().InsertOneAsync(user, cancellationToken: default));
+        var refreshTokenCollection = _mongoService.GetCollection<RefreshToken>();
 
-        tasks.Add(_mongoService.GetCollection<RefreshToken>().InsertOneAsync(refreshToken, cancellationToken: default));
-
-        await Task.WhenAll(tasks);
+        await refreshTokenCollection.DeleteManyAsync(rt=>rt.UserId == user.Id, cancellationToken: default);
         
+        await refreshTokenCollection.InsertOneAsync(refreshToken, cancellationToken: default);
+
         return new TokenResponseDto(accessToken.Token, refreshToken.Token);
     }
 }

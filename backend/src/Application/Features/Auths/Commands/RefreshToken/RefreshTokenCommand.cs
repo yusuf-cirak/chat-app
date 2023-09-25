@@ -45,11 +45,12 @@ public sealed class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCom
 
             var accessToken = _jwtHelper.CreateAccessToken(user);
             var refreshToken = _jwtHelper.CreateRefreshToken(user, userIpAddress);
+            
+            var refreshTokenCollection = _mongoService.GetCollection<RefreshToken>();
 
-            await _mongoService.GetCollection<RefreshToken>()
-                .DeleteManyAsync(rt => rt.UserId == userId, cancellationToken: default);
-        
-            await _mongoService.GetCollection<RefreshToken>().InsertOneAsync(refreshToken, cancellationToken: default);
+            // await refreshTokenCollection.DeleteManyAsync(rt => rt.UserId == userId, cancellationToken: default);
+
+            await refreshTokenCollection.InsertOneAsync(refreshToken, cancellationToken: default);
         
             return new(accessToken.Token, refreshToken.Token);
         }

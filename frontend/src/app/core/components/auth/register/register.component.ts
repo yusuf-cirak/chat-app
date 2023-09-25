@@ -1,17 +1,20 @@
-import { Component, WritableSignal, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
-  FormBuilder,
-  FormGroup,
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { LoginUserDto } from 'src/app/core/dtos/login-user-dto';
+  Component,
+  DestroyRef,
+  WritableSignal,
+  inject,
+  signal,
+} from '@angular/core';
+import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { RegisterUserDto } from 'src/app/core/dtos/register-user-dto';
+import { AuthService } from 'src/app/core/services/auth.service';
 import { ButtonComponent } from 'src/app/shared/components/button/button.component';
 import { InputComponent } from 'src/app/shared/components/input/input.component';
 import { minLength } from 'src/app/shared/validators/min.length';
-import { required } from 'src/app/shared/validators/required';
+import { TokenService } from 'src/app/core/services/token.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-register',
@@ -21,6 +24,12 @@ import { required } from 'src/app/shared/validators/required';
   styleUrls: ['./register.component.scss'],
 })
 export class RegisterComponent {
+  // Inject dependencies
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly toastrService = inject(ToastrService);
+  private readonly tokenService = inject(TokenService);
+  private readonly _destroyRef = inject(DestroyRef);
   isFormSubmitted: WritableSignal<boolean> = signal(false);
 
   formBuilder = inject(NonNullableFormBuilder);
@@ -36,12 +45,28 @@ export class RegisterComponent {
     ],
   });
 
-  register(formValid: boolean, formValues: LoginUserDto) {
+  register(formValid: boolean, user: RegisterUserDto) {
     if (!formValid) {
       this.formGroup.markAllAsTouched();
       return;
     }
-
     this.isFormSubmitted.set(true);
+
+    this.authService
+      .register(user)
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: (tokens) => {
+          this.tokenService.setTokens(tokens);
+          const currentUser = this.tokenService.getUserCredentialsFromToken();
+          this.authService.setUser(currentUser!);
+          this.router.navigateByUrl('/chat');
+        },
+        error: (error) => {
+          this.toastrService.error(error.error.detail);
+          this.isFormSubmitted.set(false);
+          this.formGroup.reset();
+        },
+      });
   }
 }

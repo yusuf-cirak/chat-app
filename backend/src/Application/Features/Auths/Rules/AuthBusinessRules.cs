@@ -56,13 +56,16 @@ public sealed class AuthBusinessRules : BaseBusinessRules
     
     public async Task GetAndVerifyUserRefreshToken(ObjectId userId,string refreshTokenFromRequest)
     {
+        var refreshTokenCollection = _mongoService.GetCollection<RefreshToken>();
+        
         var refreshToken = await _mongoService.GetCollection<RefreshToken>()
             .Find(rt => rt.UserId == userId)
+            .SortByDescending(e=>e.Id)
             .FirstOrDefaultAsync(cancellationToken: default);
         
-        var ipAdress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
+        var address = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
         
-        if (refreshToken is null ||refreshToken.Token !=refreshTokenFromRequest || refreshToken.CreatedByIp != ipAdress || refreshToken.ExpiresAt < DateTime.Now)
+        if (refreshToken is null ||refreshToken.Token !=refreshTokenFromRequest || refreshToken.CreatedByIp != address || refreshToken.ExpiresAt < DateTime.Now)
         {
             throw new BusinessException("Refresh token is not valid");
         }

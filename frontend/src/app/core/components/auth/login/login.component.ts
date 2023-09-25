@@ -1,15 +1,21 @@
-import { RegisterUserDto } from './../../../dtos/register-user-dto';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgIf } from '@angular/common';
-import { Component, WritableSignal, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  WritableSignal,
+  inject,
+  signal,
+} from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { AppState } from 'src/app/app.state';
+import { Router, RouterLink } from '@angular/router';
+import { LoginUserDto } from 'src/app/core/dtos/login-user-dto';
+import { AuthService } from 'src/app/core/services/auth.service';
 import { ButtonComponent } from 'src/app/shared/components/button/button.component';
 import { InputComponent } from 'src/app/shared/components/input/input.component';
-import { loginAction } from 'src/app/shared/states/user/user.actions';
 import { minLength } from 'src/app/shared/validators/min.length';
-import { required } from 'src/app/shared/validators/required';
+import { TokenService } from 'src/app/core/services/token.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-login',
@@ -25,6 +31,13 @@ import { required } from 'src/app/shared/validators/required';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent {
+  // Inject dependencies
+  private readonly authService = inject(AuthService);
+  private readonly tokenService = inject(TokenService);
+  private readonly router = inject(Router);
+  private readonly toastrService = inject(ToastrService);
+  private readonly _destroyRef = inject(DestroyRef);
+
   // Form states
   isFormSubmitted: WritableSignal<boolean> = signal(false);
 
@@ -40,18 +53,29 @@ export class LoginComponent {
     ],
   });
 
-  // Global state
-  private readonly store = inject(Store<AppState>);
-
-  login(formValid: boolean, formValues: RegisterUserDto) {
+  async login(formValid: boolean, user: LoginUserDto) {
     if (!formValid) {
       // validateAllFormFields(this.formGroup);
       this.formGroup.markAllAsTouched();
       return;
     }
-
     this.isFormSubmitted.set(true);
 
-    this.store.dispatch(loginAction({ user: formValues as any }));
+    this.authService
+      .login(user)
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: (tokens) => {
+          this.tokenService.setTokens(tokens);
+          const currentUser = this.tokenService.getUserCredentialsFromToken();
+          this.authService.setUser(currentUser!);
+          this.router.navigateByUrl('/chat');
+        },
+        error: (error) => {
+          this.toastrService.error(error.error.detail);
+          this.isFormSubmitted.set(false);
+          this.formGroup.reset();
+        },
+      });
   }
 }
