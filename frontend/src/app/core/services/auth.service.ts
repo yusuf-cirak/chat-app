@@ -17,15 +17,6 @@ export class AuthService {
   private readonly _httpClientService = inject(HttpClientService);
 
   private user$ = new BehaviorSubject<UserDto>(null!);
-  private _isAuthenticated = signal(false);
-
-  get isAuthentictated(): boolean {
-    return this._isAuthenticated();
-  }
-
-  set isAuthenticated(value: boolean) {
-    this._isAuthenticated.set(value);
-  }
 
   getUserValue() {
     return this.user$.getValue();
@@ -36,7 +27,6 @@ export class AuthService {
   }
 
   setUser(user: UserDto) {
-    this.isAuthenticated = true;
     this.user$.next(user);
   }
 

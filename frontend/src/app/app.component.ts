@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { TokenService } from './core/services/token.service';
 
 @Component({
   selector: 'app-root',
@@ -9,4 +10,13 @@ import { RouterOutlet } from '@angular/router';
 })
 export class AppComponent {
   title = 'ChatApp';
+
+  private readonly tokenService = inject(TokenService);
+
+  ngOnInit() {
+    const accessToken = this.tokenService.accesToken;
+    if (accessToken) {
+      this.tokenService.setUserCredentialsFromToken(accessToken);
+    }
+  }
 }

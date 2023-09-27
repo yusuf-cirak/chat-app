@@ -11,16 +11,19 @@ import { UserDto } from 'src/app/shared/api/user-dto';
 export class TokenService {
   private decodedJwt: any = {};
 
-  get accesToken() {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      this.setUserCredentialsFromToken(token);
-      return token;
-    }
-    return null;
+  get accesToken(): string | null {
+    return localStorage.getItem('accessToken');
   }
 
-  get refreshToken() {
+  isAccessTokenExpired(): boolean {
+    if (!this.decodedJwt?.exp) {
+      return true;
+    }
+
+    return Date.now() >= this.decodedJwt.exp * 1000;
+  }
+
+  get refreshToken(): string | null {
     return localStorage.getItem('refreshToken');
   }
 

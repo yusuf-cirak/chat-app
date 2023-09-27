@@ -7,17 +7,22 @@ import { catchError, map, of, tap } from 'rxjs';
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
 
-  if (authService.isAuthentictated) {
+  if (authService.getUserValue()) {
     return true;
   }
 
   const tokenService = inject(TokenService);
+
   const router = inject(Router);
 
   const accessToken = tokenService.accesToken;
 
   if (!accessToken) {
     return router.createUrlTree(['/login']);
+  }
+
+  if (!tokenService.isAccessTokenExpired()) {
+    return true;
   }
 
   return authService.refreshToken().pipe(
