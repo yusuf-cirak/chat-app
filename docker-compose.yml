@@ -1,0 +1,16 @@
+version: "3.9"
+
+name: chat-app
+configs:
+  mongo-init:
+    file: ./mongo-init.js
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    ports:
+      - "27018:27017"
