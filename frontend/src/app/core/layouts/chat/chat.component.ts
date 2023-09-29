@@ -11,7 +11,13 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import {
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  forkJoin,
+  take,
+} from 'rxjs';
 import { HttpClientService } from 'src/app/shared/services/http-client.service';
 import { InputComponent } from 'src/app/shared/components/input/input.component';
 import { ButtonComponent } from 'src/app/shared/components/button/button.component';
@@ -25,6 +31,7 @@ import { minLength } from 'src/app/shared/validators/min.length';
 import { length } from 'src/app/shared/validators/length';
 import { Router } from '@angular/router';
 import { TokenService } from '../../services/token.service';
+import { AuthService } from '../../services/auth.service';
 
 interface SidebarChatGroup {
   id: string;
@@ -58,6 +65,12 @@ interface Messages {
   }[];
 }
 
+interface ChatUser {
+  id: string;
+  userName: string;
+  profilePictureUrl: string;
+}
+
 type ChatType = 'private' | 'group';
 
 // Chat Group Info { id, name } - Group or user name - One API call to receive chat groups of user
@@ -85,16 +98,15 @@ type CreateChatForm = {
     ReactiveFormsModule,
     ChipListComponent,
   ],
-  providers: [ChatService],
   templateUrl: './chat.component.html',
 })
 export class ChatComponent implements OnInit {
   // Inject dependencies
-  private readonly _httpClientService = inject(HttpClientService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _formBuilder = inject(NonNullableFormBuilder);
   private readonly chatService = inject(ChatService);
   private readonly tokenService = inject(TokenService);
+  private readonly authService = inject(AuthService);
   private readonly _router = inject(Router);
 
   chatForm = this._formBuilder.group({
@@ -117,6 +129,15 @@ export class ChatComponent implements OnInit {
   _selectedChatTypeForCreate = signal<ChatType>('private');
 
   // UI States
+
+  // Create chat states
+  private _createChatModalVisible: WritableSignal<boolean> = signal(false);
+  get createChatModalVisible() {
+    return this._createChatModalVisible();
+  }
+  set createChatModalVisible(value: boolean) {
+    this._createChatModalVisible.set(value);
+  }
   private _showMenu: WritableSignal<boolean> = signal(false);
 
   get showMenu() {
@@ -137,6 +158,12 @@ export class ChatComponent implements OnInit {
 
   get selectedChat() {
     return this._selectedChat();
+  }
+
+  private _chatUsers: WritableSignal<ChatUser[]> = signal([]);
+
+  get chatUsers() {
+    return this._chatUsers();
   }
 
   // Get it with http request
@@ -395,15 +422,6 @@ export class ChatComponent implements OnInit {
     return this._chatMessages();
   }
 
-  // Create chat states
-  private _createChatModalVisible: WritableSignal<boolean> = signal(false);
-  get createChatModalVisible() {
-    return this._createChatModalVisible();
-  }
-  set createChatModalVisible(value: boolean) {
-    this._createChatModalVisible.set(value);
-  }
-
   private _chatBadges = signal<ChatDateBadge>({
     '1': [
       {
@@ -465,9 +483,16 @@ export class ChatComponent implements OnInit {
   }
 
   ngOnInit() {
-    // forkJoin([this._httpClientService.get({})])
-    //   .pipe(takeUntilDestroyed(this._destroyRef))
-    //   .subscribe();
+    forkJoin([
+      this.chatService.getChatUsers(),
+      this.chatService.getChatGroups(),
+      this.chatService.getChatGroupMessages(),
+    ]).subscribe({
+      next: ([users, groups, messages]) => {
+        debugger;
+        console.log(users, groups, messages);
+      },
+    });
 
     // Register selected chat type change to update form
 
@@ -555,6 +580,8 @@ export class ChatComponent implements OnInit {
       isPrivate: isChatTypePrivate,
     };
 
+    chatObj.participantUserIds.push();
+
     this.chatService
       .createChatGroup(chatObj)
       .pipe(takeUntilDestroyed(this._destroyRef));
@@ -594,7 +621,7 @@ export class ChatComponent implements OnInit {
 
     this._chatMessages.mutate((messages) => {
       messages[chatId].push({
-        id: '1',
+        id: '',
         senderId: '1',
         senderUsername: 'John Doe',
         body: message,
@@ -676,6 +703,7 @@ export class ChatComponent implements OnInit {
 
   logout() {
     this.tokenService.removeTokens();
+    this.authService.setUser(null!);
     this._router.navigate(['/login']);
   }
 }
