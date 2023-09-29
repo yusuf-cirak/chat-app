@@ -11,11 +11,10 @@ namespace WebAPI.Controllers;
 [ApiController]
 public sealed class MessagesController : BaseController
 {
-    
     [HttpGet]
-    public async Task<IActionResult> GetAll(GetChatGroupMessagesQueryRequest getChatGroupMessagesQueryRequest)
+    public async Task<IActionResult> GetAll()
     {
-        var response = await Mediator.Send(getChatGroupMessagesQueryRequest);
+        var response = await Mediator.Send(new GetChatGroupMessagesQueryRequest());
         return Ok(response);
     }
     

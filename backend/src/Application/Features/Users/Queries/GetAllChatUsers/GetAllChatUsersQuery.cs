@@ -1,6 +1,5 @@
 ﻿using System.Security.Claims;
 using Application.Abstractions.Security;
-using Application.Features.ChatGroups.Dtos;
 using Application.Features.Users.Dtos;
 using MongoDB.Driver;
 
@@ -23,15 +22,15 @@ public sealed class GetAllChatUsersQueryRequestHandler : IRequestHandler<GetAllC
     {
         var userId = ObjectId.Parse(_httpContextAccessor.HttpContext.User.Claims
             .First(e => e.Type == ClaimTypes.NameIdentifier).Value);
-
-        var userChatGroups = _mongoService.GetCollection<ChatGroup>().Find(e => e.UserIds.Contains(userId)).ToList();
+        
+        var userIds = _mongoService.GetCollection<ChatGroup>().Find(e => e.UserIds.Contains(userId)).ToList().SelectMany(cg=>cg.UserIds).Distinct().ToList();
 
         var userProjection = Builders<User>.Projection
             .Include(e => e.Id)
             .Include(e => e.UserName);
 
         var chatGroupUsers = _mongoService.GetCollection<User>()
-            .Find(e => userChatGroups.SelectMany(e => e.UserIds).Contains(e.Id)).Project<GetUserDto>(userProjection)
+            .Find(e => userIds.Contains(e.Id)).Project<GetUserDto>(userProjection)
             .ToList();
 
         return Task.FromResult(chatGroupUsers);

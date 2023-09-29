@@ -6,20 +6,24 @@ public sealed class ChatGroup : BaseAuditableEntity
 
     public List<ObjectId> UserIds { get; set; }
 
+    public bool IsPrivate { get; set; }
+
 
     public ChatGroup()
     {
         UserIds = new();
     }
     
-    public ChatGroup(string name, List<ObjectId> userIds)
+    public ChatGroup(string name, List<ObjectId> userIds,bool isPrivate)
     {
         Name = name;
         UserIds = userIds;
+        IsPrivate = isPrivate;
     }
     
-    public ChatGroup(List<ObjectId> userIds)
+    public ChatGroup(List<ObjectId> userIds,bool isPrivate)
     {
         UserIds = userIds;
+        IsPrivate = isPrivate;
     }
 }

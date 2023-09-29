@@ -55,7 +55,7 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
     private async Task<ObjectId> CreatePrivateChatGroupAsync(List<ObjectId> participantUserIds,
         CancellationToken cancellationToken)
     {
-        var newChatGroup = new ChatGroup(participantUserIds);
+        var newChatGroup = new ChatGroup(participantUserIds, isPrivate: true);
 
         await _mongoService.GetCollection<ChatGroup>()
             .InsertOneAsync(newChatGroup, cancellationToken: cancellationToken);
@@ -66,7 +66,7 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
     private async Task<ObjectId> CreateNamedChatGroupAsync(string groupName, List<ObjectId> participantUserIds,
         CancellationToken cancellationToken)
     {
-        var newChatGroup = new ChatGroup(groupName, participantUserIds);
+        var newChatGroup = new ChatGroup(groupName, participantUserIds, isPrivate: false);
 
         await _mongoService.GetCollection<ChatGroup>()
             .InsertOneAsync(newChatGroup, cancellationToken: cancellationToken);

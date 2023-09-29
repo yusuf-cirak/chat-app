@@ -22,6 +22,7 @@
 
 
     <ItemGroup>
+      <Folder Include="Features\Messages\Dtos\" />
       <Folder Include="Features\Users\Rules\" />
     </ItemGroup>
 

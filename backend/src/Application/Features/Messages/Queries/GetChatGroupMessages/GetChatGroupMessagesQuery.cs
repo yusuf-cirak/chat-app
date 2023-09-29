@@ -5,7 +5,7 @@ using MongoDB.Driver;
 namespace Application.Features.Messages.Queries.GetChatGroupMessages;
 
 public readonly record struct GetChatGroupMessagesQueryRequest
-    (List<ObjectId> ChatGroupIds) : IRequest<Dictionary<ObjectId, List<Message>>>, ISecuredRequest;
+    () : IRequest<Dictionary<ObjectId, List<Message>>>, ISecuredRequest;
 
 public sealed class
     GetChatGroupMessagesQueryHandler : IRequestHandler<GetChatGroupMessagesQueryRequest,
