@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { TokenService } from '../services/token.service';
 import { AuthService } from '../services/auth.service';
-import { catchError, map, of, tap } from 'rxjs';
+import { catchError, map, of, take, tap } from 'rxjs';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
@@ -21,15 +21,15 @@ export const authGuard: CanActivateFn = (route, state) => {
     return router.createUrlTree(['/login']);
   }
 
-  if (!tokenService.isAccessTokenExpired()) {
-    return true;
-  }
-
-  return authService.refreshToken().pipe(
+  return authService.refreshToken(true).pipe(
     map((tokenResult) => {
       tokenService.setTokens(tokenResult);
 
-      authService.setUser(tokenService.getUserCredentialsFromToken()!);
+      const decodedToken = tokenService.decodeAccessToken(accessToken);
+
+      authService.setUser(
+        tokenService.getUserCredentialsFromDecodedToken(decodedToken)!
+      );
 
       return true;
     }),

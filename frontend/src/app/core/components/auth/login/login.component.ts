@@ -67,12 +67,18 @@ export class LoginComponent {
       .subscribe({
         next: (tokens) => {
           this.tokenService.setTokens(tokens);
-          const currentUser = this.tokenService.getUserCredentialsFromToken();
+          const decodedToken = this.tokenService.decodeAccessToken(
+            tokens.accessToken
+          );
+          const currentUser =
+            this.tokenService.getUserCredentialsFromDecodedToken(decodedToken);
           this.authService.setUser(currentUser!);
           this.router.navigateByUrl('/chat');
         },
         error: (error) => {
-          this.toastrService.error(error.error.detail);
+          this.toastrService.error(
+            error?.error?.detail || 'Something went wrong'
+          );
           this.isFormSubmitted.set(false);
           this.formGroup.reset();
         },

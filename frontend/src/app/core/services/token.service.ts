@@ -9,18 +9,16 @@ import { UserDto } from 'src/app/shared/api/user-dto';
   providedIn: 'root',
 })
 export class TokenService {
-  private decodedJwt: any = {};
-
   get accesToken(): string | null {
     return localStorage.getItem('accessToken');
   }
 
-  isAccessTokenExpired(): boolean {
-    if (!this.decodedJwt?.exp) {
+  isTokenExpired(decodedToken: any): boolean {
+    if (!decodedToken) {
       return true;
     }
 
-    return Date.now() >= this.decodedJwt.exp * 1000;
+    return Date.now() >= decodedToken.exp * 1000;
   }
 
   get refreshToken(): string | null {
@@ -32,42 +30,39 @@ export class TokenService {
   ) {
     localStorage.setItem('accessToken', tokens.accessToken);
     localStorage.setItem('refreshToken', tokens.refreshToken);
-
-    this.setUserCredentialsFromToken(tokens.accessToken);
   }
 
   removeTokens() {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
-    this.decodedJwt = {};
   }
 
-  setUserCredentialsFromToken(token: string) {
+  decodeAccessToken(token: any) {
+    if (!token) {
+      return null;
+    }
+    const decodedToken: any = {};
     for (const [key, value] of Object.entries(jwtDecode(token)!)) {
       if (key.includes('/')) {
         const newKey = key.split('/').slice(-1)[0];
-        this.decodedJwt[newKey] = value;
+        decodedToken[newKey] = value;
       } else {
-        this.decodedJwt[key] = value;
+        decodedToken[key] = value;
       }
     }
+
+    return decodedToken;
   }
 
-  getUserCredentialsFromToken(): UserDto | null {
-    if (this.decodedJwt?.nameidentifier) {
-      return {
-        id: this.decodedJwt?.nameidentifier,
-        userName: this.decodedJwt?.unique_name,
-        profilePicturePath: this.decodedJwt?.profilepicturepath,
-      };
+  getUserCredentialsFromDecodedToken(decodedToken: any): UserDto | null {
+    if (!decodedToken) {
+      return null;
     }
-    return null;
-  }
 
-  getUserIdFromToken() {
-    if (!this.decodedJwt?.nameidentifier) {
-      this.setUserCredentialsFromToken(this.accesToken!);
-    }
-    return this.decodedJwt?.nameidentifier;
+    return {
+      id: decodedToken?.nameidentifier,
+      userName: decodedToken?.unique_name,
+      profilePicturePath: decodedToken?.profilepicturepath,
+    };
   }
 }

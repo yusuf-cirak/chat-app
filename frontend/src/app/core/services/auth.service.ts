@@ -15,6 +15,7 @@ import { UserDto } from 'src/app/shared/api/user-dto';
 })
 export class AuthService {
   private readonly _httpClientService = inject(HttpClientService);
+  private readonly _tokenService = inject(TokenService);
 
   private user$ = new BehaviorSubject<UserDto>(null!);
 
@@ -44,17 +45,17 @@ export class AuthService {
     );
   }
 
-  refreshToken(): Observable<RefreshTokenResponseDto> {
-    const tokenService = inject(TokenService);
-    const refreshToken = tokenService.refreshToken;
-    const accessToken = tokenService.accesToken;
-    const userId = tokenService.getUserIdFromToken();
+  refreshToken(skipInterceptor = false): Observable<RefreshTokenResponseDto> {
+    const refreshToken = this._tokenService.refreshToken;
+    const accessToken = this._tokenService.accesToken;
+    const userId = this.getUserValue()?.id;
     return this._httpClientService.post(
       {
         controller: 'auth',
         action: 'refresh',
         headers: new HttpHeaders({
           Authorization: `Bearer ${accessToken}`,
+          SkipInterceptor: skipInterceptor.valueOf().toString(),
         }),
       },
       { refreshToken, userId }

@@ -66,7 +66,9 @@ export class HttpClientService {
     });
   }
   delete(requestParameter: Partial<RequestParameter>, id: string) {
-    return this._httpClient.delete(this.url(requestParameter, id));
+    return this._httpClient.delete(this.url(requestParameter, id), {
+      headers: requestParameter.headers,
+    });
   }
 }
 
