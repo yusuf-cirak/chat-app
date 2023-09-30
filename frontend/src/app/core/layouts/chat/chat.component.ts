@@ -1,3 +1,4 @@
+import { MessageDto } from './../../dtos/chat-group-messages-dto';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import {
@@ -11,14 +12,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import {
-  combineLatest,
-  debounceTime,
-  distinctUntilChanged,
-  forkJoin,
-  take,
-} from 'rxjs';
-import { HttpClientService } from 'src/app/shared/services/http-client.service';
+import { debounceTime, distinctUntilChanged, forkJoin } from 'rxjs';
 import { InputComponent } from 'src/app/shared/components/input/input.component';
 import { ButtonComponent } from 'src/app/shared/components/button/button.component';
 import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -32,10 +26,13 @@ import { length } from 'src/app/shared/validators/length';
 import { Router } from '@angular/router';
 import { TokenService } from '../../services/token.service';
 import { AuthService } from '../../services/auth.service';
+import { UserDto } from 'src/app/shared/api/user-dto';
+import { ChatGroupDto } from '../../dtos/chat-group-dto';
 
 interface SidebarChatGroup {
   id: string;
   name: string;
+  userIds: string[];
   isPrivate: boolean;
   lastMessage: string;
 }
@@ -44,6 +41,7 @@ interface SelectedChat {
   index: number;
   id: string;
   name: string;
+  userIds: string[];
   isPrivate: boolean;
 }
 
@@ -54,21 +52,28 @@ interface ChatDateBadge {
   }[];
 }
 
+interface ChatMessage {
+  id: string;
+  senderId: string;
+  body: string;
+  date: Date;
+  isMe: boolean;
+}
 interface Messages {
-  [chatId: string]: {
-    id: string;
-    senderId: string;
-    senderUsername: string;
-    body: string;
-    date: Date;
-    isMe: boolean;
-  }[];
+  [chatId: string]: ChatMessage[];
 }
 
-interface ChatUser {
-  id: string;
-  userName: string;
-  profilePictureUrl: string;
+// interface ChatUser {
+//   id: string;
+//   userName: string;
+//   profilePictureUrl: string;
+// }
+
+interface ChatUserDictionary {
+  [userId: string]: {
+    userName: string;
+    profilePictureUrl: string;
+  };
 }
 
 type ChatType = 'private' | 'group';
@@ -108,6 +113,10 @@ export class ChatComponent implements OnInit {
   private readonly tokenService = inject(TokenService);
   private readonly authService = inject(AuthService);
   private readonly _router = inject(Router);
+
+  get currentUserId() {
+    return this.authService.getUserValue().id;
+  }
 
   chatForm = this._formBuilder.group({
     groupName: [
@@ -153,6 +162,7 @@ export class ChatComponent implements OnInit {
     index: -1,
     id: '' as any,
     name: '',
+    userIds: [],
     isPrivate: false,
   });
 
@@ -160,295 +170,38 @@ export class ChatComponent implements OnInit {
     return this._selectedChat();
   }
 
-  private _chatUsers: WritableSignal<ChatUser[]> = signal([]);
+  private _chatUsers: WritableSignal<ChatUserDictionary> = signal({});
 
   get chatUsers() {
     return this._chatUsers();
   }
 
   // Get it with http request
-  private _sidebarChatGroups: WritableSignal<SidebarChatGroup[]> = signal([
-    {
-      id: '1',
-      name: 'private1',
-      isPrivate: true,
-      lastMessage: 'Hello, how are you?',
-    },
-    {
-      id: '2',
-      name: 'private2',
-      isPrivate: true,
-      lastMessage: 'Hello, how are you?',
-    },
-    {
-      id: '3',
-      name: 'group1',
-      isPrivate: false,
-      lastMessage: 'Hello, how are you?',
-    },
-  ]);
+  private _sidebarChatGroups: WritableSignal<SidebarChatGroup[]> = signal([]);
+  private _filteredChatGroups: WritableSignal<SidebarChatGroup[]> = signal([]);
 
-  get sidebarChatGroups() {
-    return this._sidebarChatGroups();
+  get filteredChatGroups() {
+    return this._filteredChatGroups();
   }
 
   // Get it with http request
-  private _chatMessages: WritableSignal<Messages> = signal({
-    '1': [
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Hello, how are you?',
-        date: new Date(),
-        isMe: true,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '1',
-        senderId: '1',
-        senderUsername: 'John Doe',
-        body: 'Im fine, and you?',
-        date: new Date(),
-        isMe: false,
-      },
-    ],
-    '2': [
-      {
-        id: '2',
-        senderId: '2',
-        senderUsername: 'John Doe',
-        body: 'Hello, how are you?',
-        date: new Date(),
-        isMe: true,
-      },
-    ],
-    '3': [
-      {
-        id: '3',
-        senderId: '3',
-        senderUsername: 'John Doe',
-        body: 'Hello, how are you? ',
-        date: new Date(),
-        isMe: false,
-      },
-      {
-        id: '3',
-        senderId: '3',
-        senderUsername: 'John Doe',
-        body: 'Im fine, what about you?',
-        date: new Date(),
-        isMe: true,
-      },
-    ],
-  });
+  private _chatMessages: WritableSignal<Messages> = signal({});
 
   get chatMessages() {
     return this._chatMessages();
   }
 
-  private _chatBadges = signal<ChatDateBadge>({
-    '1': [
-      {
-        date: new Date(),
-        displayBeforeChatIndex: 0,
-      },
-    ],
-    '2': [
-      {
-        date: new Date(),
-        displayBeforeChatIndex: 0,
-      },
-    ],
-    '3': [
-      {
-        date: new Date(),
-        displayBeforeChatIndex: 0,
-      },
-    ],
-  });
+  private _chatBadges = signal<ChatDateBadge>({});
 
   get chatBadges() {
     return this._chatBadges();
   }
 
+  private today = new Date();
+  // Set yesterday onInit
+  private yesterday = new Date();
+
   // Input states
-  searchInput: WritableSignal<string> = signal('');
   chatMessageInput: WritableSignal<string> = signal('');
 
   // HTML Element references
@@ -458,6 +211,8 @@ export class ChatComponent implements OnInit {
   @ViewChild('messagesWrapperRef') private messagesWrapperRef!: ElementRef;
 
   @ViewChild('showMenuRef') private showMenuRef!: ElementRef;
+
+  @ViewChild('createChatModalRef') private createChatModalRef!: ElementRef;
 
   // Event listeners
   @HostListener('document:keyup.enter', ['$event'])
@@ -475,22 +230,122 @@ export class ChatComponent implements OnInit {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     if (
-      !this.showMenuRef.nativeElement.contains(event.target) &&
-      this.showMenu
+      this.showMenu &&
+      !this.showMenuRef.nativeElement.contains(event.target)
     ) {
       this.showMenu = false;
+    } else if (
+      this.createChatModalVisible &&
+      !this.createChatModalRef.nativeElement.contains(event.target)
+    ) {
+      this.createChatModalVisible = false;
     }
   }
 
   ngOnInit() {
+    this.yesterday.setDate(this.today.getDate() - 1);
+
     forkJoin([
       this.chatService.getChatUsers(),
       this.chatService.getChatGroups(),
       this.chatService.getChatGroupMessages(),
     ]).subscribe({
       next: ([users, groups, messages]) => {
-        debugger;
-        console.log(users, groups, messages);
+        // Set all the chat users => _chatUsers
+        // ChatUsers is an dictionary object with key as userId and value as ChatUser, but the "users" payload from API is an array of ChatUser
+        const chatUsers: ChatUserDictionary = users.reduce(
+          (chatUsersObj: ChatUserDictionary, currentUser: UserDto) => {
+            chatUsersObj[currentUser.id] = {
+              userName: currentUser.userName,
+              profilePictureUrl: currentUser.profilePicturePath,
+            };
+            return chatUsersObj;
+          },
+          {}
+        );
+        this._chatUsers.set(chatUsers);
+
+        // Set all the chat messages _chatMessages
+        // "messages" payload from API lacks the isMe property, so we need to add it manually
+        // We also set the chat badges here, no need for another loop
+        const chatMessages: Messages = {};
+        const chatBadges: ChatDateBadge = {};
+        for (const [chatId, values] of Object.entries(messages)) {
+          chatMessages[chatId] = !values
+            ? []
+            : values.reduce(
+                (
+                  messagesArr: ChatMessage[],
+                  current: MessageDto,
+                  currentIndex: number
+                ) => {
+                  const messageSentDate = new Date(current.sentAt);
+                  if (typeof chatBadges[chatId] === 'undefined') {
+                    chatBadges[chatId] = [];
+                  }
+                  if (
+                    !chatBadges[chatId].some(
+                      (chatBadge) =>
+                        chatBadge.date.getDate() ===
+                          messageSentDate.getDate() &&
+                        chatBadge.date.getMonth() ===
+                          messageSentDate.getMonth() &&
+                        chatBadge.date.getFullYear() ===
+                          messageSentDate.getFullYear()
+                    )
+                  ) {
+                    chatBadges[chatId].push({
+                      date: messageSentDate,
+                      displayBeforeChatIndex: currentIndex,
+                    });
+                  }
+
+                  messagesArr.push({
+                    body: current.body,
+                    date: messageSentDate,
+                    id: current.id,
+                    isMe: current.userId === this.currentUserId,
+                    senderId: current.userId,
+                  });
+                  return messagesArr;
+                },
+                []
+              );
+        }
+
+        this._chatMessages.set(chatMessages);
+        this._chatBadges.set(chatBadges);
+
+        // Set all the sidebar chat groups _sidebarChatGroups
+        // "groups" payload from API lacks the lastMessage property, so we need to add it manually
+        const sidebarChatGroups: SidebarChatGroup[] = groups.map((group) => {
+          const isChatGroupPrivate = group.isPrivate;
+          const lastMessageObj = chatMessages[group.id]?.slice(-1)[0];
+          let lastMessage = '';
+          if (isChatGroupPrivate) {
+            lastMessage = lastMessageObj.body;
+            group.name = this.getPrivateChatDisplayName(group);
+          } else {
+            lastMessage = `${chatUsers[lastMessageObj?.senderId].userName}: ${
+              lastMessageObj?.body
+            }`;
+          }
+          const lastMessageStr = !isChatGroupPrivate
+            ? `${chatUsers[lastMessageObj?.senderId].userName}: ${
+                lastMessageObj?.body
+              }`
+            : `${lastMessageObj?.body}`;
+          return {
+            id: group.id,
+            name: group.name,
+            isPrivate: group.isPrivate,
+            userIds: group.userIds,
+            lastMessage: lastMessageStr,
+          };
+        });
+
+        this._sidebarChatGroups.set(sidebarChatGroups);
+        this._filteredChatGroups.set(sidebarChatGroups);
       },
     });
 
@@ -506,7 +361,7 @@ export class ChatComponent implements OnInit {
       ...group,
     });
     this.chatMessageInput.set('');
-    this.chatMessageInputRef.nativeElement?.focus();
+    this.focusChatInput();
     this.scrollToBottom();
   }
 
@@ -588,6 +443,7 @@ export class ChatComponent implements OnInit {
 
     const newChatGroup: SidebarChatGroup = {
       name: isChatTypePrivate ? formValues.selectedUsers[0].key : chatObj.name,
+      userIds: chatObj.participantUserIds,
       isPrivate: isChatTypePrivate,
       id: '4',
       lastMessage: '',
@@ -623,7 +479,6 @@ export class ChatComponent implements OnInit {
       messages[chatId].push({
         id: '',
         senderId: '1',
-        senderUsername: 'John Doe',
         body: message,
         date: new Date(),
         isMe: true,
@@ -642,11 +497,29 @@ export class ChatComponent implements OnInit {
 
       if (messageContainerRef) {
         messageContainerRef.scrollTo({
-          top: 10000,
+          top: messageContainerRef.scrollHeight,
           behavior: 'instant',
         });
       }
     }, 0);
+  }
+
+  private focusChatInput() {
+    setTimeout(() => {
+      const chatInputRef =
+        (this.chatMessageInputRef.nativeElement as HTMLDivElement) || null;
+
+      if (chatInputRef) {
+        chatInputRef.focus();
+      }
+    }, 0);
+  }
+
+  getPrivateChatDisplayName(
+    group: SidebarChatGroup | SelectedChat | ChatGroupDto
+  ): string {
+    const otherUserId = group.userIds.find((u) => u !== this.currentUserId)!;
+    return this.chatUsers[otherUserId].userName;
   }
 
   openCreateChatModal(chatType: ChatType) {
@@ -691,19 +564,20 @@ export class ChatComponent implements OnInit {
     }
   }
 
-  displayChatDateBadge(date: Date): string {
-    const today = new Date().getDate();
-    if (today === date.getDate()) {
-      return 'TODAY';
-    } else if (today - date.getDate() === 1) {
-      return 'YESTERDAY';
-    }
-    return date.getMonth() + 1 + '/' + date.getDate();
-  }
-
   logout() {
     this.tokenService.removeTokens();
     this.authService.setUser(null!);
     this._router.navigate(['/login']);
+  }
+
+  filterChatGroups(searchInput: string) {
+    if (searchInput.length) {
+      const filteredChatGroups = this._sidebarChatGroups().filter((group) =>
+        group.name.toLowerCase().includes(searchInput.toLowerCase())
+      );
+      this._filteredChatGroups.set(filteredChatGroups);
+    } else {
+      this._filteredChatGroups.set(this._sidebarChatGroups());
+    }
   }
 }

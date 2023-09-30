@@ -138,7 +138,7 @@
             class="w-[100%] h-[100%] bg-wp-panel-background border-transparent focus:border-transparent focus:ring-0 justify-center"
             type="text"
             placeholder="Search"
-            (change)="searchInput.set($any($event.target).value)"
+            (input)="filterChatGroups($any($event.target).value)"
           />
         </div>
         <span id="filter" class="w-5 h-5 hover:cursor-pointer">
@@ -157,8 +157,8 @@
         <!-- Sidebar All Chats -->
         <div
           class="chat-container hover:bg-[#f0f2f5] prevent-select"
-          *ngFor="let group of sidebarChatGroups; let i = index"
-          (click)="onChatClick(group, i)"
+          *ngFor="let chatGroup of filteredChatGroups; let i = index"
+          (click)="onChatClick(chatGroup, i)"
           [ngClass]="{ 'bg-[#f0f2f5]': i === selectedChat.index }"
         >
           <div id="chat" class="w-full h-[74px] chat-grid cursor-pointer">
@@ -175,12 +175,12 @@
               class="user-chat flex flex-col justify-center gap-2 border-b border-b-wp-panel-b-border"
             >
               <span class="user-name font-mono font-normal">{{
-                group.name
+                chatGroup.name
               }}</span>
               <span
                 class="user-message text-[#667781] font-mono text-ellipsis whitespace-nowrap overflow-hidden"
               >
-                {{ group.lastMessage }}
+                {{ chatGroup.lastMessage }}
               </span>
             </div>
             <!-- <div class="chat-info"></div> -->
@@ -271,11 +271,10 @@
                     id="chat-date-badge"
                     class="w-14 max-w-[5rem] h-7 bg-white rounded-md self-center text-wp-badge-text text-center text-sm"
                     *ngIf="
-                      (chatBadge.date | date : 'dd/MM') ===
-                        (chatMessage.date | date : 'dd/MM') &&
+                      chatBadge.date === chatMessage.date &&
                       chatBadge.displayBeforeChatIndex === chatMessageIndex
                     "
-                    >{{ displayChatDateBadge(chatBadge.date) }}</span
+                    >{{ chatBadge.date | date : "dd/MM" }}</span
                   >
                 </ng-container>
                 <div
@@ -327,7 +326,7 @@
                       <span
                         id="user-or-group-name"
                         class="text-black text-sm font-semibold w-full"
-                        >{{ chatMessage.senderUsername }}</span
+                        >{{ chatUsers[chatMessage.senderId].userName }}</span
                       >
 
                       <div class="flex">
@@ -360,13 +359,12 @@
                 >
                   <span
                     id="chat-date-badge"
-                    class="w-14 max-w-[5rem] h-7 bg-white rounded-md self-center text-wp-badge-text text-center text-sm"
+                    class="w-14 max-w-[15rem] h-7 bg-white rounded-md self-center text-wp-badge-text text-center text-sm"
                     *ngIf="
-                      (chatBadge.date | date : 'dd/MM') ===
-                        (chatMessage.date | date : 'dd/MM') &&
+                      chatBadge.date === chatMessage.date &&
                       chatBadge.displayBeforeChatIndex === chatMessageIndex
                     "
-                    >{{ displayChatDateBadge(chatBadge.date) }}</span
+                    >{{ chatBadge.date | date : "dd/MM" }}</span
                   >
                 </ng-container>
                 <div
@@ -444,7 +442,7 @@
   </section>
 </div>
 
-<div class="modal" *ngIf="createChatModalVisible">
+<div class="modal" *ngIf="createChatModalVisible" #createChatModalRef>
   <article class="modal-container">
     <header class="modal-container-header">
       <h1 class="modal-container-title">
