@@ -5,11 +5,11 @@ using MongoDB.Driver;
 namespace Application.Features.Messages.Queries.GetChatGroupMessages;
 
 public readonly record struct GetChatGroupMessagesQueryRequest
-    () : IRequest<Dictionary<ObjectId, List<Message>>>, ISecuredRequest;
+    () : IRequest<Dictionary<string, List<Message>>>, ISecuredRequest;
 
 public sealed class
     GetChatGroupMessagesQueryHandler : IRequestHandler<GetChatGroupMessagesQueryRequest,
-        Dictionary<ObjectId, List<Message>>>
+        Dictionary<string, List<Message>>>
 {
     private readonly IMongoService _mongoService;
     private readonly IHttpContextAccessor _httpContextAccessor;
@@ -20,22 +20,24 @@ public sealed class
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public Task<Dictionary<ObjectId, List<Message>>> Handle(GetChatGroupMessagesQueryRequest request,
+    public Task<Dictionary<string, List<Message>>> Handle(GetChatGroupMessagesQueryRequest request,
         CancellationToken cancellationToken)
     {
-        var userId = ObjectId.Parse(_httpContextAccessor.HttpContext?.User.Claims
+        var userId = (_httpContextAccessor.HttpContext?.User.Claims
             .First(e => e.Type == ClaimTypes.NameIdentifier).Value);
 
         // Getting the userChatGroups with only Id field
-        var userChatGroupProjection = Builders<ChatGroup>.Projection
-            .Include(e => e.Id);
 
-        var userChatGroups = _mongoService.GetCollection<ChatGroup>().Find(e => e.UserIds.Contains(userId))
-            .Project<ObjectId>(userChatGroupProjection).ToList();
+        var chatGroupProjection = Builders<ChatGroup>.Projection.Include(e => e.Id);
 
+        var userChatGroupIds =
+            _mongoService.GetCollection<ChatGroup>().Find(e => e.UserIds.Contains(userId!))
+                .Project<ChatGroup>(chatGroupProjection).ToList().Select(cg=>cg.Id).ToList();
 
-        var messages = _mongoService.GetCollection<Message>().Find(e => userChatGroups.Contains(e.ChatGroupId)).ToList()
+        var messages = _mongoService.GetCollection<Message>()
+            .Find(message => userChatGroupIds.Contains(message.ChatGroupId)).ToList()
             .GroupBy(e => e.ChatGroupId).ToDictionary(e => e.Key, e => e.ToList());
+
 
         return Task.FromResult(messages);
     }

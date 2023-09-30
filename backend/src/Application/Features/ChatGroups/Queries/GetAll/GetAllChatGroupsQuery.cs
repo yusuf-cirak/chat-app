@@ -20,13 +20,15 @@ public sealed class GetAllChatGroupsQueryHandler : IRequestHandler<GetAllChatGro
 
     public async Task<List<GetChatGroupDto>> Handle(GetAllChatGroupsQueryRequest request, CancellationToken cancellationToken)
     {
-        var userId = ObjectId.Parse(_httpContextAccessor.HttpContext?.User.Claims.First(e=>e.Type==ClaimTypes.NameIdentifier).Value);
-        
+        var userId = (_httpContextAccessor.HttpContext?.User.Claims.First(e=>e.Type==ClaimTypes.NameIdentifier).Value);
+
         var chatGroupProjection = Builders<ChatGroup>.Projection
             .Include(e => e.Id)
-            .Include(e => e.Name);
+            .Include(e => e.Name)
+            .Include(c => c.IsPrivate)
+            .Include(c => c.UserIds);
         
-        var chatGroupsDto = await _mongoService.GetCollection<ChatGroup>().Find(e => e.UserIds.Contains(userId)).Project<GetChatGroupDto>(chatGroupProjection).ToListAsync(cancellationToken: cancellationToken);
+        var chatGroupsDto = await _mongoService.GetCollection<ChatGroup>().Find(e => e.UserIds.Contains(userId!)).Project<GetChatGroupDto>(chatGroupProjection).ToListAsync(cancellationToken: cancellationToken);
 
         return chatGroupsDto;
     }
