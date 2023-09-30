@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace Application.Features.Messages.Commands.Update;
 
-public readonly record struct UpdateMessageCommandRequest(ObjectId Id, string Body) : IRequest<bool>,ISecuredRequest;
+public readonly record struct UpdateMessageCommandRequest(string Id, string Body) : IRequest<bool>,ISecuredRequest;
 
 public sealed class UpdateMessageCommandHandler : IRequestHandler<UpdateMessageCommandRequest, bool>
 {
@@ -23,7 +23,7 @@ public sealed class UpdateMessageCommandHandler : IRequestHandler<UpdateMessageC
         
         var userId = _httpContextAccessor.HttpContext.User.Claims.First(claim=>claim.Type==ClaimTypes.NameIdentifier).Value;
         
-        var result = (await _mongoService.GetCollection<Message>().UpdateOneAsync(e => e.Id == request.Id && e.UserId==ObjectId.Parse(userId), updateDefinition, cancellationToken: cancellationToken)).IsModifiedCountAvailable;
+        var result = (await _mongoService.GetCollection<Message>().UpdateOneAsync(e => e.Id == request.Id && e.UserId==(userId), updateDefinition, cancellationToken: cancellationToken)).IsModifiedCountAvailable;
         
         return result;
     }

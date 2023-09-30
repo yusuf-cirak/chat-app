@@ -4,7 +4,8 @@ public sealed class ChatGroup : BaseAuditableEntity
 {
     [BsonIgnoreIfDefault] public string Name { get; set; }
 
-    public List<ObjectId> UserIds { get; set; }
+
+    public List<string> UserIds { get; set; }
 
     public bool IsPrivate { get; set; }
 
@@ -14,14 +15,14 @@ public sealed class ChatGroup : BaseAuditableEntity
         UserIds = new();
     }
     
-    public ChatGroup(string name, List<ObjectId> userIds,bool isPrivate)
+    public ChatGroup(string name, List<string> userIds,bool isPrivate)
     {
         Name = name;
         UserIds = userIds;
         IsPrivate = isPrivate;
     }
     
-    public ChatGroup(List<ObjectId> userIds,bool isPrivate)
+    public ChatGroup(List<string> userIds,bool isPrivate)
     {
         UserIds = userIds;
         IsPrivate = isPrivate;

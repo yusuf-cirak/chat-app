@@ -12,9 +12,9 @@ public sealed class ChatGroupBusinessRules : BaseBusinessRules
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public void UserMustExistInParticipantsBeforeCreatingChatGroup(List<ObjectId> participants)
+    public void UserMustExistInParticipantsBeforeCreatingChatGroup(List<string> participants)
     {
-        var userId = ObjectId.Parse(_httpContextAccessor.HttpContext.User.Claims.First(e => e.Type == ClaimTypes.NameIdentifier).Value);
+        var userId = (_httpContextAccessor.HttpContext.User.Claims.First(e => e.Type == ClaimTypes.NameIdentifier).Value);
         
         if (!participants.Contains(userId))
         {

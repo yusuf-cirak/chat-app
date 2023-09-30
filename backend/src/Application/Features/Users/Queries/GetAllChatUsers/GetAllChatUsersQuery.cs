@@ -20,7 +20,7 @@ public sealed class GetAllChatUsersQueryRequestHandler : IRequestHandler<GetAllC
 
     public Task<List<GetUserDto>> Handle(GetAllChatUsersQueryRequest request, CancellationToken cancellationToken)
     {
-        var userId = ObjectId.Parse(_httpContextAccessor.HttpContext.User.Claims
+        var userId = (_httpContextAccessor.HttpContext.User.Claims
             .First(e => e.Type == ClaimTypes.NameIdentifier).Value);
         
         var userIds = _mongoService.GetCollection<ChatGroup>().Find(e => e.UserIds.Contains(userId)).ToList().SelectMany(cg=>cg.UserIds).Distinct().ToList();

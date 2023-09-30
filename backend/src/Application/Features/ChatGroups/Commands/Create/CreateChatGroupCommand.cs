@@ -5,9 +5,9 @@ using MongoDB.Driver;
 namespace Application.Features.ChatGroups.Commands.Create;
 
 public readonly record struct CreateChatGroupCommandRequest
-    (List<ObjectId> ParticipantUserIds, string Name,bool IsPrivate) : IRequest<ObjectId>, ISecuredRequest;
+    (List<string> ParticipantUserIds, string Name,bool IsPrivate) : IRequest<string>, ISecuredRequest;
 
-public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGroupCommandRequest, ObjectId>
+public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGroupCommandRequest, string>
 {
     private readonly IMongoService _mongoService;
     private readonly ChatGroupBusinessRules _chatGroupBusinessRules;
@@ -18,7 +18,7 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
         _chatGroupBusinessRules = chatGroupBusinessRules;
     }
 
-    public async Task<ObjectId> Handle(CreateChatGroupCommandRequest request, CancellationToken cancellationToken)
+    public async Task<string> Handle(CreateChatGroupCommandRequest request, CancellationToken cancellationToken)
     {
         _chatGroupBusinessRules.UserMustExistInParticipantsBeforeCreatingChatGroup(request.ParticipantUserIds);
         // Chat group is private if it has only 2 participants and has no name
@@ -27,9 +27,9 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
             // Scenario 1: Users already have a chat group together
             var chatGroupId = FindExistingChatGroupIdAsync(request.ParticipantUserIds, cancellationToken);
 
-            if (chatGroupId.HasValue)
+            if (!string.IsNullOrEmpty(chatGroupId))
             {
-                return chatGroupId.Value;
+                return chatGroupId;
             }
 
             // Scenario 2: Creating a new private chat group
@@ -40,19 +40,19 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
         return await CreateNamedChatGroupAsync(request.Name, request.ParticipantUserIds, cancellationToken);
     }
 
-    private ObjectId? FindExistingChatGroupIdAsync(List<ObjectId> participantUserIds,
+    private string? FindExistingChatGroupIdAsync(List<string> participantUserIds,
         CancellationToken cancellationToken)
     {
         var userChatGroupProjection = Builders<ChatGroup>.Projection
             .Include(e => e.Id);
         var chatGroupId = _mongoService.GetCollection<ChatGroup>()
             .Find(cg => cg.UserIds.Count == 2 && cg.UserIds.All(participantUserIds.Contains))
-            .Project<ObjectId?>(userChatGroupProjection).First();
+            .Project<string?>(userChatGroupProjection).First();
 
         return chatGroupId;
     }
 
-    private async Task<ObjectId> CreatePrivateChatGroupAsync(List<ObjectId> participantUserIds,
+    private async Task<string> CreatePrivateChatGroupAsync(List<string> participantUserIds,
         CancellationToken cancellationToken)
     {
         var newChatGroup = new ChatGroup(participantUserIds, isPrivate: true);
@@ -63,7 +63,7 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
         return newChatGroup.Id;
     }
 
-    private async Task<ObjectId> CreateNamedChatGroupAsync(string groupName, List<ObjectId> participantUserIds,
+    private async Task<string> CreateNamedChatGroupAsync(string groupName, List<string> participantUserIds,
         CancellationToken cancellationToken)
     {
         var newChatGroup = new ChatGroup(groupName, participantUserIds, isPrivate: false);

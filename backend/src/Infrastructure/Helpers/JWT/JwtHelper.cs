@@ -53,14 +53,16 @@ public sealed class JwtHelper : IJwtHelper
 
     private IEnumerable<Claim> SetClaims(User user)
     {
-        List<Claim> claims = new(2);
-        claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()!));
-        claims.Add(new Claim(ClaimTypes.Name, user.UserName));
+        List<Claim> claims = new(2)
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()!),
+            new Claim(ClaimTypes.Name, user.UserName)
+        };
 
         return claims;
     }
 
-    public RefreshToken CreateRefreshToken(User user,string ipAddress)
+    public RefreshToken CreateRefreshToken(User user, string ipAddress)
     {
         var secureRandomBytes = new byte[64];
 

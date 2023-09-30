@@ -1,11 +1,8 @@
 ﻿using System.Security.Claims;
 using Application.Abstractions.Helpers;
 using Application.Abstractions.Security;
-using Application.Abstractions.Services;
 using Application.Features.Auths.Dtos;
 using Application.Features.Auths.Rules;
-using MongoDB.Bson;
-using MongoDB.Driver;
 
 namespace Application.Features.Auths.Commands.Refresh;
 
@@ -30,7 +27,7 @@ public sealed class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCom
 
     public async Task<TokenResponseDto> Handle(RefreshTokenCommandRequest request, CancellationToken cancellationToken)
     {
-            var userId = ObjectId.Parse(request.UserId);
+            var userId = (request.UserId);
             await _authBusinessRules.GetAndVerifyUserRefreshToken(userId, request.RefreshToken);
 
             var userClaims = _httpContextAccessor.HttpContext.User.Claims;

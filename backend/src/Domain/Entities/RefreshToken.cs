@@ -2,7 +2,7 @@
 
 public sealed class RefreshToken : BaseEntity
 {
-    public ObjectId UserId { get; set; }
+    public string UserId { get; set; }
     public string CreatedByIp { get; set; }
     public DateTime ExpiresAt { get; set; }
     public string Token { get; set; }
@@ -12,7 +12,7 @@ public sealed class RefreshToken : BaseEntity
         
     }
 
-    public RefreshToken(string token,ObjectId userId,string createdByIp, DateTime expiresAt)
+    public RefreshToken(string token,string userId,string createdByIp, DateTime expiresAt)
     {
         Token = token;
         UserId = userId;

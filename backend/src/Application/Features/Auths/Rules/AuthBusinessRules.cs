@@ -54,7 +54,7 @@ public sealed class AuthBusinessRules : BaseBusinessRules
         return user;
     }
     
-    public async Task GetAndVerifyUserRefreshToken(ObjectId userId,string refreshTokenFromRequest)
+    public async Task GetAndVerifyUserRefreshToken(string userId,string refreshTokenFromRequest)
     {
         var refreshTokenCollection = _mongoService.GetCollection<RefreshToken>();
         
