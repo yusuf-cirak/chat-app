@@ -1,32 +1,54 @@
-<div class="flex flex-col items-center w-full h-full">
-  <!-- Green background -->
-  <section
-    id="landing-header"
-    class="w-full h-[8%] sm:h-[30%] bg-wp-green items-center justify-center absolute"
-  ></section>
+<ng-container *ngIf="currentUser$ | async as currentUser">
+  <div class="flex flex-col items-center w-full h-full">
+    <!-- Green background -->
+    <section
+      id="landing-header"
+      class="w-full h-[8%] sm:h-[30%] bg-wp-green items-center justify-center absolute"
+    ></section>
 
-  <!-- Chat -->
-  <section
-    id="chat"
-    class="relative w-[85%] h-[90%] top-[5%] flex items-start justify-start bg-slate-600"
-  >
-    <!-- Sidebar Chat Container -->
-    <div id="sidebar-container" class="w-[32%] h-full bg-white flex flex-col">
-      <!-- User Profile Header -->
-      <div
-        id="user-profile-header"
-        class="w-full h-[7%] bg-wp-panel-background border-r-wp-panel-r-border border-r flex items-center justify-between px-4"
-      >
-        <span id="profile-picture" class="w-[40px] h-[40px] flex">
-          <img
-            src="../../../../assets/images/noPic.svg"
-            alt="Profile Picture"
-          />
-        </span>
+    <!-- Chat -->
+    <section
+      id="chat"
+      class="relative w-[85%] h-[90%] top-[5%] flex items-start justify-start bg-slate-600"
+    >
+      <!-- Sidebar Chat Container -->
+      <div id="sidebar-container" class="w-[32%] h-full bg-white flex flex-col">
+        <!-- User Profile Header -->
+        <div
+          id="user-profile-header"
+          class="w-full h-[7%] bg-wp-panel-background border-r-wp-panel-r-border border-r flex items-center justify-between px-4"
+        >
+          <span
+            id="profile-picture"
+            class="w-[3rem] h-[3rem] flex profile-picture-group"
+            (click)="imageInput.click()"
+          >
+            <img
+              [src]="
+                !currentUser.profileImageUrl
+                  ? '../../../../assets/images/noPic.svg'
+                  : 'https://res.cloudinary.com/dhcu4h56y/image/upload/f_auto,q_auto/v1/profile_images/' +
+                    currentUser.profileImageUrl
+              "
+              alt="Profile Picture"
+              class="rounded-3xl"
+            />
+            <img
+              src="../../../../assets/images/camera.svg"
+              class="w-4 h-4 self-center absolute left-[2rem] profile-picture-upload"
+            />
+            <input
+              #imageInput
+              type="file"
+              hidden
+              accept="image/*"
+              (change)="uploadProfilePicture($any($event).target.files[0])"
+            />
+          </span>
 
-        <div class="flex gap-5">
-          <div class="relative inline-block text-left">
-            <!--
+          <div class="flex gap-5">
+            <div class="relative inline-block text-left">
+              <!--
     Dropdown menu, show/hide based on menu state.
 
     Entering: "transition ease-out duration-100"
@@ -36,300 +58,266 @@
       From: "transform opacity-100 scale-100"
       To: "transform opacity-0 scale-95"
   -->
+            </div>
+            <span
+              id="community-tab"
+              class="w-7 h-7 flex center hover:cursor-pointer"
+              ><img
+                src="../../../../assets/images/community-tab.svg"
+                alt="Community Tab"
+                type="image/svg+xml"
+            /></span>
+
+            <span id="status" class="w-7 h-7 flex center hover:cursor-pointer"
+              ><img
+                src="../../../../assets/images/status.svg"
+                alt="Status"
+                type="image/svg+xml"
+            /></span>
+
+            <span id="status" class="w-7 h-7 flex center hover:cursor-pointer"
+              ><img
+                src="../../../../assets/images/new-chat.svg"
+                alt="Status"
+                type="image/svg+xml"
+            /></span>
+
+            <span
+              #showMenuRef
+              id="menu"
+              class="w-7 h-7 flex center hover:cursor-pointer"
+              (click)="showMenu = !showMenu; ($event.stopPropagation)"
+              [ngClass]="{
+                'bg-wp-panel-active-bg': showMenu,
+                'rounded-xl': showMenu
+              }"
+              ><img
+                src="../../../../assets/images/menu.svg"
+                alt="Menu"
+                type="image/svg+xml"
+              />
+            </span>
+            <div
+              *ngIf="showMenu"
+              class="absolute z-10 -ml-12 mt-8 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+              role="menu"
+              aria-orientation="vertical"
+              aria-labelledby="menu-button"
+              tabindex="-1"
+            >
+              <div
+                class="py-1"
+                role="none"
+                (click)="openCreateChatModal('private')"
+              >
+                <a
+                  class="text-gray-700 block px-4 py-2 text-sm hover:bg-wp-panel-background hover:cursor-pointer"
+                  role="menuitem"
+                  tabindex="-1"
+                  id="menu-item-2"
+                  >New Chat</a
+                >
+              </div>
+              <div
+                class="py-1"
+                role="none"
+                (click)="openCreateChatModal('group')"
+              >
+                <a
+                  class="text-gray-700 block px-4 py-2 text-sm hover:bg-wp-panel-background hover:cursor-pointer"
+                  role="menuitem"
+                  tabindex="-1"
+                  id="menu-item-4"
+                  >New Group Chat</a
+                >
+              </div>
+              <div class="py-1" role="none" (click)="logout()">
+                <a
+                  class="text-gray-700 block px-4 py-2 text-sm hover:bg-wp-panel-background hover:cursor-pointer"
+                  role="menuitem"
+                  tabindex="-1"
+                  id="menu-item-6"
+                  >Logout</a
+                >
+              </div>
+            </div>
           </div>
-          <span
-            id="community-tab"
-            class="w-7 h-7 flex center hover:cursor-pointer"
-            ><img
-              src="../../../../assets/images/community-tab.svg"
-              alt="Community Tab"
-              type="image/svg+xml"
-          /></span>
-
-          <span id="status" class="w-7 h-7 flex center hover:cursor-pointer"
-            ><img
-              src="../../../../assets/images/status.svg"
-              alt="Status"
-              type="image/svg+xml"
-          /></span>
-
-          <span id="status" class="w-7 h-7 flex center hover:cursor-pointer"
-            ><img
-              src="../../../../assets/images/new-chat.svg"
-              alt="Status"
-              type="image/svg+xml"
-          /></span>
-
-          <span
-            #showMenuRef
-            id="menu"
-            class="w-7 h-7 flex center hover:cursor-pointer"
-            (click)="showMenu = !showMenu; ($event.stopPropagation)"
-            [ngClass]="{
-              'bg-wp-panel-active-bg': showMenu,
-              'rounded-xl': showMenu
-            }"
-            ><img
-              src="../../../../assets/images/menu.svg"
-              alt="Menu"
+        </div>
+        <!-- Sidebar Search Container -->
+        <div
+          id="search"
+          class="w-full h-[6%] bg-white flex justify-evenly items-center border-b border-b-wp-b-panel-border border-r border-r-wp-panel-r-border"
+        >
+          <div
+            id="search-container"
+            class="bg-wp-panel-background flex text-center items-center gap-4 rounded-lg w-[90%] h-[80%] px-3 py-3"
+          >
+            <span class="w-5 h-5"
+              ><img src="../../../../assets/images/searchIcon.png" alt="Search"
+            /></span>
+            <input
+              id="search-input"
+              class="w-[100%] h-[100%] bg-wp-panel-background border-transparent focus:border-transparent focus:ring-0 justify-center"
+              type="text"
+              placeholder="Search"
+              (input)="filterChatGroups($any($event.target).value)"
+            />
+          </div>
+          <span id="filter" class="w-5 h-5 hover:cursor-pointer">
+            <img
+              src="../../../../assets/images/filter.svg"
+              alt="Filter"
               type="image/svg+xml"
             />
           </span>
+        </div>
+        <!-- Sidebar Chats Container -->
+        <div
+          id="chats"
+          class="w-full h-max bg-white grid border-r border-r-wp-panel-r-border overflow-auto"
+        >
+          <!-- Sidebar All Chats -->
           <div
-            *ngIf="showMenu"
-            class="absolute z-10 -ml-12 mt-8 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-            role="menu"
-            aria-orientation="vertical"
-            aria-labelledby="menu-button"
-            tabindex="-1"
+            class="chat-container hover:bg-[#f0f2f5] prevent-select"
+            *ngFor="let chatGroup of filteredChatGroups; let i = index"
+            (click)="onChatClick(chatGroup, i)"
+            [ngClass]="{ 'bg-[#f0f2f5]': i === selectedChat.index }"
           >
-            <div
-              class="py-1"
-              role="none"
-              (click)="openCreateChatModal('private')"
-            >
-              <a
-                class="text-gray-700 block px-4 py-2 text-sm hover:bg-wp-panel-background hover:cursor-pointer"
-                role="menuitem"
-                tabindex="-1"
-                id="menu-item-2"
-                >New Chat</a
-              >
-            </div>
-            <div
-              class="py-1"
-              role="none"
-              (click)="openCreateChatModal('group')"
-            >
-              <a
-                class="text-gray-700 block px-4 py-2 text-sm hover:bg-wp-panel-background hover:cursor-pointer"
-                role="menuitem"
-                tabindex="-1"
-                id="menu-item-4"
-                >New Group Chat</a
-              >
-            </div>
-            <div class="py-1" role="none" (click)="logout()">
-              <a
-                class="text-gray-700 block px-4 py-2 text-sm hover:bg-wp-panel-background hover:cursor-pointer"
-                role="menuitem"
-                tabindex="-1"
-                id="menu-item-6"
-                >Logout</a
-              >
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Sidebar Search Container -->
-      <div
-        id="search"
-        class="w-full h-[6%] bg-white flex justify-evenly items-center border-b border-b-wp-b-panel-border border-r border-r-wp-panel-r-border"
-      >
-        <div
-          id="search-container"
-          class="bg-wp-panel-background flex text-center items-center gap-4 rounded-lg w-[90%] h-[80%] px-3 py-3"
-        >
-          <span class="w-5 h-5"
-            ><img src="../../../../assets/images/searchIcon.png" alt="Search"
-          /></span>
-          <input
-            id="search-input"
-            class="w-[100%] h-[100%] bg-wp-panel-background border-transparent focus:border-transparent focus:ring-0 justify-center"
-            type="text"
-            placeholder="Search"
-            (input)="filterChatGroups($any($event.target).value)"
-          />
-        </div>
-        <span id="filter" class="w-5 h-5 hover:cursor-pointer">
-          <img
-            src="../../../../assets/images/filter.svg"
-            alt="Filter"
-            type="image/svg+xml"
-          />
-        </span>
-      </div>
-      <!-- Sidebar Chats Container -->
-      <div
-        id="chats"
-        class="w-full h-max bg-white grid border-r border-r-wp-panel-r-border overflow-auto"
-      >
-        <!-- Sidebar All Chats -->
-        <div
-          class="chat-container hover:bg-[#f0f2f5] prevent-select"
-          *ngFor="let chatGroup of filteredChatGroups; let i = index"
-          (click)="onChatClick(chatGroup, i)"
-          [ngClass]="{ 'bg-[#f0f2f5]': i === selectedChat.index }"
-        >
-          <div id="chat" class="w-full h-[74px] chat-grid cursor-pointer">
-            <div class="profile-picture flex items-center justify-center">
-              <span class="w-[49px] h-[49px] flex"
-                ><img
-                  src="../../../../assets/images/noPic.svg"
-                  alt="Profile Picture"
-              /></span>
-            </div>
-
-            <!-- Sidebar User Name and Last Message -->
-            <div
-              class="user-chat flex flex-col justify-center gap-2 border-b border-b-wp-panel-b-border"
-            >
-              <span class="user-name font-mono font-normal">{{
-                chatGroup.name
-              }}</span>
-              <span
-                class="user-message text-[#667781] font-mono text-ellipsis whitespace-nowrap overflow-hidden"
-              >
-                {{ chatGroup.lastMessage }}
-              </span>
-            </div>
-            <!-- <div class="chat-info"></div> -->
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Chat Container -->
-    <div
-      id="chatbox-container"
-      class="w-[68%] h-[100%] flex flex-col bg-wp-panel-background"
-    >
-      <!-- Chat Header -->
-      <div
-        id="user-chat"
-        class="w-full h-[100%]"
-        *ngIf="selectedChat.index > -1"
-      >
-        <div
-          id="chat-user-profile-header"
-          class="w-full h-[7%] bg-wp-panel-background flex flex-col"
-        >
-          <div
-            class="user-photo-header w-full h-[100%] bg-wp-panel-background grid"
-          >
-            <div
-              id="chat"
-              class="w-full h-[100%] profile-detail-grid cursor-pointer"
-            >
-              <div
-                class="profile-detail-picture flex flex-col items-center justify-center w-full h-full"
-              >
-                <span class="w-[40px] h-[40px] flex"
+            <div id="chat" class="w-full h-[74px] chat-grid cursor-pointer">
+              <div class="profile-picture flex items-center justify-center">
+                <span class="w-[49px] h-[49px] flex"
                   ><img
                     src="../../../../assets/images/noPic.svg"
                     alt="Profile Picture"
                 /></span>
               </div>
 
-              <div class="profile-info flex flex-col justify-center">
-                <span class="user-name font-mono font-normal">{{
-                  selectedChat.name
-                }}</span>
-              </div>
+              <!-- Sidebar User Name and Last Message -->
               <div
-                class="profile-detail-buttons flex flex-row justify-evenly items-center pr-2"
+                class="user-chat flex flex-col justify-center gap-2 border-b border-b-wp-panel-b-border"
               >
+                <span class="user-name font-mono font-normal">{{
+                  chatGroup.name
+                }}</span>
                 <span
-                  id="search"
-                  class="w-7 h-7 flex center hover:cursor-pointer"
-                  ><img
-                    src="../../../../assets/images/searchIcon.svg"
-                    alt="Search"
-                    type="image/svg+xml"
-                /></span>
-                <span id="menu" class="w-7 h-7 flex center hover:cursor-pointer"
-                  ><img
-                    src="../../../../assets/images/menu.svg"
-                    alt="Menu"
-                    type="image/svg+xml"
-                /></span>
+                  class="user-message text-[#667781] font-mono text-ellipsis whitespace-nowrap overflow-hidden"
+                >
+                  {{ chatGroup.lastMessage }}
+                </span>
               </div>
+              <!-- <div class="chat-info"></div> -->
             </div>
           </div>
         </div>
-        <!-- Message Container -->
-        <div id="messages" class="w-full h-[86%] wp-bg-image">
+      </div>
+      <!-- Chat Container -->
+      <div
+        id="chatbox-container"
+        class="w-[68%] h-[100%] flex flex-col bg-wp-panel-background"
+      >
+        <!-- Chat Header -->
+        <div
+          id="user-chat"
+          class="w-full h-[100%]"
+          *ngIf="selectedChat.index > -1"
+        >
           <div
-            id="messages-wrapper"
-            class="flex flex-col overflow-y-scroll w-full h-full max-h-[auto] py-4 pt-16 px-12 gap-y-4"
-            #messagesWrapperRef
-            [ngClass]="{
-              'justify-end': chatMessages[selectedChat.id].length <= 12
-            }"
+            id="chat-user-profile-header"
+            class="w-full min-h-[6rem] bg-wp-panel-background flex flex-col"
           >
-            <!-- Group Chat -->
-            <ng-container *ngIf="!selectedChat.isPrivate; else privateChat">
-              <ng-container
-                *ngFor="
-                  let chatMessage of chatMessages[selectedChat.id];
-                  let chatMessageIndex = index
-                "
+            <div
+              class="user-photo-header w-full h-[100%] bg-wp-panel-background grid"
+            >
+              <div
+                id="chat"
+                class="w-full h-[100%] profile-detail-grid cursor-pointer"
               >
-                <ng-container
-                  *ngFor="let chatBadge of chatBadges[selectedChat.id]"
+                <div
+                  class="profile-detail-picture flex flex-col items-center justify-center w-full h-full"
+                >
+                  <span class="w-[40px] h-[40px] flex"
+                    ><img
+                      src="../../../../assets/images/noPic.svg"
+                      alt="Profile Picture"
+                  /></span>
+                </div>
+
+                <div class="profile-info flex flex-col justify-center">
+                  <span class="user-name font-mono font-normal">{{
+                    selectedChat.name
+                  }}</span>
+                </div>
+                <div
+                  class="profile-detail-buttons flex flex-row justify-evenly items-center pr-2"
                 >
                   <span
-                    id="chat-date-badge"
-                    class="w-14 max-w-[5rem] h-7 bg-white rounded-md self-center text-wp-badge-text text-center text-sm"
-                    *ngIf="
-                      chatBadge.date === chatMessage.date &&
-                      chatBadge.displayBeforeChatIndex === chatMessageIndex
-                    "
-                    >{{ chatBadge.date | date : "dd/MM" }}</span
+                    id="search"
+                    class="w-7 h-7 flex center hover:cursor-pointer"
+                    ><img
+                      src="../../../../assets/images/searchIcon.svg"
+                      alt="Search"
+                      type="image/svg+xml"
+                  /></span>
+                  <span
+                    id="menu"
+                    class="w-7 h-7 flex center hover:cursor-pointer"
+                    ><img
+                      src="../../../../assets/images/menu.svg"
+                      alt="Menu"
+                      type="image/svg+xml"
+                  /></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Message Container -->
+          <div id="messages" class="w-full h-[86%] wp-bg-image">
+            <div
+              id="messages-wrapper"
+              class="flex flex-col overflow-y-scroll w-full h-full max-h-[auto] py-4 pt-16 px-12 gap-y-4"
+              #messagesWrapperRef
+              [ngClass]="{
+                'justify-end': chatMessages[selectedChat.id].length <= 12
+              }"
+            >
+              <!-- Group Chat -->
+              <ng-container *ngIf="!selectedChat.isPrivate; else privateChat">
+                <ng-container
+                  *ngFor="
+                    let chatMessage of chatMessages[selectedChat.id];
+                    let chatMessageIndex = index
+                  "
+                >
+                  <ng-container
+                    *ngFor="let chatBadge of chatBadges[selectedChat.id]"
                   >
-                </ng-container>
-                <div
-                  id="chat-group-message-container"
-                  class="flex self-start w-fit rounded-lg"
-                  [ngClass]="{
+                    <span
+                      id="chat-date-badge"
+                      class="w-14 max-w-[5rem] h-7 bg-white rounded-md self-center text-wp-badge-text text-center text-sm"
+                      *ngIf="
+                        chatBadge.date === chatMessage.date &&
+                        chatBadge.displayBeforeChatIndex === chatMessageIndex
+                      "
+                      >{{ chatBadge.date | date : "dd/MM" }}</span
+                    >
+                  </ng-container>
+                  <div
+                    id="chat-group-message-container"
+                    class="flex self-start w-fit rounded-lg"
+                    [ngClass]="{
                     'self-end': chatMessage.isMe,
                   }"
-                >
-                  <!-- My message -->
-                  <ng-container *ngIf="chatMessage.isMe; else otherUserMessage">
-                    <div
-                      class="flex min-h-[2rem] h-auto px-2 py-2 gap-1 rounded-lg"
-                      [ngClass]="{
-                        'bg-wp-my-message-background': chatMessage.isMe
-                      }"
+                  >
+                    <!-- My message -->
+                    <ng-container
+                      *ngIf="chatMessage.isMe; else otherUserMessage"
                     >
-                      <span
-                        id="chat-message"
-                        class="max-w-[20rem] justify-self-start text-sm break-words"
-                        >{{ chatMessage.body }}
-                      </span>
-                      <span
-                        id="date"
-                        class="w-fit h-fit text-xs self-end pt-2 pl-2 text-wp-message-date-color"
-                        >{{ chatMessage.date | date : "H:mm" }}</span
+                      <div
+                        class="flex min-h-[2rem] h-auto px-2 py-2 gap-1 rounded-lg"
+                        [ngClass]="{
+                          'bg-wp-my-message-background': chatMessage.isMe
+                        }"
                       >
-                    </div>
-                  </ng-container>
-                  <!-- Other users messages -->
-                  <ng-template #otherUserMessage>
-                    <span id="profile-picture" class="grid w-[28px] h-[28px]">
-                      <img
-                        type="image/svg+xml"
-                        src="../../../../assets/images/noPic.svg"
-                      />
-                    </span>
-                    <span id="tail" class="w-2 h-3 flex relative">
-                      <img
-                        type="image/svg+xml"
-                        [src]="'../../../../assets/images/tail-in.svg'"
-                        class="rotate-[94deg]"
-                      />
-                    </span>
-                    <div
-                      id="message-detail-container"
-                      class="grid bg-white rounded-lg min-h-[1rem] h-fit px-2 py-2 gap-1"
-                    >
-                      <span
-                        id="user-or-group-name"
-                        class="text-black text-sm font-semibold w-full"
-                        >{{ chatUsers[chatMessage.senderId].userName }}</span
-                      >
-
-                      <div class="flex">
                         <span
                           id="chat-message"
                           class="max-w-[20rem] justify-self-start text-sm break-words"
@@ -341,168 +329,207 @@
                           >{{ chatMessage.date | date : "H:mm" }}</span
                         >
                       </div>
-                    </div>
-                  </ng-template>
-                </div>
-              </ng-container>
-            </ng-container>
-            <!-- TODO: Private chat -->
-            <ng-template #privateChat>
-              <ng-container
-                *ngFor="
-                  let chatMessage of chatMessages[selectedChat.id];
-                  let chatMessageIndex = index
-                "
-              >
-                <ng-container
-                  *ngFor="let chatBadge of chatBadges[selectedChat.id]"
-                >
-                  <span
-                    id="chat-date-badge"
-                    class="w-14 max-w-[15rem] h-7 bg-white rounded-md self-center text-wp-badge-text text-center text-sm"
-                    *ngIf="
-                      chatBadge.date === chatMessage.date &&
-                      chatBadge.displayBeforeChatIndex === chatMessageIndex
-                    "
-                    >{{ chatBadge.date | date : "dd/MM" }}</span
-                  >
-                </ng-container>
-                <div
-                  id="message-detail-container"
-                  class="flex bg-white self-start w-fit min-h-[auto] px-2 py-2 gap-1 rounded-lg"
-                  [ngClass]="{
-                    'self-end': chatMessage.isMe,
-                    'bg-wp-my-message-background': chatMessage.isMe
-                  }"
-                >
-                  <div class="flex">
-                    <span
-                      id="chat-message"
-                      class="max-w-[20rem] justify-self-start text-sm break-words"
-                      >{{ chatMessage.body }}
-                    </span>
-                    <span
-                      id="date"
-                      class="w-fit h-fit text-xs self-end justify-self-end pt-2 pl-2 text-wp-message-date-color"
-                      >{{ chatMessage.date | date : "H:mm" }}</span
-                    >
+                    </ng-container>
+                    <!-- Other users messages -->
+                    <ng-template #otherUserMessage>
+                      <span id="profile-picture" class="grid w-[28px] h-[28px]">
+                        <img
+                          type="image/svg+xml"
+                          src="../../../../assets/images/noPic.svg"
+                        />
+                      </span>
+                      <span id="tail" class="w-2 h-3 flex relative">
+                        <img
+                          type="image/svg+xml"
+                          [src]="'../../../../assets/images/tail-in.svg'"
+                          class="rotate-[94deg]"
+                        />
+                      </span>
+                      <div
+                        id="message-detail-container"
+                        class="grid bg-white rounded-lg min-h-[1rem] h-fit px-2 py-2 gap-1"
+                      >
+                        <span
+                          id="user-or-group-name"
+                          class="text-black text-sm font-semibold w-full"
+                          >{{ chatUsers[chatMessage.senderId].userName }}</span
+                        >
+
+                        <div class="flex">
+                          <span
+                            id="chat-message"
+                            class="max-w-[20rem] justify-self-start text-sm break-words"
+                            >{{ chatMessage.body }}
+                          </span>
+                          <span
+                            id="date"
+                            class="w-fit h-fit text-xs self-end pt-2 pl-2 text-wp-message-date-color"
+                            >{{ chatMessage.date | date : "H:mm" }}</span
+                          >
+                        </div>
+                      </div>
+                    </ng-template>
                   </div>
-                </div>
+                </ng-container>
               </ng-container>
-            </ng-template>
+              <!-- TODO: Private chat -->
+              <ng-template #privateChat>
+                <ng-container
+                  *ngFor="
+                    let chatMessage of chatMessages[selectedChat.id];
+                    let chatMessageIndex = index
+                  "
+                >
+                  <ng-container
+                    *ngFor="let chatBadge of chatBadges[selectedChat.id]"
+                  >
+                    <span
+                      id="chat-date-badge"
+                      class="w-14 max-w-[15rem] h-7 bg-white rounded-md self-center text-wp-badge-text text-center text-sm"
+                      *ngIf="
+                        chatBadge.date === chatMessage.date &&
+                        chatBadge.displayBeforeChatIndex === chatMessageIndex
+                      "
+                      >{{ chatBadge.date | date : "dd/MM" }}</span
+                    >
+                  </ng-container>
+                  <div
+                    id="message-detail-container"
+                    class="flex bg-white self-start w-fit min-h-[auto] px-2 py-2 gap-1 rounded-lg"
+                    [ngClass]="{
+                      'self-end': chatMessage.isMe,
+                      'bg-wp-my-message-background': chatMessage.isMe
+                    }"
+                  >
+                    <div class="flex">
+                      <span
+                        id="chat-message"
+                        class="max-w-[20rem] justify-self-start text-sm break-words"
+                        >{{ chatMessage.body }}
+                      </span>
+                      <span
+                        id="date"
+                        class="w-fit h-fit text-xs self-end justify-self-end pt-2 pl-2 text-wp-message-date-color"
+                        >{{ chatMessage.date | date : "H:mm" }}</span
+                      >
+                    </div>
+                  </div>
+                </ng-container>
+              </ng-template>
+            </div>
           </div>
-        </div>
-        <!-- Chat Input Container -->
-        <div
-          id="user-chat-input-container"
-          class="w-full h-[7%] bg-wp-panel-background flex items-center justify-start"
-        >
+          <!-- Chat Input Container -->
           <div
-            id="chat-emoji"
-            class="flex flex-row w-[10%] h-full justify-evenly items-center hover:cursor-pointer gap-2"
+            id="user-chat-input-container"
+            class="w-full h-[7%] bg-wp-panel-background flex items-center justify-start"
           >
-            <span id="emoji" class="w-[25px] h-[25px] flex">
-              <img
-                src="../../../../assets/images/smile-icon.svg"
-                alt="Smile Icon"
-              />
-            </span>
-            <span id="plus" class="w-[25px] h-[25px] flex">
-              <img src="../../../../assets/images/plus.svg" alt="Plus Icon" />
-            </span>
-          </div>
-          <input
-            #chatMessageInputRef
-            type="text"
-            id="chat-input"
-            class="w-[85%] h-[75%] bg-white flex items-center rounded-lg border-transparent focus:border-transparent focus:ring-0 justify-center"
-            placeholder="Type a message"
-            autofocus
-            (change)="chatMessageInput.set($any($event.target).value)"
-            [value]="chatMessageInput()"
-          />
-          <div
-            id="chat-send"
-            class="flex flex-row w-[6%] h-full justify-center items-center hover:cursor-pointer"
-            (click)="
-              sendMessage(
-                chatMessageInput(),
-                selectedChat.id,
-                selectedChat.index
-              )
-            "
-          >
-            <span id="send" class="w-[25px] h-[25px] flex">
-              <img src="../../../../assets/images/send.svg" alt="Send Icon" />
-            </span>
+            <div
+              id="chat-emoji"
+              class="flex flex-row w-[10%] h-full justify-evenly items-center hover:cursor-pointer gap-2"
+            >
+              <span id="emoji" class="w-[25px] h-[25px] flex">
+                <img
+                  src="../../../../assets/images/smile-icon.svg"
+                  alt="Smile Icon"
+                />
+              </span>
+              <span id="plus" class="w-[25px] h-[25px] flex">
+                <img src="../../../../assets/images/plus.svg" alt="Plus Icon" />
+              </span>
+            </div>
+            <input
+              #chatMessageInputRef
+              type="text"
+              id="chat-input"
+              class="w-[85%] h-[75%] bg-white flex items-center rounded-lg border-transparent focus:border-transparent focus:ring-0 justify-center"
+              placeholder="Type a message"
+              autofocus
+              (change)="chatMessageInput.set($any($event.target).value)"
+              [value]="chatMessageInput()"
+            />
+            <div
+              id="chat-send"
+              class="flex flex-row w-[6%] h-full justify-center items-center hover:cursor-pointer"
+              (click)="
+                sendMessage(
+                  chatMessageInput(),
+                  selectedChat.id,
+                  selectedChat.index
+                )
+              "
+            >
+              <span id="send" class="w-[25px] h-[25px] flex">
+                <img src="../../../../assets/images/send.svg" alt="Send Icon" />
+              </span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
-</div>
+    </section>
+  </div>
 
-<div class="modal" *ngIf="createChatModalVisible" #createChatModalRef>
-  <article class="modal-container">
-    <header class="modal-container-header">
-      <h1 class="modal-container-title">
-        <img src="../../../../assets/images/user-plus.svg" class="w-6 h6" />
-        Create Chat
-      </h1>
-      <button class="icon-button" (click)="createChatModalVisible = false">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="24"
-          height="24"
-        >
-          <path fill="none" d="M0 0h24v24H0z" />
-          <path
-            fill="currentColor"
-            d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95L7.05 5.636z"
-          />
-        </svg>
-      </button>
-    </header>
+  <div class="modal" *ngIf="createChatModalVisible" #createChatModalRef>
+    <article class="modal-container">
+      <header class="modal-container-header">
+        <h1 class="modal-container-title">
+          <img src="../../../../assets/images/user-plus.svg" class="w-6 h6" />
+          Create Chat
+        </h1>
+        <button class="icon-button" (click)="createChatModalVisible = false">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="24"
+            height="24"
+          >
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path
+              fill="currentColor"
+              d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95L7.05 5.636z"
+            />
+          </svg>
+        </button>
+      </header>
 
-    <form
-      class="modal-container-body rtf flex flex-col items-center justify-center"
-      [formGroup]="chatForm"
-      (ngSubmit)="createChat()"
-    >
-      <app-input
-        inputType="text"
-        label="Group name"
-        placeholder="Enter a group name"
-        [control]="chatForm.controls['groupName']"
-        *ngIf="chatForm.controls['groupName'].enabled"
-      ></app-input>
+      <form
+        class="modal-container-body rtf flex flex-col items-center justify-center"
+        [formGroup]="chatForm"
+        (ngSubmit)="createChat()"
+      >
+        <app-input
+          inputType="text"
+          label="Group name"
+          placeholder="Enter a group name"
+          [control]="chatForm.controls['groupName']"
+          *ngIf="chatForm.controls['groupName'].enabled"
+        ></app-input>
 
-      <app-input
-        inputType="text"
-        label="Search"
-        placeholder="Search for users"
-        [dropdownVisible]="true"
-        [suggestions]="suggestions"
-        [control]="chatForm.controls['userSearchInput']"
-        (onSuggestionClick)="onSuggestionClick($event)"
-        [disabled]="
-          _selectedChatTypeForCreate() === 'private' &&
-          chatForm.controls['selectedUsers'].value.length === 1
-        "
-      ></app-input>
-      <div id="chip-container" class="w-full min-h-[2rem]">
-        <app-chip-list
-          [chipItems]="chatForm.get('selectedUsers')!.value!"
-          (onChipRemoveClick)="removeChip($event)"
-        ></app-chip-list>
-      </div>
-      <app-button
-        label="Start Chat"
-        class="focus:outline-none rounded text-black bg-wp-green hover:opacity-90 w-full h-10"
-        buttonType="submit"
-        [disabled]="!chatForm.valid"
-      ></app-button>
-    </form>
-  </article>
-</div>
+        <app-input
+          inputType="text"
+          label="Search"
+          placeholder="Search for users"
+          [dropdownVisible]="true"
+          [suggestions]="suggestions"
+          [control]="chatForm.controls['userSearchInput']"
+          (onSuggestionClick)="onSuggestionClick($event)"
+          [disabled]="
+            _selectedChatTypeForCreate() === 'private' &&
+            chatForm.controls['selectedUsers'].value.length === 1
+          "
+        ></app-input>
+        <div id="chip-container" class="w-full min-h-[2rem]">
+          <app-chip-list
+            [chipItems]="chatForm.get('selectedUsers')!.value!"
+            (onChipRemoveClick)="removeChip($event)"
+          ></app-chip-list>
+        </div>
+        <app-button
+          label="Start Chat"
+          class="focus:outline-none rounded text-black bg-wp-green hover:opacity-90 w-full h-10"
+          buttonType="submit"
+          [disabled]="!chatForm.valid"
+        ></app-button>
+      </form>
+    </article>
+  </div>
+</ng-container>

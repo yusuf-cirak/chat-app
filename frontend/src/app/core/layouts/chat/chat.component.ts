@@ -1,6 +1,7 @@
+import { ImageService } from './../../services/image.service';
 import { MessageDto } from './../../dtos/chat-group-messages-dto';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe, DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import {
   Component,
   DestroyRef,
@@ -26,8 +27,9 @@ import { length } from 'src/app/shared/validators/length';
 import { Router } from '@angular/router';
 import { TokenService } from '../../services/token.service';
 import { AuthService } from '../../services/auth.service';
-import { UserDto } from 'src/app/shared/api/user-dto';
+import { UserDto } from 'src/app/core/dtos/user-dto';
 import { ChatGroupDto } from '../../dtos/chat-group-dto';
+import { ToastrService } from 'ngx-toastr';
 
 interface SidebarChatGroup {
   id: string;
@@ -97,6 +99,7 @@ type CreateChatForm = {
     NgIf,
     NgFor,
     NgClass,
+    AsyncPipe,
     DatePipe,
     InputComponent,
     ButtonComponent,
@@ -107,13 +110,16 @@ type CreateChatForm = {
 })
 export class ChatComponent implements OnInit {
   // Inject dependencies
+  private readonly _router = inject(Router);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _formBuilder = inject(NonNullableFormBuilder);
   private readonly chatService = inject(ChatService);
   private readonly tokenService = inject(TokenService);
   private readonly authService = inject(AuthService);
-  private readonly _router = inject(Router);
+  private readonly imageService = inject(ImageService);
+  private readonly toastrService = inject(ToastrService);
 
+  currentUser$ = this.authService.getUserAsObservable();
   get currentUserId() {
     return this.authService.getUserValue().id;
   }
@@ -257,7 +263,7 @@ export class ChatComponent implements OnInit {
           (chatUsersObj: ChatUserDictionary, currentUser: UserDto) => {
             chatUsersObj[currentUser.id] = {
               userName: currentUser.userName,
-              profilePictureUrl: currentUser.profilePicturePath,
+              profilePictureUrl: currentUser.profileImageUrl,
             };
             return chatUsersObj;
           },
@@ -579,5 +585,25 @@ export class ChatComponent implements OnInit {
     } else {
       this._filteredChatGroups.set(this._sidebarChatGroups());
     }
+  }
+
+  uploadProfilePicture(picture: File) {
+    this.imageService
+      .uploadProfileImage({ file: picture, userId: this.currentUserId })
+      .subscribe({
+        next: (result) => {
+          this.authService.setUser({
+            ...this.authService.getUserValue(),
+            profileImageUrl: result,
+          });
+        },
+        error: (err) => {
+          debugger;
+          this.toastrService.error(
+            err.error.detail || 'Something went wrong',
+            'Error'
+          );
+        },
+      });
   }
 }
