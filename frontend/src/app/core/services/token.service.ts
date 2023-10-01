@@ -1,35 +1,43 @@
-import { Injectable } from '@angular/core';
+import { Injectable, WritableSignal, signal } from '@angular/core';
 import { LoginResponseDto } from '../dtos/login-response-dto';
 import { RefreshTokenResponseDto } from '../dtos/refresh-token-response-dto';
 import { RegisterResponseDto } from '../dtos/register-response-dto';
 import jwtDecode from 'jwt-decode';
-import { UserDto } from 'src/app/shared/api/user-dto';
+import { UserDto } from 'src/app/core/dtos/user-dto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TokenService {
-  get accesToken(): string | null {
-    return localStorage.getItem('accessToken');
+  private _decodedToken: WritableSignal<any> = signal(null!);
+
+  get decodedToken() {
+    return this._decodedToken();
   }
 
-  isTokenExpired(decodedToken: any): boolean {
-    if (!decodedToken) {
-      return true;
-    }
-
-    return Date.now() >= decodedToken.exp * 1000;
+  get accesToken(): string | null {
+    return localStorage.getItem('accessToken');
   }
 
   get refreshToken(): string | null {
     return localStorage.getItem('refreshToken');
   }
 
-  setTokens(
+  isAccessTokenExpired(): boolean {
+    if (!this.decodedToken) {
+      return true;
+    }
+
+    return Date.now() >= this.decodedToken?.exp * 1000;
+  }
+
+  setTokensAndDecodeAccessToken(
     tokens: RegisterResponseDto | LoginResponseDto | RefreshTokenResponseDto
   ) {
     localStorage.setItem('accessToken', tokens.accessToken);
     localStorage.setItem('refreshToken', tokens.refreshToken);
+
+    this.decodeAccessToken(tokens.accessToken);
   }
 
   removeTokens() {
@@ -38,9 +46,6 @@ export class TokenService {
   }
 
   decodeAccessToken(token: any) {
-    if (!token) {
-      return null;
-    }
     const decodedToken: any = {};
     for (const [key, value] of Object.entries(jwtDecode(token)!)) {
       if (key.includes('/')) {
@@ -51,10 +56,11 @@ export class TokenService {
       }
     }
 
-    return decodedToken;
+    this._decodedToken.set(decodedToken);
   }
 
-  getUserCredentialsFromDecodedToken(decodedToken: any): UserDto | null {
+  getUserCredentialsFromDecodedToken(): UserDto | null {
+    const decodedToken = this.decodedToken;
     if (!decodedToken) {
       return null;
     }
@@ -62,7 +68,7 @@ export class TokenService {
     return {
       id: decodedToken?.nameidentifier,
       userName: decodedToken?.unique_name,
-      profilePicturePath: decodedToken?.profilepicturepath,
+      profileImageUrl: decodedToken?.ProfileImageUrl,
     };
   }
 }

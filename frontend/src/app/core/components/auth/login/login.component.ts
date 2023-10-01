@@ -66,12 +66,9 @@ export class LoginComponent {
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe({
         next: (tokens) => {
-          this.tokenService.setTokens(tokens);
-          const decodedToken = this.tokenService.decodeAccessToken(
-            tokens.accessToken
-          );
+          this.tokenService.setTokensAndDecodeAccessToken(tokens);
           const currentUser =
-            this.tokenService.getUserCredentialsFromDecodedToken(decodedToken);
+            this.tokenService.getUserCredentialsFromDecodedToken();
           this.authService.setUser(currentUser!);
           this.router.navigateByUrl('/chat');
         },

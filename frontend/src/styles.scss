@@ -429,3 +429,15 @@ a {
 
   color: #94a0b8;
 }
+
+.profile-picture-group {
+  .profile-picture-upload {
+    display: none;
+  }
+  &:hover {
+    cursor: pointer;
+    .profile-picture-upload {
+      display: flex;
+    }
+  }
+}

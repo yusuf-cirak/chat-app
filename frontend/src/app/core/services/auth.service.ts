@@ -8,7 +8,7 @@ import { RegisterResponseDto } from '../dtos/register-response-dto';
 import { LoginResponseDto } from '../dtos/login-response-dto';
 import { TokenService } from './token.service';
 import { HttpHeaders } from '@angular/common/http';
-import { UserDto } from 'src/app/shared/api/user-dto';
+import { UserDto } from 'src/app/core/dtos/user-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -48,7 +48,7 @@ export class AuthService {
   refreshToken(skipInterceptor = false): Observable<RefreshTokenResponseDto> {
     const refreshToken = this._tokenService.refreshToken;
     const accessToken = this._tokenService.accesToken;
-    const userId = this.getUserValue()?.id;
+    const userId = this._tokenService.getUserCredentialsFromDecodedToken()?.id;
     return this._httpClientService.post(
       {
         controller: 'auth',

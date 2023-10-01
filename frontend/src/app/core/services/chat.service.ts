@@ -3,7 +3,7 @@ import { HttpClientService } from 'src/app/shared/services/http-client.service';
 import { CreateChatGroupDto } from '../dtos/create-chat-group-dto';
 import { SendMessageDto } from '../dtos/send-message-dto';
 import { Observable } from 'rxjs';
-import { UserDto } from 'src/app/shared/api/user-dto';
+import { UserDto } from 'src/app/core/dtos/user-dto';
 import { ChatGroupDto } from '../dtos/chat-group-dto';
 import { ChatGroupMessagesDto } from '../dtos/chat-group-messages-dto';
 

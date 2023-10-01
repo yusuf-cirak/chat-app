@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { TokenService } from '../services/token.service';
 import { AuthService } from '../services/auth.service';
-import { catchError, map, of, take, tap } from 'rxjs';
+import { catchError, map, of } from 'rxjs';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
@@ -23,13 +23,9 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   return authService.refreshToken(true).pipe(
     map((tokenResult) => {
-      tokenService.setTokens(tokenResult);
+      tokenService.setTokensAndDecodeAccessToken(tokenResult);
 
-      const decodedToken = tokenService.decodeAccessToken(accessToken);
-
-      authService.setUser(
-        tokenService.getUserCredentialsFromDecodedToken(decodedToken)!
-      );
+      authService.setUser(tokenService.getUserCredentialsFromDecodedToken()!);
 
       return true;
     }),

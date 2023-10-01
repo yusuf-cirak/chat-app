@@ -16,15 +16,9 @@ export const authPageGuard: CanActivateFn = (route, state) => {
   const tokenService = inject(TokenService);
   return authService.refreshToken(true).pipe(
     map((tokenResult) => {
-      tokenService.setTokens(tokenResult);
+      tokenService.setTokensAndDecodeAccessToken(tokenResult);
 
-      const decodedToken = tokenService.decodeAccessToken(
-        tokenResult.accessToken
-      );
-
-      authService.setUser(
-        tokenService.getUserCredentialsFromDecodedToken(decodedToken)!
-      );
+      authService.setUser(tokenService.getUserCredentialsFromDecodedToken()!);
 
       return router.createUrlTree(['/chat']);
     }),

@@ -13,15 +13,15 @@ export class AppComponent {
   title = 'ChatApp';
 
   private readonly tokenService = inject(TokenService);
-  private readonly userService = inject(AuthService);
+  private readonly authService = inject(AuthService);
 
   ngOnInit() {
     const accessToken = this.tokenService.accesToken;
     if (accessToken) {
-      const decodedToken = this.tokenService.decodeAccessToken(accessToken);
-      if (!this.tokenService.isTokenExpired(decodedToken)) {
-        this.userService.setUser(
-          this.tokenService.getUserCredentialsFromDecodedToken(decodedToken)!
+      this.tokenService.decodeAccessToken(accessToken);
+      if (!this.tokenService.isAccessTokenExpired()) {
+        this.authService.setUser(
+          this.tokenService.getUserCredentialsFromDecodedToken()!
         );
       }
     }

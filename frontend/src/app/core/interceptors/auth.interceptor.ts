@@ -44,12 +44,10 @@ export function authInterceptor(
             return throwError(() => error);
           }),
           tap((tokens: RefreshTokenResponseDto) => {
-            tokenService.setTokens(tokens);
-            const decodedToken = tokenService.decodeAccessToken(
-              tokens.accessToken
-            );
+            tokenService.setTokensAndDecodeAccessToken(tokens);
+
             authService.setUser(
-              tokenService.getUserCredentialsFromDecodedToken(decodedToken)!
+              tokenService.getUserCredentialsFromDecodedToken()!
             );
           }),
           mergeMap((tokens) => {
