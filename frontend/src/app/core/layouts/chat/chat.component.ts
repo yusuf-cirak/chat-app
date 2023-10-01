@@ -37,6 +37,7 @@ interface SidebarChatGroup {
   userIds: string[];
   isPrivate: boolean;
   lastMessage: string;
+  profileImageUrl: string;
 }
 
 interface SelectedChat {
@@ -45,6 +46,7 @@ interface SelectedChat {
   name: string;
   userIds: string[];
   isPrivate: boolean;
+  profileImageUrl: string;
 }
 
 interface ChatDateBadge {
@@ -65,16 +67,10 @@ interface Messages {
   [chatId: string]: ChatMessage[];
 }
 
-// interface ChatUser {
-//   id: string;
-//   userName: string;
-//   profilePictureUrl: string;
-// }
-
 interface ChatUserDictionary {
   [userId: string]: {
     userName: string;
-    profilePictureUrl: string;
+    profileImageUrl: string;
   };
 }
 
@@ -170,6 +166,7 @@ export class ChatComponent implements OnInit {
     name: '',
     userIds: [],
     isPrivate: false,
+    profileImageUrl: '',
   });
 
   get selectedChat() {
@@ -263,7 +260,7 @@ export class ChatComponent implements OnInit {
           (chatUsersObj: ChatUserDictionary, currentUser: UserDto) => {
             chatUsersObj[currentUser.id] = {
               userName: currentUser.userName,
-              profilePictureUrl: currentUser.profileImageUrl,
+              profileImageUrl: currentUser.profileImageUrl,
             };
             return chatUsersObj;
           },
@@ -328,25 +325,28 @@ export class ChatComponent implements OnInit {
           const isChatGroupPrivate = group.isPrivate;
           const lastMessageObj = chatMessages[group.id]?.slice(-1)[0];
           let lastMessage = '';
+          let groupName = group.name;
+          let chatGroupImageUrl = '';
           if (isChatGroupPrivate) {
             lastMessage = lastMessageObj.body;
-            group.name = this.getPrivateChatDisplayName(group);
+            const otherUserId = group.userIds.find(
+              (id) => id !== this.currentUserId
+            );
+            const otherUser = chatUsers[otherUserId!];
+            groupName = otherUser.userName;
+            chatGroupImageUrl = otherUser.profileImageUrl;
           } else {
             lastMessage = `${chatUsers[lastMessageObj?.senderId].userName}: ${
               lastMessageObj?.body
             }`;
           }
-          const lastMessageStr = !isChatGroupPrivate
-            ? `${chatUsers[lastMessageObj?.senderId].userName}: ${
-                lastMessageObj?.body
-              }`
-            : `${lastMessageObj?.body}`;
           return {
             id: group.id,
-            name: group.name,
+            name: groupName,
             isPrivate: group.isPrivate,
             userIds: group.userIds,
-            lastMessage: lastMessageStr,
+            lastMessage: lastMessage,
+            profileImageUrl: chatGroupImageUrl,
           };
         });
 
@@ -441,7 +441,7 @@ export class ChatComponent implements OnInit {
       isPrivate: isChatTypePrivate,
     };
 
-    chatObj.participantUserIds.push();
+    chatObj.participantUserIds.push(this.currentUserId);
 
     this.chatService
       .createChatGroup(chatObj)
@@ -453,6 +453,7 @@ export class ChatComponent implements OnInit {
       isPrivate: isChatTypePrivate,
       id: '4',
       lastMessage: '',
+      profileImageUrl: '',
       // selectedUsers: formValues.selectedUsers.map((s: LookupItem) => s.value),
     };
 
@@ -606,4 +607,9 @@ export class ChatComponent implements OnInit {
         },
       });
   }
+
+  // getChatGroupImage(group: ChatGroupDto | SelectedChat) {
+  //   const otherUserId = group.userIds.find((u) => u !== this.currentUserId)!;
+  //   return `https://res.cloudinary.com/dhcu4h56y/image/upload/f_auto,q_auto/v1/profile_images/${this.chatUsers[otherUserId].profileImageUrl}`;
+  // }
 }

@@ -15,6 +15,7 @@ public class SeedDataGenerator
             .RuleFor(u => u.UserName, f => f.Person.UserName.ToLower())
             .RuleFor(u=>u.PasswordHash,f=>passwordHash)
             .RuleFor(u=>u.PasswordSalt,f=>passwordSalt)
+            .RuleFor(u=>u.ProfileImageUrl,"pgkxunrceumvwehu7kwr")
             .Generate(count);
     } 
     

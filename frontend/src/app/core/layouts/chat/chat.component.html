@@ -185,11 +185,18 @@
           >
             <div id="chat" class="w-full h-[74px] chat-grid cursor-pointer">
               <div class="profile-picture flex items-center justify-center">
-                <span class="w-[49px] h-[49px] flex"
-                  ><img
-                    src="../../../../assets/images/noPic.svg"
+                <span class="w-[49px] h-[49px] flex">
+                  <img
+                    [src]="
+                      !chatGroup.profileImageUrl
+                        ? '../../../../assets/images/noPic.svg'
+                        : 'https://res.cloudinary.com/dhcu4h56y/image/upload/f_auto,q_auto/v1/profile_images/' +
+                          chatGroup.profileImageUrl
+                    "
                     alt="Profile Picture"
-                /></span>
+                    class="rounded-3xl"
+                  />
+                </span>
               </div>
 
               <!-- Sidebar User Name and Last Message -->
@@ -223,7 +230,7 @@
         >
           <div
             id="chat-user-profile-header"
-            class="w-full min-h-[6rem] bg-wp-panel-background flex flex-col"
+            class="w-full min-h-[3rem] bg-wp-panel-background flex flex-col justify-center items-center"
           >
             <div
               class="user-photo-header w-full h-[100%] bg-wp-panel-background grid"
@@ -235,11 +242,18 @@
                 <div
                   class="profile-detail-picture flex flex-col items-center justify-center w-full h-full"
                 >
-                  <span class="w-[40px] h-[40px] flex"
-                    ><img
-                      src="../../../../assets/images/noPic.svg"
+                  <span class="w-[40px] h-[40px] flex">
+                    <img
+                      [src]="
+                        !selectedChat.isPrivate
+                          ? '../../../../assets/images/noPic.svg'
+                          : 'https://res.cloudinary.com/dhcu4h56y/image/upload/f_auto,q_auto/v1/profile_images/' +
+                            selectedChat.profileImageUrl
+                      "
                       alt="Profile Picture"
-                  /></span>
+                      class="rounded-3xl"
+                    />
+                  </span>
                 </div>
 
                 <div class="profile-info flex flex-col justify-center">
@@ -334,8 +348,14 @@
                     <ng-template #otherUserMessage>
                       <span id="profile-picture" class="grid w-[28px] h-[28px]">
                         <img
-                          type="image/svg+xml"
-                          src="../../../../assets/images/noPic.svg"
+                          [src]="
+                            !chatUsers[chatMessage.senderId].profileImageUrl
+                              ? '../../../../assets/images/noPic.svg'
+                              : 'https://res.cloudinary.com/dhcu4h56y/image/upload/f_auto,q_auto/v1/profile_images/' +
+                                chatUsers[chatMessage.senderId].profileImageUrl
+                          "
+                          alt="Profile Picture"
+                          class="rounded-3xl"
                         />
                       </span>
                       <span id="tail" class="w-2 h-3 flex relative">

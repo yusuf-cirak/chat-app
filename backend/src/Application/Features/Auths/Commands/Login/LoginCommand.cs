@@ -24,7 +24,7 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommandRequest, T
 
     public async Task<TokenResponseDto> Handle(LoginCommandRequest request, CancellationToken cancellationToken)
     {
-        User user = await _authBusinessRules.UserShouldExistBeforeLogin(request.UserName);
+        User user = await _authBusinessRules.UserNameShouldExistBeforeLogin(request.UserName);
 
         _authBusinessRules.UserCredentialsMustMatchBeforeLogin(request.Password, user.PasswordHash, user.PasswordSalt);
 

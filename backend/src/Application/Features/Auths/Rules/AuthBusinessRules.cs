@@ -42,13 +42,25 @@ public sealed class AuthBusinessRules : BaseBusinessRules
         }
     }
 
-    public async Task<User> UserShouldExistBeforeLogin(string userName)
+    public async Task<User> UserNameShouldExistBeforeLogin(string userName)
     {
-        User? user = await _mongoService.GetCollection<User>().Find(u => u.UserName == userName).FirstOrDefaultAsync();
+        User? user = await _mongoService.GetCollection<User>().Find(u => u.UserName == userName).SingleOrDefaultAsync();
 
         if (user is null)
         {
             throw new BusinessException("There is no user with that user name");
+        }
+
+        return user;
+    }
+    
+    public async Task<User> UserWithIdMustExistBeforeRefreshToken(string userId)
+    {
+        User? user = await _mongoService.GetCollection<User>().Find(u => u.Id == userId).SingleOrDefaultAsync();
+
+        if (user is null)
+        {
+            throw new BusinessException("There is no user with that user id");
         }
 
         return user;

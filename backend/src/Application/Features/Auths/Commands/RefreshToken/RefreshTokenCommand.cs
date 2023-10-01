@@ -3,6 +3,7 @@ using Application.Abstractions.Helpers;
 using Application.Abstractions.Security;
 using Application.Features.Auths.Dtos;
 using Application.Features.Auths.Rules;
+using MongoDB.Driver;
 
 namespace Application.Features.Auths.Commands.Refresh;
 
@@ -28,18 +29,11 @@ public sealed class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCom
     public async Task<TokenResponseDto> Handle(RefreshTokenCommandRequest request, CancellationToken cancellationToken)
     {
             var userId = (request.UserId);
+
+            var user = await _authBusinessRules.UserWithIdMustExistBeforeRefreshToken(userId);
+
             await _authBusinessRules.GetAndVerifyUserRefreshToken(userId, request.RefreshToken);
 
-            var userClaims = _httpContextAccessor.HttpContext.User.Claims!;
-        
-            var user = new User()
-            {
-                Id = userId,
-                UserName = userClaims.Single(claim => claim.Type == ClaimTypes.Name).Value,
-                ProfileImageUrl = userClaims.Single(claim=>claim.Type == "ProfileImageUrl").Value,
-                
-            };
-        
             var userIpAddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
 
             var accessToken = _jwtHelper.CreateAccessToken(user);
