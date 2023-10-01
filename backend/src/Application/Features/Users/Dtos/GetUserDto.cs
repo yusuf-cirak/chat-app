@@ -7,6 +7,7 @@ public sealed class GetUserDto
     [BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; }
     public string UserName { get; set; }
+    public string ProfileImageUrl { get; set; }
 
     public GetUserDto()
     {

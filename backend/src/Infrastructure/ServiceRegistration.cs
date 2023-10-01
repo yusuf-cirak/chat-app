@@ -1,12 +1,15 @@
 ﻿using Application.Abstractions.Helpers;
 using Application.Abstractions.Services;
 using Application.Abstractions.Services.Chat;
+using Application.Abstractions.Services.Image;
+using CloudinaryDotNet;
 using Domain.Entities;
 using Infrastructure.Dtos;
 using Infrastructure.Helpers.Hashing;
 using Infrastructure.Helpers.JWT;
 using Infrastructure.Persistence;
 using Infrastructure.Services.Chat;
+using Infrastructure.Services.Image;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
@@ -22,6 +25,12 @@ public static class ServiceRegistration
 
         services.AddSingleton<IChatService,InMemoryChatService>();
         services.AddSingleton<IChat, Chat>();
+
+
+        services.AddSingleton<Cloudinary>(_ => new Cloudinary(account:configuration.GetSection("CloudinarySettings").Get<Account>()));
+        
+        services.AddScoped<IImageService, CloudinaryImageService>();
+        services.AddScoped<IImage, Image>();
         
         services.AddSignalR();
         

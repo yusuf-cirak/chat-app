@@ -7,7 +7,7 @@ using Application.Features.Auths.Rules;
 namespace Application.Features.Auths.Commands.Refresh;
 
 public readonly record struct RefreshTokenCommandRequest
-    (string UserId, string RefreshToken) : IRequest<TokenResponseDto> , ISecuredRequest;
+    (string UserId, string RefreshToken) : IRequest<TokenResponseDto>;
 
 public sealed class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommandRequest, TokenResponseDto>
 {
@@ -30,12 +30,14 @@ public sealed class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCom
             var userId = (request.UserId);
             await _authBusinessRules.GetAndVerifyUserRefreshToken(userId, request.RefreshToken);
 
-            var userClaims = _httpContextAccessor.HttpContext.User.Claims;
+            var userClaims = _httpContextAccessor.HttpContext.User.Claims!;
         
             var user = new User()
             {
                 Id = userId,
-                UserName = userClaims.Single(claim => claim.Type == ClaimTypes.Name).Value
+                UserName = userClaims.Single(claim => claim.Type == ClaimTypes.Name).Value,
+                ProfileImageUrl = userClaims.Single(claim=>claim.Type == "ProfileImageUrl").Value,
+                
             };
         
             var userIpAddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();

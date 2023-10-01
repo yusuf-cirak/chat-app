@@ -56,7 +56,8 @@ public sealed class JwtHelper : IJwtHelper
         List<Claim> claims = new(2)
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()!),
-            new Claim(ClaimTypes.Name, user.UserName)
+            new Claim(ClaimTypes.Name, user.UserName),
+            new Claim("ProfileImageUrl", user.ProfileImageUrl),
         };
 
         return claims;

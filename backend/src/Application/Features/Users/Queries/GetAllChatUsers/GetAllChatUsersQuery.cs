@@ -27,7 +27,8 @@ public sealed class GetAllChatUsersQueryRequestHandler : IRequestHandler<GetAllC
 
         var userProjection = Builders<User>.Projection
             .Include(e => e.Id)
-            .Include(e => e.UserName);
+            .Include(e => e.UserName)
+            .Include(u => u.ProfileImageUrl);
 
         var chatGroupUsers = _mongoService.GetCollection<User>()
             .Find(e => userIds.Contains(e.Id)).Project<GetUserDto>(userProjection)
