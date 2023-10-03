@@ -42,7 +42,7 @@
               type="file"
               hidden
               accept="image/*"
-              (change)="uploadProfilePicture($any($event).target.files[0])"
+              (change)="uploadUserProfileImage($any($event).target.files[0])"
             />
           </span>
 
@@ -242,16 +242,35 @@
                 <div
                   class="profile-detail-picture flex flex-col items-center justify-center w-full h-full"
                 >
-                  <span class="w-[40px] h-[40px] flex">
+                  <span
+                    class="w-[40px] h-[40px] flex"
+                    [ngClass]="{
+                    'profile-picture-group': !selectedChat.isPrivate,
+                  }"
+                    (click)="!selectedChat.isPrivate && imageInput.click()"
+                  >
                     <img
                       [src]="
-                        !selectedChat.isPrivate
+                        !selectedChat.profileImageUrl
                           ? '../../../../assets/images/noPic.svg'
                           : 'https://res.cloudinary.com/dhcu4h56y/image/upload/f_auto,q_auto/v1/profile_images/' +
                             selectedChat.profileImageUrl
                       "
                       alt="Profile Picture"
                       class="rounded-3xl"
+                    />
+                    <img
+                      src="../../../../assets/images/camera.svg"
+                      class="w-4 h-4 self-center relative right-[1.7rem] profile-picture-upload"
+                    />
+                    <input
+                      #imageInput
+                      type="file"
+                      hidden
+                      accept="image/*"
+                      (change)="
+                        uploadChatGroupImage($any($event).target.files[0])
+                      "
                     />
                   </span>
                 </div>

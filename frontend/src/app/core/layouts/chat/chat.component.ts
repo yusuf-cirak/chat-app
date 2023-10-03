@@ -588,7 +588,10 @@ export class ChatComponent implements OnInit {
     }
   }
 
-  uploadProfilePicture(picture: File) {
+  uploadUserProfileImage(picture: File) {
+    if (!picture) {
+      return;
+    }
     this.imageService
       .uploadProfileImage({ file: picture, userId: this.currentUserId })
       .subscribe({
@@ -608,8 +611,30 @@ export class ChatComponent implements OnInit {
       });
   }
 
-  // getChatGroupImage(group: ChatGroupDto | SelectedChat) {
-  //   const otherUserId = group.userIds.find((u) => u !== this.currentUserId)!;
-  //   return `https://res.cloudinary.com/dhcu4h56y/image/upload/f_auto,q_auto/v1/profile_images/${this.chatUsers[otherUserId].profileImageUrl}`;
-  // }
+  uploadChatGroupImage(picture: File) {
+    if (!picture) {
+      return;
+    }
+    const selectedChatGroupId = this.selectedChat.id;
+    this.imageService
+      .uploadChatGroupImage({ file: picture, chatGroupId: selectedChatGroupId })
+      .subscribe({
+        next: (publicImageId) => {
+          this._selectedChat.mutate((selectedChat) => {
+            selectedChat.profileImageUrl = publicImageId;
+          });
+          this._sidebarChatGroups.mutate((groups) => {
+            groups.find((g) => g.id === selectedChatGroupId)!.profileImageUrl =
+              publicImageId;
+          });
+        },
+        error: (err) => {
+          debugger;
+          this.toastrService.error(
+            err.error.detail || 'Something went wrong',
+            'Error'
+          );
+        },
+      });
+  }
 }
