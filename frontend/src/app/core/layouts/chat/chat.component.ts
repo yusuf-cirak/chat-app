@@ -13,7 +13,14 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { debounceTime, distinctUntilChanged, forkJoin } from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  forkJoin,
+  of,
+  switchMap,
+} from 'rxjs';
 import { InputComponent } from 'src/app/shared/components/input/input.component';
 import { ButtonComponent } from 'src/app/shared/components/button/button.component';
 import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -200,6 +207,12 @@ export class ChatComponent implements OnInit {
     return this._chatBadges();
   }
 
+  _suggestions: WritableSignal<LookupItem[]> = signal([]);
+
+  get suggestions() {
+    return this._suggestions();
+  }
+
   private today = new Date();
   // Set yesterday onInit
   private yesterday = new Date();
@@ -237,11 +250,6 @@ export class ChatComponent implements OnInit {
       !this.showMenuRef.nativeElement.contains(event.target)
     ) {
       this.showMenu = false;
-    } else if (
-      this.createChatModalVisible &&
-      !this.createChatModalRef.nativeElement.contains(event.target)
-    ) {
-      this.createChatModalVisible = false;
     }
   }
 
@@ -328,7 +336,7 @@ export class ChatComponent implements OnInit {
           let groupName = group.name;
           let chatGroupImageUrl = '';
           if (isChatGroupPrivate) {
-            lastMessage = lastMessageObj.body;
+            lastMessage = lastMessageObj?.body;
             const otherUserId = group.userIds.find(
               (id) => id !== this.currentUserId
             );
@@ -336,9 +344,11 @@ export class ChatComponent implements OnInit {
             groupName = otherUser.userName;
             chatGroupImageUrl = otherUser.profileImageUrl;
           } else {
-            lastMessage = `${chatUsers[lastMessageObj?.senderId].userName}: ${
-              lastMessageObj?.body
-            }`;
+            if (lastMessageObj) {
+              lastMessage = `${
+                chatUsers[lastMessageObj?.senderId]?.userName
+              }: ${lastMessageObj?.body}`;
+            }
           }
           return {
             id: group.id,
@@ -375,15 +385,6 @@ export class ChatComponent implements OnInit {
     this.chatMessageInput.set(value);
   }
 
-  _suggestions: LookupItem[] = [
-    { key: 'Ahmet', value: 1 },
-    { key: 'Mehmet', value: 2 },
-    { key: 'Yusuf', value: 3 },
-    { key: 'Emre', value: 4 },
-  ];
-
-  suggestions: LookupItem[] = [];
-
   registerSearchInputDebounce() {
     const userSearchInput = this.chatForm.get('userSearchInput');
 
@@ -391,23 +392,39 @@ export class ChatComponent implements OnInit {
       userSearchInput.valueChanges
         .pipe(
           takeUntilDestroyed(this._destroyRef),
-          debounceTime(500),
-          distinctUntilChanged()
+          debounceTime(100),
+          distinctUntilChanged(),
+          filter((searchText) => {
+            if (searchText.length === 0) {
+              this._suggestions.set([]);
+              return false;
+            }
+            return true;
+          }),
+          switchMap((searchText) => this.chatService.searchUsers(searchText))
         )
-        .subscribe((value) => {
-          if (!value) {
-            this.suggestions = [];
+        .subscribe((usersResult: UserDto[]) => {
+          if (!usersResult.length) {
+            this._suggestions.set([]);
           } else {
-            this.suggestions = this._suggestions.filter((s) =>
-              s.key.toLowerCase().includes(value.toLowerCase())
-            );
+            const suggestions = usersResult.map((user) => ({
+              key: user.userName,
+              value: user,
+            }));
+            this._suggestions.set(suggestions);
+            // usersResult.forEach((user) => {
+            //   this.chatUsers[user.id] = {
+            //     userName: user.userName,
+            //     profileImageUrl: user.profileImageUrl,
+            //   };
+            // });
           }
         });
     }
   }
 
   onSuggestionClick(userLookup: LookupItem) {
-    this.suggestions = [];
+    this._suggestions.set([]);
     const selectedUsers = this.chatForm.get('selectedUsers');
     const value = selectedUsers?.value;
 
@@ -436,7 +453,7 @@ export class ChatComponent implements OnInit {
     const chatObj: CreateChatGroupDto = {
       name: formValues.groupName,
       participantUserIds: formValues.selectedUsers.map(
-        (s: LookupItem) => s.value as string
+        (s: LookupItem) => (s.value as UserDto).id
       ),
       isPrivate: isChatTypePrivate,
     };
@@ -445,27 +462,50 @@ export class ChatComponent implements OnInit {
 
     this.chatService
       .createChatGroup(chatObj)
-      .pipe(takeUntilDestroyed(this._destroyRef));
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: (chatGroupId) => {
+          const chatGroupIndex = this._sidebarChatGroups().findIndex(
+            (scg) => scg.id === chatGroupId
+          );
+          // Chat group already exists
+          if (chatGroupIndex !== -1) {
+            this._selectedChat.set({
+              ...this._sidebarChatGroups()[chatGroupIndex],
+              index: chatGroupIndex,
+            });
+            this.createChatModalVisible = false;
+            this.chatForm.reset();
+            return;
+          }
+          const newChatGroup: SidebarChatGroup = {
+            name: isChatTypePrivate
+              ? formValues.selectedUsers[0].key
+              : chatObj.name,
+            userIds: chatObj.participantUserIds,
+            isPrivate: isChatTypePrivate,
+            id: chatGroupId,
+            lastMessage: '',
+            profileImageUrl: '',
+          };
 
-    const newChatGroup: SidebarChatGroup = {
-      name: isChatTypePrivate ? formValues.selectedUsers[0].key : chatObj.name,
-      userIds: chatObj.participantUserIds,
-      isPrivate: isChatTypePrivate,
-      id: '4',
-      lastMessage: '',
-      profileImageUrl: '',
-      // selectedUsers: formValues.selectedUsers.map((s: LookupItem) => s.value),
-    };
+          this._sidebarChatGroups.set([
+            ...this._sidebarChatGroups(),
+            newChatGroup,
+          ]);
+          this._chatMessages.mutate((chatMessages) => {
+            chatMessages[newChatGroup.id] = [];
+          });
 
-    this._sidebarChatGroups.set([...this._sidebarChatGroups(), newChatGroup]);
-    this._chatMessages.mutate((chatMessages) => {
-      chatMessages[newChatGroup.id] = [];
-    });
-    // TODO: Notify users with socket
+          this._selectedChat.set({
+            ...newChatGroup,
+            index: this._sidebarChatGroups().length - 1,
+          });
 
-    // update sidebar chat groups
-    this.createChatModalVisible = false;
-    this.chatForm.reset();
+          this.createChatModalVisible = false;
+          this.chatForm.reset();
+        },
+      });
   }
 
   sendMessage(message: string, chatId: string, index: number) {
@@ -483,6 +523,9 @@ export class ChatComponent implements OnInit {
     });
 
     this._chatMessages.mutate((messages) => {
+      if (messages[chatId] === undefined) {
+        messages[chatId] = [];
+      }
       messages[chatId].push({
         id: '',
         senderId: '1',
@@ -602,7 +645,6 @@ export class ChatComponent implements OnInit {
           });
         },
         error: (err) => {
-          debugger;
           this.toastrService.error(
             err.error.detail || 'Something went wrong',
             'Error'
@@ -629,7 +671,6 @@ export class ChatComponent implements OnInit {
           });
         },
         error: (err) => {
-          debugger;
           this.toastrService.error(
             err.error.detail || 'Something went wrong',
             'Error'

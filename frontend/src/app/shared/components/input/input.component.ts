@@ -44,7 +44,7 @@ export class InputComponent {
 
   @Input('suggestions') set suggestionsSetter(arr: LookupItem[]) {
     this.suggestions = arr;
-    this.dropdownVisible = !!arr.length;
+    // this.dropdownVisible = !!arr.length;
   }
   @Input() control?: FormControl;
 

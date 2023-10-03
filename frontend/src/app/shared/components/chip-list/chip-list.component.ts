@@ -3,16 +3,15 @@ import {
   EventEmitter,
   Input,
   Output,
-  WritableSignal,
-  signal,
 } from '@angular/core';
-import { NgFor } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { LookupItem } from '../../api/lookup-item';
+import { UserDto } from 'src/app/core/dtos/user-dto';
 
 @Component({
   selector: 'app-chip-list',
   standalone: true,
-  imports: [NgFor],
+  imports: [NgFor, NgIf],
   templateUrl: './chip-list.component.html',
 })
 export class ChipListComponent {
@@ -25,7 +24,7 @@ export class ChipListComponent {
     this.onChipRemoveClick.emit(this.chipItems[index]);
   }
 
-  displayChip(chip: LookupItem): string | number {
+  displayChip(chip: LookupItem): string | number | UserDto {
     return chip[this.chipItemSelector as keyof LookupItem];
   }
 }

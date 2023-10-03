@@ -16,7 +16,7 @@
         <!-- User Profile Header -->
         <div
           id="user-profile-header"
-          class="w-full h-16 bg-wp-panel-background border-r-wp-panel-r-border border-r flex items-center justify-between px-4"
+          class="w-full min-h-[4rem] bg-wp-panel-background border-r-wp-panel-r-border border-r flex items-center justify-between px-4"
         >
           <span
             id="profile-picture"
@@ -311,7 +311,9 @@
               class="flex flex-col overflow-y-scroll w-full h-full max-h-[auto] py-4 pt-16 px-12 gap-y-4"
               #messagesWrapperRef
               [ngClass]="{
-                'justify-end': chatMessages[selectedChat.id].length <= 12
+                'justify-end': chatMessages[selectedChat.id]?.length
+                  ? chatMessages[selectedChat.id].length <= 12
+                  : true
               }"
             >
               <!-- Group Chat -->
@@ -509,13 +511,16 @@
   </div>
 
   <div class="modal" *ngIf="createChatModalVisible" #createChatModalRef>
-    <article class="modal-container">
+    <article class="modal-container min-w-[27rem]">
       <header class="modal-container-header">
         <h1 class="modal-container-title">
           <img src="../../../../assets/images/user-plus.svg" class="w-6 h6" />
           Create Chat
         </h1>
-        <button class="icon-button" (click)="createChatModalVisible = false">
+        <button
+          class="icon-button"
+          (click)="createChatModalVisible = false; chatForm.reset()"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -554,10 +559,19 @@
           (onSuggestionClick)="onSuggestionClick($event)"
           [disabled]="
             _selectedChatTypeForCreate() === 'private' &&
-            chatForm.controls['selectedUsers'].value.length === 1
+            chatForm.controls['selectedUsers'].status === 'VALID'
           "
+          [dropdownVisible]="
+            (_selectedChatTypeForCreate() === 'private' &&
+              chatForm.controls['selectedUsers'].status !== 'VALID') ||
+            _selectedChatTypeForCreate() === 'group'
+          "
+          class="disabled:pointer-events-none"
         ></app-input>
-        <div id="chip-container" class="w-full min-h-[2rem]">
+        <div
+          id="chip-container"
+          class="w-full min-h-[2rem] flex justify-center"
+        >
           <app-chip-list
             [chipItems]="chatForm.get('selectedUsers')!.value!"
             (onChipRemoveClick)="removeChip($event)"

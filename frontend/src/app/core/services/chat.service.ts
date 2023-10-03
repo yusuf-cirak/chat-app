@@ -18,6 +18,14 @@ export class ChatService {
     });
   }
 
+  searchUsers(searchText: string): Observable<UserDto[]> {
+    return this._httpClientService.get({
+      controller: 'users',
+      action: 'search',
+      queryString: `userName=${searchText}`,
+    });
+  }
+
   getChatGroups(): Observable<ChatGroupDto[]> {
     return this._httpClientService.get({ controller: 'chatGroups' });
   }
@@ -27,7 +35,10 @@ export class ChatService {
   }
 
   createChatGroup(chatObj: CreateChatGroupDto): Observable<string> {
-    return this._httpClientService.post({ controller: 'chatGroups' }, chatObj);
+    return this._httpClientService.post(
+      { controller: 'chatGroups', responseType: 'text' },
+      chatObj
+    );
   }
 
   sendMessage(messageObj: SendMessageDto): Observable<string> {

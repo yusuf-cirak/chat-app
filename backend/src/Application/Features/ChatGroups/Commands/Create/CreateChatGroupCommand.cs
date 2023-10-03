@@ -25,7 +25,7 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
         if (request.IsPrivate)
         {
             // Scenario 1: Users already have a chat group together
-            var chatGroupId = FindExistingChatGroupIdAsync(request.ParticipantUserIds, cancellationToken);
+            var chatGroupId = await FindExistingChatGroupIdAsync(request.ParticipantUserIds, cancellationToken);
 
             if (!string.IsNullOrEmpty(chatGroupId))
             {
@@ -40,14 +40,20 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
         return await CreateNamedChatGroupAsync(request.Name, request.ParticipantUserIds, cancellationToken);
     }
 
-    private string? FindExistingChatGroupIdAsync(List<string> participantUserIds,
+    private async Task<string?> FindExistingChatGroupIdAsync(List<string> participantUserIds,
         CancellationToken cancellationToken)
     {
         var userChatGroupProjection = Builders<ChatGroup>.Projection
             .Include(e => e.Id);
-        var chatGroupId = _mongoService.GetCollection<ChatGroup>()
-            .Find(cg => cg.UserIds.Count == 2 && cg.UserIds.All(participantUserIds.Contains))
-            .Project<string?>(userChatGroupProjection).First();
+        
+        var filter = Builders<ChatGroup>.Filter
+            .Eq(cg => cg.IsPrivate, true)
+            & Builders<ChatGroup>.Filter.Eq(cg => cg.UserIds, participantUserIds);
+
+        var chatGroupId = await _mongoService.GetCollection<ChatGroup>()
+            .Find(filter)
+            .Project<string?>(userChatGroupProjection)
+            .SingleOrDefaultAsync(cancellationToken);
 
         return chatGroupId;
     }

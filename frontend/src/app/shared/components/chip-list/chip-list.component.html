@@ -1,13 +1,15 @@
-<div id="chip-container" class="grid grid-cols-3 gap-3">
+<div
+  id="chip-container"
+  class="grid w-80 grid-cols-2 auto-cols-min grid-flow-row gap-3"
+  #chipContainerRef
+>
   <ng-container *ngFor="let chip of chipItems; let i = index">
     <div
-      class="center relative inline-block select-none whitespace-nowrap rounded-lg bg-gradient-to-tr bg-wp-green py-2 px-3.5 align-baseline font-sans text-xs font-bold leading-none text-white w-fit"
+      class="center relative inline-block select-none whitespace-nowrap rounded-lg bg-gradient-to-tr bg-wp-green py-2 px-3.5 align-baseline font-sans text-xs font-bold leading-none text-white min-w-[5rem] hover:cursor-pointer"
+      (click)="removeChipItemClicked(i)"
     >
-      <div class="mr-5 mt-px">{{ displayChip(chip) }}</div>
-      <div
-        class="absolute top-1 right-1 mx-px mt-[0.5px] w-max rounded-md"
-        (click)="removeChipItemClicked(i)"
-      >
+      <div class="mr-5 mt-px text-center">{{ displayChip(chip) }}</div>
+      <div class="absolute top-1 right-1 mx-px mt-[0.5px] w-max rounded-md">
         <div role="button" class="h-5 w-5 p-1">
           <svg
             xmlns="http://www.w3.org/2000/svg"

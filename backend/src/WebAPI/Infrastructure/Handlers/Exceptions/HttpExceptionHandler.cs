@@ -22,6 +22,7 @@ public sealed class HttpExceptionHandler : ExceptionHandler
         {
             ForbiddenAccessException forbiddenAccessException => new ForbiddenAccessExceptionDetails(forbiddenAccessException.Message),
             BusinessException businessException => new BusinessExceptionDetails(businessException.Message),
+            UnauthorizedAccessException unauthorizedAccessException => new UnauthorizedAccessExceptionDetails(unauthorizedAccessException.Message),
             _ => new UnhandledExceptionDetails(e.Message)
         };
 

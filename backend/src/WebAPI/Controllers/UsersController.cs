@@ -4,6 +4,7 @@ using Application.Features.Auths.Commands.Register;
 using Application.Features.Users.Commands.RemoveImage;
 using Application.Features.Users.Commands.UploadImage;
 using Application.Features.Users.Queries.GetAllChatUsers;
+using Application.Features.Users.Queries.GetByName;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers;
@@ -16,6 +17,13 @@ public sealed class UsersController : BaseController
     public async Task<IActionResult> GetChatUsers()
     {
         var response = await Mediator.Send(new GetAllChatUsersQueryRequest());
+        return Ok(response);
+    }
+    
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchUsersByName([FromQuery] GetUsersByNameQueryRequest getUsersByNameQueryRequest)
+    {
+        var response = await Mediator.Send(getUsersByNameQueryRequest);
         return Ok(response);
     }
     
