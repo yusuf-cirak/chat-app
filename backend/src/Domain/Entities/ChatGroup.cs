@@ -3,12 +3,12 @@
 public sealed class ChatGroup : BaseAuditableEntity
 {
     [BsonIgnoreIfDefault] public string Name { get; set; }
-
-
+    
     public List<string> UserIds { get; set; }
 
     public bool IsPrivate { get; set; }
 
+    [BsonIgnoreIfDefault] public string ImageUrl { get; set; } = string.Empty;
 
     public ChatGroup()
     {
@@ -26,5 +26,12 @@ public sealed class ChatGroup : BaseAuditableEntity
     {
         UserIds = userIds;
         IsPrivate = isPrivate;
+    }
+
+    public ChatGroup(List<string> userIds,bool isPrivate, string imageUrl)
+    {
+        UserIds = userIds;
+        IsPrivate = isPrivate;
+        ImageUrl = imageUrl;
     }
 }

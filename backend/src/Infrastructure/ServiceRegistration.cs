@@ -24,13 +24,10 @@ public static class ServiceRegistration
         services.AddSingleton<IHashingHelper, HashingHelper>();
 
         services.AddSingleton<IChatService,InMemoryChatService>();
-        services.AddSingleton<IChat, Chat>();
-
 
         services.AddSingleton<Cloudinary>(_ => new Cloudinary(account:configuration.GetSection("CloudinarySettings").Get<Account>()));
         
         services.AddScoped<IImageService, CloudinaryImageService>();
-        services.AddScoped<IImage, Image>();
         
         services.AddSignalR();
         

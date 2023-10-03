@@ -5,8 +5,10 @@ using Microsoft.AspNetCore.Http;
 
 namespace Infrastructure.Services.Image;
 
-public sealed class CloudinaryImageService : IImageService
+public sealed class CloudinaryImageService : ICloudinaryImageService
 {
+    private const string Folder = "profile_images";
+
     private readonly Cloudinary _cloudinary;
 
     public CloudinaryImageService(Cloudinary cloudinary)
@@ -14,14 +16,14 @@ public sealed class CloudinaryImageService : IImageService
         _cloudinary = cloudinary;
     }
 
-    public async Task<string> UploadImageAsync(string userId, IFormFile file)
+    public async Task<string> UploadImageAsync(string id, IFormFile file)
     {
         await using var stream = file.OpenReadStream();
         var uploadParams = new ImageUploadParams
         {
-            File = new FileDescription(userId, stream),
+            File = new FileDescription(id, stream),
             Transformation = new Transformation().Height(50).Width(50).Crop("fill").Gravity("face"),
-            Folder = "profile_images"
+            Folder = Folder
         };
 
         var uploadResult = await _cloudinary.UploadAsync(uploadParams);
@@ -29,9 +31,9 @@ public sealed class CloudinaryImageService : IImageService
         return uploadResult.PublicId.Split('/')[^1];
     }
 
-    public async Task<bool> DeleteImageAsync(string imagePublicId)
+    public async Task<bool> DeleteImageAsync(string id)
     {
-        var deleteParams = new DeletionParams($"profile_images/{imagePublicId}")
+        var deleteParams = new DeletionParams($"{Folder}/{id}")
         {
             ResourceType = ResourceType.Image,
             Type = "upload"

@@ -2,7 +2,7 @@ using Application.Abstractions.Services.Chat;
 
 namespace Infrastructure.Services.Chat;
 
-public sealed class InMemoryChatService : IChatService
+public sealed class InMemoryChatService : IInMemoryChatService
 {
     private readonly Dictionary<string, string> _users = new();
 

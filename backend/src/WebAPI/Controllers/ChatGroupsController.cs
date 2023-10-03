@@ -2,6 +2,7 @@
 using Application.Features.Auths.Commands.Refresh;
 using Application.Features.Auths.Commands.Register;
 using Application.Features.ChatGroups.Commands.Create;
+using Application.Features.ChatGroups.Commands.UploadImage;
 using Application.Features.ChatGroups.Queries.GetAll;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,6 +23,13 @@ public sealed class ChatGroupsController : BaseController
     public async Task<IActionResult> Create(CreateChatGroupCommandRequest createChatGroupCommandRequest)
     {
         var response = await Mediator.Send(createChatGroupCommandRequest);
+        return Ok(response);
+    }
+    
+    [HttpPost("image")]
+    public async Task<IActionResult> UploadImage([FromForm] UploadChatGroupImageCommandRequest uploadChatGroupImageCommandRequest)
+    {
+        var response = await Mediator.Send(uploadChatGroupImageCommandRequest);
         return Ok(response);
     }
 }

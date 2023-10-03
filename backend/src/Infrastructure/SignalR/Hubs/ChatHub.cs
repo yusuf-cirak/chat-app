@@ -10,22 +10,22 @@ namespace Infrastructure.SignalR.Hubs;
 
 public sealed class ChatHub : Hub<IChatHub>
 {
-    private readonly IChat _chat;
+    private readonly IChatService _chatService;
 
-    public ChatHub(IChat chat)
+    public ChatHub(IChatService chatService)
     {
-        _chat = chat;
+        _chatService = chatService;
     }
 
     public override async Task OnConnectedAsync()
     {
-        _chat.AddUser(Context.User.GetUserId(), Context.ConnectionId);
+        _chatService.AddUser(Context.User.GetUserId(), Context.ConnectionId);
         await base.OnConnectedAsync();
     }
 
     public override async Task OnDisconnectedAsync(Exception exception)
     {
-        _chat.RemoveUser(Context.User.GetUserId());
+        _chatService.RemoveUser(Context.User.GetUserId());
         await base.OnDisconnectedAsync(exception);
     }
 
@@ -33,7 +33,7 @@ public sealed class ChatHub : Hub<IChatHub>
     {
         string senderUserId = Context.User.GetUserId();
 
-        string recipientUserConnectionId = _chat.GetConnectionId(recipientUserId);
+        string recipientUserConnectionId = _chatService.GetConnectionId(recipientUserId);
 
         if (!string.IsNullOrEmpty(recipientUserConnectionId))
         {

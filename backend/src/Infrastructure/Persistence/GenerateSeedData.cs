@@ -2,7 +2,6 @@
 using Bogus;
 using Domain.Entities;
 using Infrastructure.Helpers.Hashing;
-using MongoDB.Bson;
 
 namespace Infrastructure.Persistence;
 
