@@ -5,6 +5,8 @@ public sealed class User : BaseEntity
     public string UserName { get; set; }
     public byte[] PasswordHash { get; set; }
     public byte[] PasswordSalt { get; set; }
+    
+    [BsonIgnoreIfDefault]
     public string ProfileImageUrl { get; set; } = string.Empty;
 
     public User()

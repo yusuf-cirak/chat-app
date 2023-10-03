@@ -16,7 +16,7 @@
         <!-- User Profile Header -->
         <div
           id="user-profile-header"
-          class="w-full h-[7%] bg-wp-panel-background border-r-wp-panel-r-border border-r flex items-center justify-between px-4"
+          class="w-full h-16 bg-wp-panel-background border-r-wp-panel-r-border border-r flex items-center justify-between px-4"
         >
           <span
             id="profile-picture"
@@ -261,7 +261,8 @@
                     />
                     <img
                       src="../../../../assets/images/camera.svg"
-                      class="w-4 h-4 self-center relative right-[1.7rem] profile-picture-upload"
+                      class="w-3 h-3 self-center relative right-[1.6rem] profile-picture-upload"
+                      *ngIf="!selectedChat.isPrivate"
                     />
                     <input
                       #imageInput
