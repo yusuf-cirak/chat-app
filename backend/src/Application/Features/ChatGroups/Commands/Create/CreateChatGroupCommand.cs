@@ -1,6 +1,7 @@
 ﻿using Application.Abstractions.Security;
 using Application.Features.ChatGroups.Rules;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace Application.Features.ChatGroups.Commands.Create;
 
@@ -43,19 +44,16 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
     private async Task<string?> FindExistingChatGroupIdAsync(List<string> participantUserIds,
         CancellationToken cancellationToken)
     {
-        var userChatGroupProjection = Builders<ChatGroup>.Projection
-            .Include(e => e.Id);
+        var userChatGroupProjection = Builders<ChatGroup>.Projection.Expression(cg => cg.Id);
         
-        var filter = Builders<ChatGroup>.Filter
-            .Eq(cg => cg.IsPrivate, true)
-            & Builders<ChatGroup>.Filter.Eq(cg => cg.UserIds, participantUserIds);
+        var filter = Builders<ChatGroup>.Filter.Where(chatGroup=> chatGroup.IsPrivate && chatGroup.UserIds.All(id=>participantUserIds.Contains(id)));
 
-        var chatGroupId = await _mongoService.GetCollection<ChatGroup>()
+        var existingChatGroupId = await _mongoService.GetCollection<ChatGroup>()
             .Find(filter)
-            .Project<string?>(userChatGroupProjection)
+            .Project(userChatGroupProjection)
             .SingleOrDefaultAsync(cancellationToken);
 
-        return chatGroupId;
+        return existingChatGroupId;
     }
 
     private async Task<string> CreatePrivateChatGroupAsync(List<string> participantUserIds,

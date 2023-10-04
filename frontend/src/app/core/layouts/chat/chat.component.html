@@ -16,7 +16,7 @@
         <!-- User Profile Header -->
         <div
           id="user-profile-header"
-          class="w-full min-h-[4rem] bg-wp-panel-background border-r-wp-panel-r-border border-r flex items-center justify-between px-4"
+          class="w-full min-h-[7%] bg-wp-panel-background border-r-wp-panel-r-border border-r flex items-center justify-between px-4"
         >
           <span
             id="profile-picture"
@@ -42,6 +42,7 @@
               type="file"
               hidden
               accept="image/*"
+              (click)="$any($event).target.files = null"
               (change)="uploadUserProfileImage($any($event).target.files[0])"
             />
           </span>
@@ -201,7 +202,7 @@
 
               <!-- Sidebar User Name and Last Message -->
               <div
-                class="user-chat flex flex-col justify-center gap-2 border-b border-b-wp-panel-b-border"
+                class="user-chat flex flex-col justify-center border-b border-b-wp-panel-b-border"
               >
                 <span class="user-name font-mono font-normal">{{
                   chatGroup.name
@@ -225,12 +226,12 @@
         <!-- Chat Header -->
         <div
           id="user-chat"
-          class="w-full h-[100%]"
+          class="w-full h-full"
           *ngIf="selectedChat.index > -1"
         >
           <div
             id="chat-user-profile-header"
-            class="w-full min-h-[3rem] bg-wp-panel-background flex flex-col justify-center items-center"
+            class="w-full min-h-[7%] bg-wp-panel-background flex flex-col justify-center items-center"
           >
             <div
               class="user-photo-header w-full h-[100%] bg-wp-panel-background grid"
@@ -240,7 +241,7 @@
                 class="w-full h-[100%] profile-detail-grid cursor-pointer"
               >
                 <div
-                  class="profile-detail-picture flex flex-col items-center justify-center w-full h-full"
+                  class="profile-detail-picture flex flex-col items-center justify-center w-full h-full gap-6"
                 >
                   <span
                     class="w-[40px] h-[40px] flex"
@@ -269,6 +270,7 @@
                       type="file"
                       hidden
                       accept="image/*"
+                      (click)="$any($event).target.files = null"
                       (change)="
                         uploadChatGroupImage($any($event).target.files[0])
                       "
@@ -276,13 +278,14 @@
                   </span>
                 </div>
 
-                <div class="profile-info flex flex-col justify-center">
-                  <span class="user-name font-mono font-normal">{{
-                    selectedChat.name
-                  }}</span>
+                <div class="profile-info flex flex-col justify-center pl-2">
+                  <span
+                    class="user-name font-mono font-normal whitespace-nowrap text-ellipsis overflow-hidden"
+                    >{{ selectedChat.name }}</span
+                  >
                 </div>
                 <div
-                  class="profile-detail-buttons flex flex-row justify-evenly items-center pr-2"
+                  class="profile-detail-buttons flex flex-row justify-evenly items-center pr-2 gap-2"
                 >
                   <span
                     id="search"
@@ -305,7 +308,7 @@
             </div>
           </div>
           <!-- Message Container -->
-          <div id="messages" class="w-full h-[86%] wp-bg-image">
+          <div id="messages" class="w-full h-[85%] wp-bg-image">
             <div
               id="messages-wrapper"
               class="flex flex-col overflow-y-scroll w-full h-full max-h-[auto] py-4 pt-16 px-12 gap-y-4"
@@ -463,11 +466,11 @@
           <!-- Chat Input Container -->
           <div
             id="user-chat-input-container"
-            class="w-full h-[7%] bg-wp-panel-background flex items-center justify-start"
+            class="w-full h-[8%] pt-1 bg-wp-panel-background flex items-center justify-start"
           >
             <div
               id="chat-emoji"
-              class="flex flex-row w-[10%] h-full justify-evenly items-center hover:cursor-pointer gap-2"
+              class="flex flex-row w-[10%] justify-evenly items-center hover:cursor-pointer gap-2"
             >
               <span id="emoji" class="w-[25px] h-[25px] flex">
                 <img

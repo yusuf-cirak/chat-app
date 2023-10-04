@@ -19,7 +19,7 @@ public sealed class CreateMessageCommandHandler : IRequestHandler<CreateMessageC
     {
         var userId = _httpContextAccessor.HttpContext?.User.Claims.First(e=>e.Type==ClaimTypes.NameIdentifier).Value;
 
-        var message = new Message(new ObjectId(userId).ToString(), request.ChatGroupId, request.Content, sentAt:DateTime.Now);
+        var message = new Message(new ObjectId(userId).ToString()!, request.ChatGroupId, request.Content, sentAt:DateTime.Now);
         
         await _mongoService.GetCollection<Message>().InsertOneAsync(message, cancellationToken: cancellationToken);
         

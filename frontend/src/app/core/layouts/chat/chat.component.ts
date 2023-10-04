@@ -345,9 +345,11 @@ export class ChatComponent implements OnInit {
             chatGroupImageUrl = otherUser.profileImageUrl;
           } else {
             if (lastMessageObj) {
-              lastMessage = `${
-                chatUsers[lastMessageObj?.senderId]?.userName
-              }: ${lastMessageObj?.body}`;
+              lastMessage = lastMessageObj.isMe
+                ? `You: ${lastMessageObj.body}`
+                : `${chatUsers[lastMessageObj?.senderId]?.userName}: ${
+                    lastMessageObj?.body
+                  }`;
             }
           }
           return {
@@ -509,6 +511,9 @@ export class ChatComponent implements OnInit {
   }
 
   sendMessage(message: string, chatId: string, index: number) {
+    if (!message.length) {
+      return;
+    }
     const messageObj: SendMessageDto = {
       content: message,
       chatGroupId: chatId,
@@ -516,28 +521,31 @@ export class ChatComponent implements OnInit {
 
     this.chatService
       .sendMessage(messageObj)
-      .pipe(takeUntilDestroyed(this._destroyRef));
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: (messageId) => {
+          this._sidebarChatGroups.mutate((groups) => {
+            groups[index].lastMessage = 'You: ' + message;
+          });
 
-    this._sidebarChatGroups.mutate((groups) => {
-      groups[index].lastMessage = 'You: ' + message;
-    });
+          this._chatMessages.mutate((messages) => {
+            if (messages[chatId] === undefined) {
+              messages[chatId] = [];
+            }
+            messages[chatId].push({
+              id: messageId,
+              senderId: this.currentUserId,
+              body: message,
+              date: new Date(),
+              isMe: true,
+            });
+          });
 
-    this._chatMessages.mutate((messages) => {
-      if (messages[chatId] === undefined) {
-        messages[chatId] = [];
-      }
-      messages[chatId].push({
-        id: '',
-        senderId: '1',
-        body: message,
-        date: new Date(),
-        isMe: true,
+          this.chatMessageInput.set('');
+
+          this.scrollToBottom();
+        },
       });
-    });
-
-    this.chatMessageInput.set('');
-
-    this.scrollToBottom();
   }
 
   private scrollToBottom() {

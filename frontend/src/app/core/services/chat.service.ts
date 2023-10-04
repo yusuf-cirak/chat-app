@@ -42,6 +42,9 @@ export class ChatService {
   }
 
   sendMessage(messageObj: SendMessageDto): Observable<string> {
-    return this._httpClientService.post({ controller: 'messages' }, messageObj);
+    return this._httpClientService.post(
+      { controller: 'messages', responseType: 'text' },
+      messageObj
+    );
   }
 }
