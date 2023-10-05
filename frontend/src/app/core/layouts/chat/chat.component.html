@@ -175,47 +175,52 @@
         <!-- Sidebar Chats Container -->
         <div
           id="chats"
-          class="w-full h-max bg-white grid border-r border-r-wp-panel-r-border overflow-auto"
+          class="w-full h-max bg-white grid border-r border-r-wp-panel-r-border overflow-auto pt-1"
         >
           <!-- Sidebar All Chats -->
-          <div
-            class="chat-container hover:bg-[#f0f2f5] prevent-select"
-            *ngFor="let chatGroup of filteredChatGroups; let i = index"
-            (click)="onChatClick(chatGroup, i)"
-            [ngClass]="{ 'bg-[#f0f2f5]': i === selectedChat.index }"
-          >
-            <div id="chat" class="w-full h-[74px] chat-grid cursor-pointer">
-              <div class="profile-picture flex items-center justify-center">
-                <span class="w-[49px] h-[49px] flex">
-                  <img
-                    [src]="
-                      !chatGroup.profileImageUrl
-                        ? '../../../../assets/images/noPic.svg'
-                        : 'https://res.cloudinary.com/dhcu4h56y/image/upload/f_auto,q_auto/v1/profile_images/' +
-                          chatGroup.profileImageUrl
-                    "
-                    alt="Profile Picture"
-                    class="rounded-3xl"
-                  />
-                </span>
-              </div>
+          <ng-container *ngIf="sidebarChatGroupsLength; else sidebarSkeleton">
+            <div
+              class="chat-container hover:bg-[#f0f2f5] prevent-select"
+              *ngFor="let chatGroup of filteredChatGroups; let i = index"
+              (click)="onChatClick(chatGroup, i)"
+              [ngClass]="{ 'bg-[#f0f2f5]': i === selectedChat.index }"
+            >
+              <div id="chat" class="w-full h-[74px] chat-grid cursor-pointer">
+                <div class="profile-picture flex items-center justify-center">
+                  <span class="w-[49px] h-[49px] flex">
+                    <img
+                      [src]="
+                        !chatGroup.profileImageUrl
+                          ? '../../../../assets/images/noPic.svg'
+                          : 'https://res.cloudinary.com/dhcu4h56y/image/upload/f_auto,q_auto/v1/profile_images/' +
+                            chatGroup.profileImageUrl
+                      "
+                      alt="Profile Picture"
+                      class="rounded-3xl"
+                    />
+                  </span>
+                </div>
 
-              <!-- Sidebar User Name and Last Message -->
-              <div
-                class="user-chat flex flex-col justify-center border-b border-b-wp-panel-b-border"
-              >
-                <span class="user-name font-mono font-normal">{{
-                  chatGroup.name
-                }}</span>
-                <span
-                  class="user-message w-full text-[#667781] font-mono text-ellipsis whitespace-nowrap overflow-hidden"
+                <!-- Sidebar User Name and Last Message -->
+                <div
+                  class="user-chat flex flex-col justify-center border-b border-b-wp-panel-b-border"
                 >
-                  {{ chatGroup.lastMessage }}
-                </span>
+                  <span class="user-name font-mono font-normal">{{
+                    chatGroup.name
+                  }}</span>
+                  <span
+                    class="user-message w-full text-[#667781] font-mono text-ellipsis whitespace-nowrap overflow-hidden"
+                  >
+                    {{ chatGroup.lastMessage }}
+                  </span>
+                </div>
+                <!-- <div class="chat-info"></div> -->
               </div>
-              <!-- <div class="chat-info"></div> -->
             </div>
-          </div>
+          </ng-container>
+          <ng-template #sidebarSkeleton>
+            <app-list-skeleton [count]="12"></app-list-skeleton>
+          </ng-template>
         </div>
       </div>
       <!-- Chat Container -->

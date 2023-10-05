@@ -38,6 +38,7 @@ import { UserDto } from 'src/app/core/dtos/user-dto';
 import { ChatGroupDto } from '../../dtos/chat-group-dto';
 import { ToastrService } from 'ngx-toastr';
 import { ChatHub } from '../../hubs/chat-hub';
+import { ListSkeletonComponent } from 'src/app/shared/components/skelenots/list/list-skeleton.component';
 
 interface SidebarChatGroup {
   id: string;
@@ -109,6 +110,7 @@ type CreateChatForm = {
     ButtonComponent,
     ReactiveFormsModule,
     ChipListComponent,
+    ListSkeletonComponent,
   ],
   templateUrl: './chat.component.html',
 })
@@ -193,6 +195,9 @@ export class ChatComponent implements OnInit {
   private _sidebarChatGroups: WritableSignal<SidebarChatGroup[]> = signal([]);
   private _filteredChatGroups: WritableSignal<SidebarChatGroup[]> = signal([]);
 
+  get sidebarChatGroupsLength() {
+    return this._sidebarChatGroups().length;
+  }
   get filteredChatGroups() {
     return this._filteredChatGroups();
   }
