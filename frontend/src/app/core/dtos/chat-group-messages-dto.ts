@@ -7,5 +7,5 @@ export interface MessageDto {
   userId: string;
   chatGroupId: string;
   body: string;
-  sentAt: string;
+  sentAt: string | Date;
 }

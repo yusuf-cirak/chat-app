@@ -1,10 +1,8 @@
-﻿using Application.Abstractions.Services;
-using Application.Abstractions.Services.Chat;
-using Domain.Entities;
+﻿using Application.Abstractions.Services.Chat;
+using Application.Features.ChatGroups.Dtos;
+using Infrastructure.Dtos.Hub;
 using Infrastructure.Extensions;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using MongoDB.Bson;
 
 namespace Infrastructure.SignalR.Hubs;
 
@@ -29,15 +27,22 @@ public sealed class ChatHub : Hub<IChatHub>
         await base.OnDisconnectedAsync(exception);
     }
 
-    public async Task SendMessageAsync(string recipientUserId, string chatGroupId, string message)
+    public async Task SendMessageAsync(MessageDto messageDto,List<string> recipientUserIds)
     {
-        string senderUserId = Context.User.GetUserId();
+        List<string> recipientUserConnectionIds = _chatService.GetConnectionIds(recipientUserIds);
 
-        string recipientUserConnectionId = _chatService.GetConnectionId(recipientUserId);
+        var receiveMessageTasks = recipientUserConnectionIds.Select(recipientUserConnectionId =>
+            Clients.Client(recipientUserConnectionId).ReceiveMessageAsync(messageDto));
 
-        if (!string.IsNullOrEmpty(recipientUserConnectionId))
-        {
-            await Clients.Client(recipientUserConnectionId).ReceiveMessageAsync(senderUserId, message);
-        }
+        await Task.WhenAll(receiveMessageTasks);
     }
+    
+    public async Task CreateChatGroupAsync(GetChatGroupDto chatGroup)
+    {
+        var createChatGroupTasks = chatGroup.UserIds.Select(userId =>
+            Clients.Client(_chatService.GetConnectionId(userId)).ChatGroupCreatedAsync(chatGroup));
+        
+        await Task.WhenAll(createChatGroupTasks);
+    }
+    
 }

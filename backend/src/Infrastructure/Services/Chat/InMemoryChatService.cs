@@ -52,6 +52,14 @@ public sealed class InMemoryChatService : IInMemoryChatService
             return _users.Where(u => u.Key == userId).Select(u => u.Value).SingleOrDefault()!;
         }
     }
+    
+    public List<string> GetConnectionIds(List<string> userIds)
+    {
+        lock (_users)
+        {
+            return _users.Where(u => userIds.Contains(u.Key)).Select(u => u.Value).ToList();
+        }
+    }
 
     public List<string> GetOnlineUsers()
     {

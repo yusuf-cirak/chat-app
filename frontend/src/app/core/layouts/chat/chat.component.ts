@@ -37,6 +37,7 @@ import { AuthService } from '../../services/auth.service';
 import { UserDto } from 'src/app/core/dtos/user-dto';
 import { ChatGroupDto } from '../../dtos/chat-group-dto';
 import { ToastrService } from 'ngx-toastr';
+import { ChatHub } from '../../hubs/chat-hub';
 
 interface SidebarChatGroup {
   id: string;
@@ -121,6 +122,8 @@ export class ChatComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly imageService = inject(ImageService);
   private readonly toastrService = inject(ToastrService);
+
+  private readonly chatHub = inject(ChatHub);
 
   currentUser$ = this.authService.getUserAsObservable();
   get currentUserId() {
@@ -371,6 +374,85 @@ export class ChatComponent implements OnInit {
 
     // Register search input debounce
     this.registerSearchInputDebounce();
+
+    // Connect to hub
+
+    this.chatHub.connectToChatHub();
+    this.chatHub.registerChatHubHandlers();
+
+    this.chatHub.chatMessageReceived$
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: (message) => {
+          if (!message) {
+            return;
+          }
+          const chatGroupId = message.chatGroupId;
+          const chatGroupIndex = this._sidebarChatGroups().findIndex(
+            (scg) => scg.id === chatGroupId
+          );
+          if (chatGroupIndex === -1) {
+            return;
+          }
+          this._sidebarChatGroups.mutate((groups) => {
+            groups[chatGroupIndex].lastMessage = message.body;
+          });
+          this._chatMessages.mutate((messages) => {
+            if (messages[chatGroupId] === undefined) {
+              messages[chatGroupId] = [];
+            }
+            messages[chatGroupId].push({
+              id: message.id,
+              senderId: message.userId,
+              body: message.body,
+              date: new Date(message.sentAt),
+              isMe: false,
+            });
+          });
+          this.scrollToBottom();
+        },
+      });
+
+    this.chatHub.chatGroupCreated$
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: (chatGroup) => {
+          if (!chatGroup) {
+            return;
+          }
+          const newChatGroup: SidebarChatGroup = {
+            name: chatGroup.name,
+            userIds: chatGroup.userIds,
+            isPrivate: chatGroup.isPrivate,
+            id: chatGroup.id,
+            lastMessage: '',
+            profileImageUrl: '',
+          };
+
+          this._sidebarChatGroups.set([
+            ...this._sidebarChatGroups(),
+            newChatGroup,
+          ]);
+
+          if (
+            this._sidebarChatGroups().length ===
+            this._filteredChatGroups().length
+          ) {
+            this._filteredChatGroups.set([
+              ...this._filteredChatGroups(),
+              newChatGroup,
+            ]);
+          }
+          this._chatMessages.mutate((chatMessages) => {
+            chatMessages[newChatGroup.id] = [];
+          });
+
+          this._selectedChat.set({
+            ...newChatGroup,
+            index: this._sidebarChatGroups().length - 1,
+          });
+        },
+      });
   }
 
   onChatClick(group: SidebarChatGroup, index: number) {
@@ -394,7 +476,7 @@ export class ChatComponent implements OnInit {
       userSearchInput.valueChanges
         .pipe(
           takeUntilDestroyed(this._destroyRef),
-          debounceTime(100),
+          debounceTime(200),
           distinctUntilChanged(),
           filter((searchText) => {
             if (searchText.length === 0) {
@@ -495,6 +577,16 @@ export class ChatComponent implements OnInit {
             ...this._sidebarChatGroups(),
             newChatGroup,
           ]);
+
+          if (
+            this._sidebarChatGroups().length ===
+            this._filteredChatGroups().length
+          ) {
+            this._filteredChatGroups.set([
+              ...this._filteredChatGroups(),
+              newChatGroup,
+            ]);
+          }
           this._chatMessages.mutate((chatMessages) => {
             chatMessages[newChatGroup.id] = [];
           });
@@ -524,8 +616,24 @@ export class ChatComponent implements OnInit {
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe({
         next: (messageId) => {
+          const messageDto: MessageDto = {
+            id: messageId,
+            userId: this.currentUserId,
+            chatGroupId: chatId,
+            body: message,
+            sentAt: new Date(),
+          };
+          const recipientUserIds = this._sidebarChatGroups()[
+            index
+          ].userIds.filter((id) => id !== this.currentUserId);
+
+          // Send message to hub, server will handle the rest
+          this.chatHub.sendMessage(messageDto, recipientUserIds);
+
           this._sidebarChatGroups.mutate((groups) => {
-            groups[index].lastMessage = 'You: ' + message;
+            groups[index].lastMessage = groups[index].isPrivate
+              ? message
+              : `You: ${message}`;
           });
 
           this._chatMessages.mutate((messages) => {
@@ -685,5 +793,9 @@ export class ChatComponent implements OnInit {
           );
         },
       });
+  }
+
+  onDestroy() {
+    this.chatHub.disconnectFromHub();
   }
 }

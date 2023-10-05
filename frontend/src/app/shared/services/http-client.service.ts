@@ -12,7 +12,7 @@ export class HttpClientService {
     let url: string = '';
     if (requestParameter.fullEndPoint) url = requestParameter.fullEndPoint; //
     else {
-      url = `${requestParameter.baseUrl ?? environment.baseUrl}/${
+      url = `${requestParameter.baseUrl ?? environment.apiUrl}/${
         requestParameter.controller
       }`;
       /*
