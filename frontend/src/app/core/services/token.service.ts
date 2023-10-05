@@ -56,6 +56,16 @@ export class TokenService {
       }
     }
 
+    if (!decodedToken['ProfileImageUrl']) {
+      const profileImageUrl = localStorage.getItem('userProfileImageUrl');
+      decodedToken['ProfileImageUrl'] = profileImageUrl;
+    } else {
+      localStorage.setItem(
+        'userProfileImageUrl',
+        decodedToken['ProfileImageUrl']
+      );
+    }
+
     this._decodedToken.set(decodedToken);
   }
 

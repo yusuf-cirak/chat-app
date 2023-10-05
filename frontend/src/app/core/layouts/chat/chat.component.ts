@@ -18,7 +18,6 @@ import {
   distinctUntilChanged,
   filter,
   forkJoin,
-  of,
   switchMap,
 } from 'rxjs';
 import { InputComponent } from 'src/app/shared/components/input/input.component';
@@ -724,6 +723,7 @@ export class ChatComponent implements OnInit {
             ...this.authService.getUserValue(),
             profileImageUrl: result,
           });
+          localStorage.setItem('userProfileImageUrl', result);
         },
         error: (err) => {
           this.toastrService.error(
