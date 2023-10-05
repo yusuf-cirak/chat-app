@@ -3,4 +3,5 @@ export interface ChatGroupDto {
   name: string;
   isPrivate: boolean;
   userIds: string[];
+  profileImageUrl: string;
 }

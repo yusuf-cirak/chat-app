@@ -10,6 +10,7 @@ public sealed class GetChatGroupDto
 
     public List<string> UserIds { get; set; }
     public bool IsPrivate { get; set; }
+    public string ProfileImageUrl { get; set; }
     
     public GetChatGroupDto()
     {
@@ -21,5 +22,14 @@ public sealed class GetChatGroupDto
         Name = name;
         IsPrivate = isPrivate;
         UserIds = userIds;
+    }
+    
+    public GetChatGroupDto(string id, string name, bool isPrivate,List<string> userIds,string profileImageUrl)
+    {
+        Id = id;
+        Name = name;
+        IsPrivate = isPrivate;
+        UserIds = userIds;
+        ProfileImageUrl = profileImageUrl;
     }
 }

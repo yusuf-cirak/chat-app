@@ -39,6 +39,7 @@ import { ChatGroupDto } from '../../dtos/chat-group-dto';
 import { ToastrService } from 'ngx-toastr';
 import { ChatHub } from '../../hubs/chat-hub';
 import { ListSkeletonComponent } from 'src/app/shared/components/skelenots/list/list-skeleton.component';
+import { AudioService } from '../../services/audio.service';
 
 interface SidebarChatGroup {
   id: string;
@@ -125,6 +126,7 @@ export class ChatComponent implements OnInit {
   private readonly imageService = inject(ImageService);
   private readonly toastrService = inject(ToastrService);
 
+  private readonly audioService = inject(AudioService);
   private readonly chatHub = inject(ChatHub);
 
   currentUser$ = this.authService.getUserAsObservable();
@@ -263,6 +265,7 @@ export class ChatComponent implements OnInit {
 
   ngOnInit() {
     this.yesterday.setDate(this.today.getDate() - 1);
+    this.audioService.setAudio();
 
     forkJoin([
       this.chatService.getChatUsers(),
@@ -342,7 +345,7 @@ export class ChatComponent implements OnInit {
           const lastMessageObj = chatMessages[group.id]?.slice(-1)[0];
           let lastMessage = '';
           let groupName = group.name;
-          let chatGroupImageUrl = '';
+          let chatGroupImageUrl = group.profileImageUrl;
           if (isChatGroupPrivate) {
             lastMessage = lastMessageObj?.body;
             const otherUserId = group.userIds.find(
@@ -415,6 +418,7 @@ export class ChatComponent implements OnInit {
             });
           });
           this.scrollToBottom();
+          this.audioService.playNewMessageAudio();
         },
       });
 
@@ -434,28 +438,7 @@ export class ChatComponent implements OnInit {
             profileImageUrl: '',
           };
 
-          this._sidebarChatGroups.set([
-            ...this._sidebarChatGroups(),
-            newChatGroup,
-          ]);
-
-          if (
-            this._sidebarChatGroups().length ===
-            this._filteredChatGroups().length
-          ) {
-            this._filteredChatGroups.set([
-              ...this._filteredChatGroups(),
-              newChatGroup,
-            ]);
-          }
-          this._chatMessages.mutate((chatMessages) => {
-            chatMessages[newChatGroup.id] = [];
-          });
-
-          this._selectedChat.set({
-            ...newChatGroup,
-            index: this._sidebarChatGroups().length - 1,
-          });
+          this.insertNewGroupToChatStates(newChatGroup);
         },
       });
   }
@@ -501,12 +484,6 @@ export class ChatComponent implements OnInit {
               value: user,
             }));
             this._suggestions.set(suggestions);
-            // usersResult.forEach((user) => {
-            //   this.chatUsers[user.id] = {
-            //     userName: user.userName,
-            //     profileImageUrl: user.profileImageUrl,
-            //   };
-            // });
           }
         });
     }
@@ -578,28 +555,11 @@ export class ChatComponent implements OnInit {
             profileImageUrl: '',
           };
 
-          this._sidebarChatGroups.set([
-            ...this._sidebarChatGroups(),
-            newChatGroup,
-          ]);
+          const { lastMessage, ...createChatGroupDto } = newChatGroup;
 
-          if (
-            this._sidebarChatGroups().length ===
-            this._filteredChatGroups().length
-          ) {
-            this._filteredChatGroups.set([
-              ...this._filteredChatGroups(),
-              newChatGroup,
-            ]);
-          }
-          this._chatMessages.mutate((chatMessages) => {
-            chatMessages[newChatGroup.id] = [];
-          });
+          this.chatHub.invokeChatGroupCreated(createChatGroupDto);
 
-          this._selectedChat.set({
-            ...newChatGroup,
-            index: this._sidebarChatGroups().length - 1,
-          });
+          this.insertNewGroupToChatStates(newChatGroup);
 
           this.createChatModalVisible = false;
           this.chatForm.reset();
@@ -633,7 +593,7 @@ export class ChatComponent implements OnInit {
           ].userIds.filter((id) => id !== this.currentUserId);
 
           // Send message to hub, server will handle the rest
-          this.chatHub.sendMessage(messageDto, recipientUserIds);
+          this.chatHub.invokeMessageSend(messageDto, recipientUserIds);
 
           this._sidebarChatGroups.mutate((groups) => {
             groups[index].lastMessage = groups[index].isPrivate
@@ -798,6 +758,27 @@ export class ChatComponent implements OnInit {
           );
         },
       });
+  }
+
+  private insertNewGroupToChatStates(newChatGroup: SidebarChatGroup) {
+    this._sidebarChatGroups.set([...this._sidebarChatGroups(), newChatGroup]);
+
+    if (
+      this._sidebarChatGroups().length === this._filteredChatGroups().length
+    ) {
+      this._filteredChatGroups.set([
+        ...this._filteredChatGroups(),
+        newChatGroup,
+      ]);
+    }
+    this._chatMessages.mutate((chatMessages) => {
+      chatMessages[newChatGroup.id] = [];
+    });
+
+    this._selectedChat.set({
+      ...newChatGroup,
+      index: this._sidebarChatGroups().length - 1,
+    });
   }
 
   onDestroy() {

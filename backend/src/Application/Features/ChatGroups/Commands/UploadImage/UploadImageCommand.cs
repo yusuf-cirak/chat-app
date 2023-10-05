@@ -40,7 +40,7 @@ public sealed class UploadChatGroupImageCommandHandler : IRequestHandler<UploadC
 
        var imagePublicId = await _imageService.UploadImageAsync(request.ChatGroupId, request.File);
 
-       var chatGroupUpdateResult =await  _mongoService.GetCollection<ChatGroup>().UpdateOneAsync(cg => cg.Id == request.ChatGroupId,Builders<ChatGroup>.Update.Set(chatGroup => chatGroup.ImageUrl, imagePublicId), cancellationToken: cancellationToken);
+       var chatGroupUpdateResult =await  _mongoService.GetCollection<ChatGroup>().UpdateOneAsync(cg => cg.Id == request.ChatGroupId,Builders<ChatGroup>.Update.Set(chatGroup => chatGroup.ProfileImageUrl, imagePublicId), cancellationToken: cancellationToken);
 
        if (!chatGroupUpdateResult.IsModifiedCountAvailable)
        {

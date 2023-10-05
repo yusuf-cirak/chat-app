@@ -46,7 +46,7 @@ export class ChatHub {
     );
   }
 
-  sendMessage(message: MessageDto, recipientUserIds: string[]) {
+  invokeMessageSend(message: MessageDto, recipientUserIds: string[]) {
     this._hubConnection
       .invoke('SendMessageAsync', message, recipientUserIds)
       .then(() => {
@@ -57,7 +57,7 @@ export class ChatHub {
       });
   }
 
-  createChatGroup(chatGroup: ChatGroupDto) {
+  invokeChatGroupCreated(chatGroup: ChatGroupDto) {
     this._hubConnection
       .invoke('CreateChatGroupAsync', chatGroup)
       .then(() => {

@@ -26,7 +26,8 @@ public sealed class GetAllChatGroupsQueryHandler : IRequestHandler<GetAllChatGro
             .Include(e => e.Id)
             .Include(e => e.Name)
             .Include(c => c.IsPrivate)
-            .Include(c => c.UserIds);
+            .Include(c => c.UserIds)
+            .Include(c => c.ProfileImageUrl);
         
         var chatGroupsDto = await _mongoService.GetCollection<ChatGroup>().Find(e => e.UserIds.Contains(userId!)).Project<GetChatGroupDto>(chatGroupProjection).ToListAsync(cancellationToken: cancellationToken);
 

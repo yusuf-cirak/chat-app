@@ -8,7 +8,7 @@ public sealed class ChatGroup : BaseAuditableEntity
 
     public bool IsPrivate { get; set; }
 
-    [BsonIgnoreIfDefault] public string ImageUrl { get; set; } = string.Empty;
+    [BsonIgnoreIfDefault] public string ProfileImageUrl { get; set; } = string.Empty;
 
     public ChatGroup()
     {
@@ -28,10 +28,10 @@ public sealed class ChatGroup : BaseAuditableEntity
         IsPrivate = isPrivate;
     }
 
-    public ChatGroup(List<string> userIds,bool isPrivate, string imageUrl)
+    public ChatGroup(List<string> userIds,bool isPrivate, string profileImageUrl)
     {
         UserIds = userIds;
         IsPrivate = isPrivate;
-        ImageUrl = imageUrl;
+        ProfileImageUrl = profileImageUrl;
     }
 }
