@@ -7,9 +7,12 @@ import { Component, Input } from '@angular/core';
   imports: [NgFor],
   template: `<div
     role="status"
-    class="max-w-md space-y-1 border border-gray-200 divide-y divide-gray-200 rounded shadow animate-pulse dark:divide-gray-700 px-5 pt-1 dark:border-gray-700"
+    class="w-full space-y-1 border-gray-200 divide-y divide-gray-200 rounded shadow animate-pulse dark:divide-gray-700 px-5 pt-1 dark:border-gray-700"
   >
-    <div class="flex items-center justify-between" *ngFor="let _ of items">
+    <div
+      class="flex items-center justify-between hover:cursor-pointer"
+      *ngFor="let _ of items"
+    >
       <div class="flex items-center mt-4 space-x-3">
         <svg
           class="w-12 h-12 text-gray-200 dark:text-gray-700"

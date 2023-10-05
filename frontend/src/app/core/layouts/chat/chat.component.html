@@ -214,7 +214,18 @@
                     {{ chatGroup.lastMessage }}
                   </span>
                 </div>
-                <!-- <div class="chat-info"></div> -->
+                <div
+                  class="chat-info flex pt-[0.6rem]"
+                  *ngIf="chatGroup.unreadMessageCount"
+                >
+                  <div
+                    class="flex items-center justify-center text-center bg-wp-unread-message-badge w-5 h-5 rounded-3xl"
+                  >
+                    <span class="flex text-center text-white text-sm">{{
+                      chatGroup.unreadMessageCount
+                    }}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </ng-container>

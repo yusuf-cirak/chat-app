@@ -17,6 +17,7 @@ module.exports = {
         "wp-panel-active-bg": "#d9dbdf",
         "wp-badge-text": "#54656f",
         "wp-hover-gray-bg": "#3b4a54",
+        "wp-unread-message-badge": "#4ad26c",
       },
     },
   },

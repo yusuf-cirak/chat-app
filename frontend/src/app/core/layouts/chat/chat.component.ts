@@ -47,6 +47,7 @@ interface SidebarChatGroup {
   isPrivate: boolean;
   lastMessage: string;
   profileImageUrl: string;
+  unreadMessageCount: number;
 }
 
 interface SelectedChat {
@@ -369,6 +370,7 @@ export class ChatComponent implements OnInit {
             userIds: group.userIds,
             lastMessage: lastMessage,
             profileImageUrl: chatGroupImageUrl,
+            unreadMessageCount: 0,
           };
         });
 
@@ -416,7 +418,14 @@ export class ChatComponent implements OnInit {
               isMe: false,
             });
           });
-          this.scrollToBottom();
+
+          if (this.selectedChat.id !== chatGroupId) {
+            this._sidebarChatGroups.mutate((groups) => {
+              groups[chatGroupIndex].unreadMessageCount++;
+            });
+          } else {
+            this.scrollToBottom();
+          }
           this.audioService.playNewMessageAudio();
         },
       });
@@ -435,6 +444,7 @@ export class ChatComponent implements OnInit {
             id: chatGroup.id,
             lastMessage: '',
             profileImageUrl: '',
+            unreadMessageCount: 0,
           };
 
           this.insertNewGroupToChatStates(newChatGroup);
@@ -446,6 +456,12 @@ export class ChatComponent implements OnInit {
     this._selectedChat.set({
       index,
       ...group,
+    });
+    this._sidebarChatGroups.mutate((groups) => {
+      groups[index].unreadMessageCount = 0;
+    });
+    this._sidebarChatGroups.mutate((groups) => {
+      groups[index].unreadMessageCount = 0;
     });
     this.chatMessageInput.set('');
     this.focusChatInput();
@@ -552,6 +568,7 @@ export class ChatComponent implements OnInit {
             id: chatGroupId,
             lastMessage: '',
             profileImageUrl: '',
+            unreadMessageCount: 0,
           };
 
           const { lastMessage, ...createChatGroupDto } = newChatGroup;
@@ -781,7 +798,7 @@ export class ChatComponent implements OnInit {
     });
   }
 
-  onDestroy() {
-    this.chatHub.disconnectFromHub();
+  async onDestroy() {
+    await this.chatHub.disconnectFromHub();
   }
 }
