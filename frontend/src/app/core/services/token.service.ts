@@ -56,16 +56,6 @@ export class TokenService {
       }
     }
 
-    if (!decodedToken['ProfileImageUrl']) {
-      const profileImageUrl = localStorage.getItem('userProfileImageUrl');
-      decodedToken['ProfileImageUrl'] = profileImageUrl;
-    } else {
-      localStorage.setItem(
-        'userProfileImageUrl',
-        decodedToken['ProfileImageUrl']
-      );
-    }
-
     this._decodedToken.set(decodedToken);
   }
 
@@ -79,6 +69,7 @@ export class TokenService {
       id: decodedToken?.nameidentifier,
       userName: decodedToken?.unique_name,
       profileImageUrl: decodedToken?.ProfileImageUrl,
-    };
+      lastUpdateDate: new Date(Date.now()),
+    } as UserDto;
   }
 }

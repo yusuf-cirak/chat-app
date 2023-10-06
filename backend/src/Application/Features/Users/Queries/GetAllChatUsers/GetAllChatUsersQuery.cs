@@ -22,8 +22,11 @@ public sealed class GetAllChatUsersQueryRequestHandler : IRequestHandler<GetAllC
     {
         var userId = (_httpContextAccessor.HttpContext.User.Claims
             .First(e => e.Type == ClaimTypes.NameIdentifier).Value);
+
+        var chatGroupProjection = Builders<ChatGroup>.Projection
+            .Expression(cg => cg.UserIds);
         
-        var userIds = _mongoService.GetCollection<ChatGroup>().Find(e => e.UserIds.Contains(userId)).ToList().SelectMany(cg=>cg.UserIds).Distinct().ToList();
+        var userIds = _mongoService.GetCollection<ChatGroup>().Find(e => e.UserIds.Contains(userId)).Project(chatGroupProjection).ToList().SelectMany(cg=>cg).ToList();
 
         var userProjection = Builders<User>.Projection
             .Include(e => e.Id)

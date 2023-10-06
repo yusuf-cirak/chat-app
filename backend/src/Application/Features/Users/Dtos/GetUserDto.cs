@@ -19,4 +19,11 @@ public sealed class GetUserDto
         Id = id;
         UserName = userName;
     }
+    
+    public GetUserDto(string id, string userName,string profileImageUrl)
+    {
+        Id = id;
+        UserName = userName;
+        ProfileImageUrl = profileImageUrl;
+    }
 }

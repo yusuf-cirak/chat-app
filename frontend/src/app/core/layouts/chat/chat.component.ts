@@ -739,8 +739,8 @@ export class ChatComponent implements OnInit {
           this.authService.setUser({
             ...this.authService.getUserValue(),
             profileImageUrl: result,
+            lastUpdateDate: new Date(Date.now()),
           });
-          localStorage.setItem('userProfileImageUrl', result);
         },
         error: (err) => {
           this.toastrService.error(

@@ -28,7 +28,15 @@ export class AuthService {
   }
 
   setUser(user: UserDto) {
+    const userFromLocalStorage = JSON.parse(
+      localStorage.getItem('user')!
+    ) as UserDto;
+
+    if (userFromLocalStorage?.lastUpdateDate > user.lastUpdateDate) {
+      user = userFromLocalStorage;
+    }
     this.user$.next(user);
+    localStorage.setItem('user', JSON.stringify(user));
   }
 
   register(user: RegisterUserDto): Observable<RegisterResponseDto> {
