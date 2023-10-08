@@ -5,7 +5,6 @@ namespace Infrastructure.SignalR.Hubs;
 
 public interface IChatHub
 {
-    Task SendMessageAsync(MessageDto messageDto);
     Task ReceiveMessageAsync(MessageDto messageDto);
-    Task ChatGroupCreatedAsync(GetChatGroupDto chatGroup);
+    Task ChatGroupCreatedAsync(GetHubChatGroupDto chatGroup);
 }

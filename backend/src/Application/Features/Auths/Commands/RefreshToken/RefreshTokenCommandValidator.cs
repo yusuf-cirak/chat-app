@@ -6,7 +6,7 @@ public sealed class RefreshTokenCommandValidator : AbstractValidator<RefreshToke
 {
     public RefreshTokenCommandValidator()
     {
-        RuleFor(u => u.UserId).NotEmpty().WithMessage("UserId cannot be empty");
-        RuleFor(u => u.RefreshToken).NotEmpty().WithMessage("Refresh token cannot be empty");
+        RuleFor(u => u.UserId).NotEmpty().NotNull().WithMessage("UserId cannot be empty");
+        RuleFor(u => u.RefreshToken).NotEmpty().NotNull().WithMessage("Refresh token cannot be empty");
     }
 }

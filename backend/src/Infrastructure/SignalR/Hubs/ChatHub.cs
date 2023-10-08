@@ -27,22 +27,34 @@ public sealed class ChatHub : Hub<IChatHub>
         await base.OnDisconnectedAsync(exception);
     }
 
-    public async Task SendMessageAsync(MessageDto messageDto,List<string> recipientUserIds)
+    public async Task SendMessageAsync(MessageDto messageDto, List<string> recipientUserIds)
     {
         List<string> recipientUserConnectionIds = _chatService.GetConnectionIds(recipientUserIds);
+
+        if (recipientUserConnectionIds.Count == 0)
+        {
+            return;
+        }
 
         var receiveMessageTasks = recipientUserConnectionIds.Select(recipientUserConnectionId =>
             Clients.Client(recipientUserConnectionId).ReceiveMessageAsync(messageDto));
 
         await Task.WhenAll(receiveMessageTasks);
     }
-    
-    public async Task CreateChatGroupAsync(GetChatGroupDto chatGroup)
+
+    public async Task CreateChatGroupAsync(GetHubChatGroupDto getChatGroup)
     {
-        var createChatGroupTasks = chatGroup.UserIds.Select(userId =>
-            Clients.Client(_chatService.GetConnectionId(userId)).ChatGroupCreatedAsync(chatGroup));
-        
-        await Task.WhenAll(createChatGroupTasks);
+        var userConnectionIds = _chatService.GetConnectionIds(getChatGroup.Users.Select(user => user.Id)
+            .Where(userId => userId != Context.User.GetUserId()).ToList());
+
+        if (userConnectionIds.Count == 0)
+        {
+            return;
+        }
+
+        var tasks = userConnectionIds.Select(userConnectionId =>
+            Clients.Client(userConnectionId).ChatGroupCreatedAsync(getChatGroup));
+
+        await Task.WhenAll(tasks);
     }
-    
 }

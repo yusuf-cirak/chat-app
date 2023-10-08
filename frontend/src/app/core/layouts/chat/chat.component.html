@@ -161,7 +161,10 @@
               class="w-[100%] h-[100%] bg-wp-panel-background border-transparent focus:border-transparent focus:ring-0 justify-center"
               type="text"
               placeholder="Search"
-              (input)="filterChatGroups($any($event.target).value)"
+              (input)="
+                chatSearchInput.set($any($event.target).value);
+                filterChatGroups($any($event.target).value)
+              "
             />
           </div>
           <span id="filter" class="w-5 h-5 hover:cursor-pointer">
@@ -206,12 +209,12 @@
                   class="user-chat flex flex-col justify-center border-b border-b-wp-panel-b-border"
                 >
                   <span class="user-name font-mono font-normal">{{
-                    chatGroup.name
+                    chatGroup?.name
                   }}</span>
                   <span
                     class="user-message w-full text-[#667781] font-mono text-ellipsis whitespace-nowrap overflow-hidden"
                   >
-                    {{ chatGroup.lastMessage }}
+                    {{ chatGroup?.lastMessage }}
                   </span>
                 </div>
                 <div

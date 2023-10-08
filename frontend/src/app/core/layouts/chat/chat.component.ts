@@ -3,6 +3,7 @@ import { MessageDto } from './../../dtos/chat-group-messages-dto';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AsyncPipe, DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import {
+  ChangeDetectorRef,
   Component,
   DestroyRef,
   ElementRef,
@@ -13,20 +14,13 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import {
-  debounceTime,
-  distinctUntilChanged,
-  filter,
-  forkJoin,
-  switchMap,
-} from 'rxjs';
+import { debounceTime, filter, forkJoin, switchMap } from 'rxjs';
 import { InputComponent } from 'src/app/shared/components/input/input.component';
 import { ButtonComponent } from 'src/app/shared/components/button/button.component';
 import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { LookupItem } from 'src/app/shared/api/lookup-item';
 import { ChipListComponent } from 'src/app/shared/components/chip-list/chip-list.component';
 import { ChatService } from '../../services/chat.service';
-import { CreateChatGroupDto } from '../../dtos/create-chat-group-dto';
 import { SendMessageDto } from '../../dtos/send-message-dto';
 import { minLength } from 'src/app/shared/validators/min.length';
 import { length } from 'src/app/shared/validators/length';
@@ -39,6 +33,8 @@ import { ToastrService } from 'ngx-toastr';
 import { ChatHub } from '../../hubs/chat-hub';
 import { ListSkeletonComponent } from 'src/app/shared/components/skelenots/list/list-skeleton.component';
 import { AudioService } from '../../services/audio.service';
+import { CreateChatGroupDto } from '../../dtos/create-chat-group-dto';
+import { CreateHubChatGroupDto } from '../../dtos/create-hub-chat-group-dto';
 
 interface SidebarChatGroup {
   id: string;
@@ -113,12 +109,14 @@ type CreateChatForm = {
     ChipListComponent,
     ListSkeletonComponent,
   ],
+  providers: [ChatHub],
   templateUrl: './chat.component.html',
 })
 export class ChatComponent implements OnInit {
   // Inject dependencies
   private readonly _router = inject(Router);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _changeDetectorRef = inject(ChangeDetectorRef);
   private readonly _formBuilder = inject(NonNullableFormBuilder);
   private readonly chatService = inject(ChatService);
   private readonly tokenService = inject(TokenService);
@@ -194,11 +192,15 @@ export class ChatComponent implements OnInit {
   }
 
   // Get it with http request
-  private _sidebarChatGroups: WritableSignal<SidebarChatGroup[]> = signal([]);
-  private _filteredChatGroups: WritableSignal<SidebarChatGroup[]> = signal([]);
+  private _sidebarChatGroups: WritableSignal<SidebarChatGroup[]> = signal(
+    null!
+  );
+  private _filteredChatGroups: WritableSignal<SidebarChatGroup[]> = signal(
+    null!
+  );
 
   get sidebarChatGroupsLength() {
-    return this._sidebarChatGroups().length;
+    return this._sidebarChatGroups()?.length;
   }
   get filteredChatGroups() {
     return this._filteredChatGroups();
@@ -223,9 +225,7 @@ export class ChatComponent implements OnInit {
     return this._suggestions();
   }
 
-  private today = new Date();
-  // Set yesterday onInit
-  private yesterday = new Date();
+  chatSearchInput = signal('');
 
   // Input states
   chatMessageInput: WritableSignal<string> = signal('');
@@ -237,8 +237,6 @@ export class ChatComponent implements OnInit {
   @ViewChild('messagesWrapperRef') private messagesWrapperRef!: ElementRef;
 
   @ViewChild('showMenuRef') private showMenuRef!: ElementRef;
-
-  @ViewChild('createChatModalRef') private createChatModalRef!: ElementRef;
 
   // Event listeners
   @HostListener('document:keyup.enter', ['$event'])
@@ -264,7 +262,6 @@ export class ChatComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.yesterday.setDate(this.today.getDate() - 1);
     this.audioService.setAudio();
 
     forkJoin([
@@ -387,7 +384,6 @@ export class ChatComponent implements OnInit {
     // Connect to hub
 
     this.chatHub.connectToChatHub();
-    this.chatHub.registerChatHubHandlers();
 
     this.chatHub.chatMessageReceived$
       .pipe(takeUntilDestroyed(this._destroyRef))
@@ -427,6 +423,7 @@ export class ChatComponent implements OnInit {
             this.scrollToBottom();
           }
           this.audioService.playNewMessageAudio();
+          this._changeDetectorRef.detectChanges();
         },
       });
 
@@ -437,17 +434,22 @@ export class ChatComponent implements OnInit {
           if (!chatGroup) {
             return;
           }
+          console.log('New chat group created');
           const newChatGroup: SidebarChatGroup = {
-            name: chatGroup.name,
-            userIds: chatGroup.userIds,
+            name: !chatGroup.isPrivate
+              ? chatGroup.name
+              : chatGroup.users.find((u) => u.id !== this.currentUserId)
+                  ?.userName!,
+            userIds: chatGroup.users.map((u) => u.id),
             isPrivate: chatGroup.isPrivate,
             id: chatGroup.id,
-            lastMessage: '',
+            lastMessage: 'You are added to this group.',
             profileImageUrl: '',
-            unreadMessageCount: 0,
+            unreadMessageCount: 1,
           };
 
           this.insertNewGroupToChatStates(newChatGroup);
+          this._changeDetectorRef.detectChanges();
         },
       });
   }
@@ -480,7 +482,6 @@ export class ChatComponent implements OnInit {
         .pipe(
           takeUntilDestroyed(this._destroyRef),
           debounceTime(200),
-          distinctUntilChanged(),
           filter((searchText) => {
             if (searchText.length === 0) {
               this._suggestions.set([]);
@@ -499,6 +500,14 @@ export class ChatComponent implements OnInit {
               value: user,
             }));
             this._suggestions.set(suggestions);
+            this._chatUsers.mutate((chatUsers) => {
+              usersResult.forEach((user) => {
+                chatUsers[user.id] = {
+                  userName: user.userName,
+                  profileImageUrl: user.profileImageUrl,
+                };
+              });
+            });
           }
         });
     }
@@ -524,10 +533,28 @@ export class ChatComponent implements OnInit {
   }
 
   createChat() {
-    // TODO: Create chat group with API
     const formValues = this.chatForm.value as any as CreateChatForm;
 
     const isChatTypePrivate = this._selectedChatTypeForCreate() === 'private';
+
+    if (isChatTypePrivate) {
+      // search for existing private chat group
+      const privateChatGroup = this._sidebarChatGroups().find(
+        (scg) => scg.isPrivate && scg.name === formValues.selectedUsers[0].key
+      );
+
+      // If private chat group exists, set it as selected chat and return
+      if (privateChatGroup) {
+        this._selectedChat.set({
+          ...privateChatGroup,
+          index: this._sidebarChatGroups().indexOf(privateChatGroup),
+        });
+        this.createChatModalVisible = false;
+        this.chatForm.reset();
+        this.focusChatInput();
+        return;
+      }
+    }
 
     formValues.groupName = formValues?.groupName?.trim() || '';
 
@@ -549,7 +576,6 @@ export class ChatComponent implements OnInit {
           const chatGroupIndex = this._sidebarChatGroups().findIndex(
             (scg) => scg.id === chatGroupId
           );
-          // Chat group already exists
           if (chatGroupIndex !== -1) {
             this._selectedChat.set({
               ...this._sidebarChatGroups()[chatGroupIndex],
@@ -571,12 +597,30 @@ export class ChatComponent implements OnInit {
             unreadMessageCount: 0,
           };
 
-          const { lastMessage, ...createChatGroupDto } = newChatGroup;
+          const { lastMessage, unreadMessageCount, userIds, ...chatGroupDto } =
+            newChatGroup;
 
-          this.chatHub.invokeChatGroupCreated(createChatGroupDto);
+          const users = newChatGroup.userIds.map((userId) => {
+            const user = this.chatUsers[userId];
+            return {
+              id: userId,
+              userName: user.userName,
+              profileImageUrl: user.profileImageUrl,
+            };
+          });
+
+          const createHubChatGroupDto: CreateHubChatGroupDto = {
+            ...chatGroupDto,
+            users,
+          };
+          this.chatHub.invokeChatGroupCreated(createHubChatGroupDto);
 
           this.insertNewGroupToChatStates(newChatGroup);
 
+          this._selectedChat.set({
+            ...newChatGroup,
+            index: this._sidebarChatGroups().length - 1,
+          });
           this.createChatModalVisible = false;
           this.chatForm.reset();
         },
@@ -778,27 +822,24 @@ export class ChatComponent implements OnInit {
   }
 
   private insertNewGroupToChatStates(newChatGroup: SidebarChatGroup) {
-    this._sidebarChatGroups.set([...this._sidebarChatGroups(), newChatGroup]);
+    const previousChatGroupsLength = this._sidebarChatGroups().length;
+    this._sidebarChatGroups.mutate((groups) => {
+      groups.push(newChatGroup);
+    });
 
-    if (
-      this._sidebarChatGroups().length === this._filteredChatGroups().length
-    ) {
-      this._filteredChatGroups.set([
-        ...this._filteredChatGroups(),
-        newChatGroup,
-      ]);
+    // If user has filtered chat groups, we need to filter the new chat group as well
+    if (previousChatGroupsLength !== this._filteredChatGroups().length) {
+      this.filterChatGroups(this.chatSearchInput());
     }
+
     this._chatMessages.mutate((chatMessages) => {
       chatMessages[newChatGroup.id] = [];
     });
 
-    this._selectedChat.set({
-      ...newChatGroup,
-      index: this._sidebarChatGroups().length - 1,
-    });
+    this._changeDetectorRef.detectChanges();
   }
 
-  async onDestroy() {
-    await this.chatHub.disconnectFromHub();
+  ngOnDestroy() {
+    this.chatHub.disconnectFromHub();
   }
 }

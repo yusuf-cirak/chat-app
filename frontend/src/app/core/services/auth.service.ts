@@ -32,7 +32,7 @@ export class AuthService {
       localStorage.getItem('user')!
     ) as UserDto;
 
-    if (userFromLocalStorage?.lastUpdateDate > user.lastUpdateDate) {
+    if (userFromLocalStorage?.lastUpdateDate > user?.lastUpdateDate) {
       user = userFromLocalStorage;
     }
     this.user$.next(user);

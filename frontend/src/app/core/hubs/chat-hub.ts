@@ -4,10 +4,9 @@ import { BehaviorSubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { MessageDto } from '../dtos/chat-group-messages-dto';
 import { ChatGroupDto } from '../dtos/chat-group-dto';
+import { CreateHubChatGroupDto } from '../dtos/create-hub-chat-group-dto';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class ChatHub {
   private readonly _hubConnection = new signalR.HubConnectionBuilder()
     .withUrl(environment.chatHubUrl!, {
@@ -16,21 +15,30 @@ export class ChatHub {
     .build();
 
   chatMessageReceived$ = new BehaviorSubject<MessageDto>(null!);
-  chatGroupCreated$ = new BehaviorSubject<ChatGroupDto>(null!);
+  chatGroupCreated$ = new BehaviorSubject<CreateHubChatGroupDto>(null!);
 
   connectToChatHub() {
     this._hubConnection
       .start()
       .then(() => {
         console.log('Connected to chat hub');
+        this.registerChatHubHandlers();
+        console.log('Registered chat hub handlers');
       })
       .catch((err) => {
         console.error(err);
       });
   }
 
-  async disconnectFromHub() {
-    await this._hubConnection.stop();
+  disconnectFromHub() {
+    this._hubConnection
+      .stop()
+      .then(() => {
+        console.log('Disconnected from chat hub');
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   }
 
   registerChatHubHandlers() {
@@ -40,7 +48,7 @@ export class ChatHub {
 
     this._hubConnection.on(
       'ChatGroupCreatedAsync',
-      (chatGroup: ChatGroupDto) => {
+      (chatGroup: CreateHubChatGroupDto) => {
         this.chatGroupCreated$.next(chatGroup);
       }
     );
@@ -57,9 +65,9 @@ export class ChatHub {
       });
   }
 
-  invokeChatGroupCreated(chatGroup: ChatGroupDto) {
+  invokeChatGroupCreated(newChatGroup: CreateHubChatGroupDto) {
     this._hubConnection
-      .invoke('CreateChatGroupAsync', chatGroup)
+      .invoke('CreateChatGroupAsync', newChatGroup)
       .then(() => {
         console.log('Chat group created');
       })

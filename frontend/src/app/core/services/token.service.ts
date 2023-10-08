@@ -43,6 +43,7 @@ export class TokenService {
   removeTokens() {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
   }
 
   decodeAccessToken(token: any) {
