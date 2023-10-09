@@ -544,8 +544,6 @@ export class ChatComponent implements OnInit {
 
   createChat() {
     const formValues = this.chatForm.value as any as CreateChatForm;
-    debugger;
-
     const isChatTypePrivate = this._selectedChatTypeForCreate() === 'private';
 
     if (isChatTypePrivate) {
@@ -578,7 +576,6 @@ export class ChatComponent implements OnInit {
     };
 
     // Add current user to participantUserIds if chat type is private and user is not trying to create a chat with himself
-    debugger;
     if (
       isChatTypePrivate &&
       chatObj.participantUserIds[0] !== this.currentUserId
@@ -591,7 +588,6 @@ export class ChatComponent implements OnInit {
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe({
         next: (chatGroupId) => {
-          debugger;
           const chatGroupIndex = this._sidebarChatGroups().findIndex(
             (scg) => scg.id === chatGroupId
           );
@@ -606,7 +602,9 @@ export class ChatComponent implements OnInit {
           }
           const newChatGroup: SidebarChatGroup = {
             name: isChatTypePrivate
-              ? formValues.selectedUsers[0].key
+              ? formValues.selectedUsers.length === 1
+                ? formValues.selectedUsers[0].key + ' (You)'
+                : formValues.selectedUsers[0].key
               : chatObj.name,
             userIds: chatObj.participantUserIds,
             isPrivate: isChatTypePrivate,
