@@ -10,8 +10,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<GlobalExceptionHandlerMiddleware>();
 
-// Accept anything from header, accept any method. Only on localhost:4200 and http & https protocol 
-builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.WithOrigins("http://localhost:4200", "https://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+// Accept anything from header, accept any method. Only on localhost:4200 and http & https protocols.
+if (builder.Environment.IsDevelopment())
+{
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
+    policy.WithOrigins("https://localhost:80","http://localhost:80").AllowAnyMethod().AllowAnyHeader().AllowCredentials()));
+}
+else
+{
+    builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
+    policy.SetIsOriginAllowed(_ => true).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+}
 
 builder.Services.AddResponseCompressionServices(); // From WebAPI\Extensions\ResponseCompressionExtensions.cs
 
@@ -51,10 +60,9 @@ app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseHealthChecks("/_health", new HealthCheckOptions
-{
-    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-    
-}
+    {
+        ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+    }
 ); // RequireAuthorization, RequireCors, RequireHost possible for limiting calls for /_health endpoint.
 
 app.UseCors();

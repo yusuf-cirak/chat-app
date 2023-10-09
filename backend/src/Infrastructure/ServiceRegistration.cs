@@ -36,10 +36,11 @@ public static class ServiceRegistration
         services.AddScoped<IMongoService, MongoService>();
 
         // Generate seed data if less than 1000 message exist in database.
-        var mongoService = services.BuildServiceProvider().GetRequiredService<IMongoService>();
-        if (mongoService.GetCollection<Message>().CountDocuments(_ => true) < 500)
-        {
-            new SeedDataGenerator().GenerateAndPersist(mongoService);
-        }
+        // var mongoService = services.BuildServiceProvider().GetRequiredService<IMongoService>();
+        // if (mongoService.GetCollection<Message>().CountDocuments(_ => true) < 500)
+        // {
+        //     new SeedDataGenerator().GenerateAndPersist(mongoService);
+        // }
+        
     }
 }
