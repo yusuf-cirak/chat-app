@@ -17,4 +17,4 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            ls && rm -rf chat-app && git clone https://github.com/yusuf-cirak/chat-app.git && cd chat-app && git checkout main && bash start.sh
+            rm -rf chat-app && git clone https://github.com/yusuf-cirak/chat-app.git && cd chat-app && git checkout master && bash start.sh
