@@ -39,3 +39,4 @@ services:
 networks:
   chat-app:
     driver: bridge
+    name: chat-app
