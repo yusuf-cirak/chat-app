@@ -21,7 +21,7 @@ services:
       context: ./backend/src
       dockerfile: Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       - mongodb
     networks:
