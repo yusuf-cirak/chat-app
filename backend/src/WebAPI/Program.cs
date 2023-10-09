@@ -18,8 +18,11 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
 }
 else
 {
+    //builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
+    //policy.SetIsOriginAllowed(_ => true).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+
     builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
-    policy.SetIsOriginAllowed(_ => true).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+    policy.WithOrigins("https://localhost:80","http://localhost:80").AllowAnyMethod().AllowAnyHeader().AllowCredentials()));
 }
 
 builder.Services.AddResponseCompressionServices(); // From WebAPI\Extensions\ResponseCompressionExtensions.cs
