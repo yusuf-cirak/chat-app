@@ -1,13 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClientService } from 'src/app/shared/services/http-client.service';
 import { UploadProfileImageDto } from '../dtos/upload-profile-image-dto';
-import { Observable, map } from 'rxjs';
+import { Observable } from 'rxjs';
 import { UploadChatGroupImageDto } from '../dtos/upload-chat-group-image-dto';
+import { environment } from 'src/environments/environment';
 @Injectable({
   providedIn: 'root',
 })
 export class ImageService {
   private readonly _httpClientService = inject(HttpClientService);
+  readonly cloudinaryBaseUrl = `https://res.cloudinary.com/${environment?.cloudinary?.publicKey}/image/upload/f_auto,q_auto/v1/profile_images/`;
 
   uploadProfileImage(
     uploadProfileImageDto: UploadProfileImageDto

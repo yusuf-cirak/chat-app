@@ -27,8 +27,7 @@
               [src]="
                 !currentUser.profileImageUrl
                   ? '../../../../assets/images/noPic.svg'
-                  : 'https://res.cloudinary.com/dhcu4h56y/image/upload/f_auto,q_auto/v1/profile_images/' +
-                    currentUser.profileImageUrl
+                  : cloudinaryBaseUrl + currentUser.profileImageUrl
               "
               alt="Profile Picture"
               class="rounded-3xl"
@@ -197,8 +196,7 @@
                       [src]="
                         !chatGroup.profileImageUrl
                           ? '../../../../assets/images/noPic.svg'
-                          : 'https://res.cloudinary.com/dhcu4h56y/image/upload/f_auto,q_auto/v1/profile_images/' +
-                            chatGroup.profileImageUrl
+                          : cloudinaryBaseUrl + chatGroup.profileImageUrl
                       "
                       alt="Profile Picture"
                       class="rounded-3xl"
@@ -275,8 +273,7 @@
                       [src]="
                         !selectedChat.profileImageUrl
                           ? '../../../../assets/images/noPic.svg'
-                          : 'https://res.cloudinary.com/dhcu4h56y/image/upload/f_auto,q_auto/v1/profile_images/' +
-                            selectedChat.profileImageUrl
+                          : cloudinaryBaseUrl + selectedChat.profileImageUrl
                       "
                       alt="Profile Picture"
                       class="rounded-3xl"
@@ -397,7 +394,7 @@
                           [src]="
                             !chatUsers[chatMessage.senderId].profileImageUrl
                               ? '../../../../assets/images/noPic.svg'
-                              : 'https://res.cloudinary.com/dhcu4h56y/image/upload/f_auto,q_auto/v1/profile_images/' +
+                              : cloudinaryBaseUrl +
                                 chatUsers[chatMessage.senderId].profileImageUrl
                           "
                           alt="Profile Picture"

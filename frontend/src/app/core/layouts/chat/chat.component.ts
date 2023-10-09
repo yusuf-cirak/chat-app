@@ -127,6 +127,8 @@ export class ChatComponent implements OnInit {
   private readonly audioService = inject(AudioService);
   private readonly chatHub = inject(ChatHub);
 
+  readonly cloudinaryBaseUrl = this.imageService.cloudinaryBaseUrl;
+
   currentUser$ = this.authService.getUserAsObservable();
   get currentUserId() {
     return this.authService.getUserValue().id;
@@ -262,7 +264,6 @@ export class ChatComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log(this.authService.getUserValue());
     this.audioService.setAudio();
 
     forkJoin([
