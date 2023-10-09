@@ -459,6 +459,7 @@ export class ChatComponent implements OnInit {
           };
 
           this.insertNewGroupToChatStates(newChatGroup);
+          this.audioService.playNewMessageAudio();
           this._changeDetectorRef.detectChanges();
         },
       });
@@ -577,8 +578,9 @@ export class ChatComponent implements OnInit {
 
     // Add current user to participantUserIds if chat type is private and user is not trying to create a chat with himself
     if (
-      isChatTypePrivate &&
-      chatObj.participantUserIds[0] !== this.currentUserId
+      (isChatTypePrivate &&
+        chatObj.participantUserIds[0] !== this.currentUserId) ||
+      !isChatTypePrivate
     ) {
       chatObj.participantUserIds.push(this.currentUserId);
     }
@@ -602,7 +604,8 @@ export class ChatComponent implements OnInit {
           }
           const newChatGroup: SidebarChatGroup = {
             name: isChatTypePrivate
-              ? formValues.selectedUsers.length === 1
+              ? (formValues.selectedUsers[0].value as UserDto).id ===
+                this.currentUserId
                 ? formValues.selectedUsers[0].key + ' (You)'
                 : formValues.selectedUsers[0].key
               : chatObj.name,
