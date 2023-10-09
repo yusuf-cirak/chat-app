@@ -60,7 +60,10 @@ export class RegisterComponent {
           this.tokenService.setTokensAndDecodeAccessToken(tokens);
           const currentUser =
             this.tokenService.getUserCredentialsFromDecodedToken();
-          this.authService.setUser(currentUser!);
+          this.authService.setUser({
+            ...currentUser!,
+            lastUpdateDate: new Date(Date.now()),
+          });
           this.router.navigateByUrl('/chat');
         },
         error: (error) => {

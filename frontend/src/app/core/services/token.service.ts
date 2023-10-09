@@ -68,9 +68,8 @@ export class TokenService {
 
     return {
       id: decodedToken?.nameidentifier,
-      userName: decodedToken?.unique_name,
+      userName: decodedToken?.name,
       profileImageUrl: decodedToken?.ProfileImageUrl,
-      lastUpdateDate: new Date(Date.now()),
     } as UserDto;
   }
 }

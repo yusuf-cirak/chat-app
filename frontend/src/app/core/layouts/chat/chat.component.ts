@@ -262,6 +262,7 @@ export class ChatComponent implements OnInit {
   }
 
   ngOnInit() {
+    console.log(this.authService.getUserValue());
     this.audioService.setAudio();
 
     forkJoin([
@@ -800,11 +801,14 @@ export class ChatComponent implements OnInit {
       .uploadProfileImage({ file: picture, userId: this.currentUserId })
       .subscribe({
         next: (result) => {
-          this.authService.setUser({
+          const updatedUser = {
             ...this.authService.getUserValue(),
             profileImageUrl: result,
             lastUpdateDate: new Date(Date.now()),
-          });
+          };
+          this.authService.setUser(updatedUser);
+
+          localStorage.setItem('user', JSON.stringify(updatedUser));
         },
         error: (err) => {
           this.toastrService.error(
