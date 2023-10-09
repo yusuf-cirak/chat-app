@@ -1,0 +1,20 @@
+name: Publish Chat App
+on:
+  push:
+    branches:
+      - main
+jobs:
+  release:
+    concurrency:
+      group: ${{ github.ref }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Chat App
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            ls && rm -rf chat-app && git clone https://github.com/yusuf-cirak/chat-app.git && cd chat-app && git checkout main && bash start.sh
