@@ -6,7 +6,7 @@ using MongoDB.Driver.Linq;
 namespace Application.Features.ChatGroups.Commands.Create;
 
 public readonly record struct CreateChatGroupCommandRequest
-    (List<string> ParticipantUserIds, string Name,bool IsPrivate) : IRequest<string>, ISecuredRequest;
+    (List<string> ParticipantUserIds, string Name, bool IsPrivate) : IRequest<string>, ISecuredRequest;
 
 public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGroupCommandRequest, string>
 {
@@ -26,7 +26,7 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
         if (request.IsPrivate)
         {
             // Scenario 1: Users already have a chat group together
-            var chatGroupId = await FindExistingChatGroupIdAsync(request.ParticipantUserIds, cancellationToken);
+            var chatGroupId = await FindExistingPrivateChatGroupIdAsync(request.ParticipantUserIds, cancellationToken);
 
             if (!string.IsNullOrEmpty(chatGroupId))
             {
@@ -41,12 +41,13 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
         return await CreateNamedChatGroupAsync(request.Name, request.ParticipantUserIds, cancellationToken);
     }
 
-    private async Task<string?> FindExistingChatGroupIdAsync(List<string> participantUserIds,
+    private async Task<string?> FindExistingPrivateChatGroupIdAsync(List<string> participantUserIds,
         CancellationToken cancellationToken)
     {
         var userChatGroupProjection = Builders<ChatGroup>.Projection.Expression(cg => cg.Id);
-        
-        var filter = Builders<ChatGroup>.Filter.Where(chatGroup=> chatGroup.IsPrivate && chatGroup.UserIds.All(id=>participantUserIds.Contains(id)));
+
+        var filter = Builders<ChatGroup>.Filter.Where(cg => cg.IsPrivate) &
+                     Builders<ChatGroup>.Filter.All(u => u.UserIds, participantUserIds);
 
         var existingChatGroupId = await _mongoService.GetCollection<ChatGroup>()
             .Find(filter)
@@ -74,7 +75,7 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
 
         await _mongoService.GetCollection<ChatGroup>()
             .InsertOneAsync(newChatGroup, cancellationToken: cancellationToken);
-        
+
         return newChatGroup.Id;
     }
 }

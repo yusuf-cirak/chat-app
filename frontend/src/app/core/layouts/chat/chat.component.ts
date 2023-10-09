@@ -199,8 +199,8 @@ export class ChatComponent implements OnInit {
     null!
   );
 
-  get sidebarChatGroupsLength() {
-    return this._sidebarChatGroups()?.length;
+  get sidebarChatGroups() {
+    return this._sidebarChatGroups();
   }
   get filteredChatGroups() {
     return this._filteredChatGroups();
@@ -345,12 +345,22 @@ export class ChatComponent implements OnInit {
           let chatGroupImageUrl = group.profileImageUrl;
           if (isChatGroupPrivate) {
             lastMessage = lastMessageObj?.body;
-            const otherUserId = group.userIds.find(
-              (id) => id !== this.currentUserId
-            );
-            const otherUser = chatUsers[otherUserId!];
-            groupName = otherUser.userName;
-            chatGroupImageUrl = otherUser.profileImageUrl;
+
+            if (
+              group.userIds.length === 1 &&
+              group.userIds[0] === this.currentUserId
+            ) {
+              const currentUser = chatUsers[this.currentUserId];
+              groupName = currentUser.userName + ' (You)';
+              chatGroupImageUrl = currentUser.profileImageUrl;
+            } else {
+              const otherUserId = group.userIds.find(
+                (id) => id !== this.currentUserId
+              );
+              const otherUser = chatUsers[otherUserId!];
+              groupName = otherUser.userName;
+              chatGroupImageUrl = otherUser.profileImageUrl;
+            }
           } else {
             if (lastMessageObj) {
               lastMessage = lastMessageObj.isMe
@@ -534,6 +544,7 @@ export class ChatComponent implements OnInit {
 
   createChat() {
     const formValues = this.chatForm.value as any as CreateChatForm;
+    debugger;
 
     const isChatTypePrivate = this._selectedChatTypeForCreate() === 'private';
 
@@ -566,13 +577,21 @@ export class ChatComponent implements OnInit {
       isPrivate: isChatTypePrivate,
     };
 
-    chatObj.participantUserIds.push(this.currentUserId);
+    // Add current user to participantUserIds if chat type is private and user is not trying to create a chat with himself
+    debugger;
+    if (
+      isChatTypePrivate &&
+      chatObj.participantUserIds[0] !== this.currentUserId
+    ) {
+      chatObj.participantUserIds.push(this.currentUserId);
+    }
 
     this.chatService
       .createChatGroup(chatObj)
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe({
         next: (chatGroupId) => {
+          debugger;
           const chatGroupIndex = this._sidebarChatGroups().findIndex(
             (scg) => scg.id === chatGroupId
           );

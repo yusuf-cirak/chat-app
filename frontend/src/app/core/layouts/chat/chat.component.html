@@ -116,7 +116,7 @@
                   role="menuitem"
                   tabindex="-1"
                   id="menu-item-2"
-                  >New Chat</a
+                  >New Private Chat</a
                 >
               </div>
               <div
@@ -181,7 +181,9 @@
           class="w-full h-max bg-white grid border-r border-r-wp-panel-r-border overflow-auto pt-1"
         >
           <!-- Sidebar All Chats -->
-          <ng-container *ngIf="sidebarChatGroupsLength; else sidebarSkeleton">
+          <ng-container
+            *ngIf="sidebarChatGroups !== null; else sidebarSkeleton"
+          >
             <div
               class="chat-container hover:bg-[#f0f2f5] prevent-select"
               *ngFor="let chatGroup of filteredChatGroups; let i = index"
