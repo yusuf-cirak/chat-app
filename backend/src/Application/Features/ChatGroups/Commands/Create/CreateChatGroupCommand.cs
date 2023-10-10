@@ -46,8 +46,8 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
     {
         var userChatGroupProjection = Builders<ChatGroup>.Projection.Expression(cg => cg.Id);
 
-        var filter = Builders<ChatGroup>.Filter.Where(cg => cg.IsPrivate) &
-                     Builders<ChatGroup>.Filter.All(u => u.UserIds, participantUserIds);
+        var filter = Builders<ChatGroup>.Filter.Where(cg => cg.IsPrivate) & Builders<ChatGroup>.Filter.All(u => u.UserIds, participantUserIds) & Builders<ChatGroup>.Filter.Size(u => u.UserIds, participantUserIds.Count);
+
 
         var existingChatGroupId = await _mongoService.GetCollection<ChatGroup>()
             .Find(filter)

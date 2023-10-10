@@ -548,7 +548,10 @@ export class ChatComponent implements OnInit {
     if (isChatTypePrivate) {
       // search for existing private chat group
       const privateChatGroup = this._sidebarChatGroups().find(
-        (scg) => scg.isPrivate && scg.name === formValues.selectedUsers[0].key
+        (scg) =>
+          scg.isPrivate &&
+          (scg.name === formValues.selectedUsers[0].key ||
+            scg.name === formValues.selectedUsers[0].key + ' (You)')
       );
 
       // If private chat group exists, set it as selected chat and return
@@ -568,8 +571,8 @@ export class ChatComponent implements OnInit {
 
     const chatObj: CreateChatGroupDto = {
       name: formValues.groupName,
-      participantUserIds: new Set<string>(
-        formValues.selectedUsers.map((s: LookupItem) => (s.value as UserDto).id)
+      participantUserIds: formValues.selectedUsers.map(
+        (s: LookupItem) => (s.value as UserDto).id
       ),
       isPrivate: isChatTypePrivate,
     };
@@ -577,14 +580,19 @@ export class ChatComponent implements OnInit {
     // Add current user to participantUserIds if chat type is private and user is not trying to create a chat with himself
     if (
       (isChatTypePrivate &&
-        !chatObj.participantUserIds.has(this.currentUserId)) ||
+        chatObj.participantUserIds[0] !== this.currentUserId) ||
       !isChatTypePrivate
     ) {
-      chatObj.participantUserIds.add(this.currentUserId);
+      chatObj.participantUserIds.push(this.currentUserId);
     }
 
     this.chatService
-      .createChatGroup(chatObj)
+      .createChatGroup({
+        ...chatObj,
+        participantUserIds: Array.from(
+          new Set(chatObj.participantUserIds).values()
+        ),
+      })
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe({
         next: (chatGroupId) => {
@@ -607,11 +615,13 @@ export class ChatComponent implements OnInit {
                 ? formValues.selectedUsers[0].key + ' (You)'
                 : formValues.selectedUsers[0].key
               : chatObj.name,
-            userIds: Array.from(chatObj.participantUserIds),
+            userIds: chatObj.participantUserIds,
             isPrivate: isChatTypePrivate,
             id: chatGroupId,
             lastMessage: '',
-            profileImageUrl: '',
+            profileImageUrl: isChatTypePrivate
+              ? this.chatUsers[chatObj.participantUserIds[0]].profileImageUrl
+              : '',
             unreadMessageCount: 0,
           };
 
