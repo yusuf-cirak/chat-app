@@ -3,7 +3,6 @@ import { MessageDto } from './../../dtos/chat-group-messages-dto';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AsyncPipe, DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import {
-  ChangeDetectorRef,
   Component,
   DestroyRef,
   ElementRef,
@@ -116,7 +115,6 @@ export class ChatComponent implements OnInit {
   // Inject dependencies
   private readonly _router = inject(Router);
   private readonly _destroyRef = inject(DestroyRef);
-  private readonly _changeDetectorRef = inject(ChangeDetectorRef);
   private readonly _formBuilder = inject(NonNullableFormBuilder);
   private readonly chatService = inject(ChatService);
   private readonly tokenService = inject(TokenService);
@@ -435,7 +433,6 @@ export class ChatComponent implements OnInit {
             this.scrollToBottom();
           }
           this.audioService.playNewMessageAudio();
-          this._changeDetectorRef.detectChanges();
         },
       });
 
@@ -462,7 +459,6 @@ export class ChatComponent implements OnInit {
 
           this.insertNewGroupToChatStates(newChatGroup);
           this.audioService.playNewMessageAudio();
-          this._changeDetectorRef.detectChanges();
         },
       });
   }
@@ -572,8 +568,8 @@ export class ChatComponent implements OnInit {
 
     const chatObj: CreateChatGroupDto = {
       name: formValues.groupName,
-      participantUserIds: formValues.selectedUsers.map(
-        (s: LookupItem) => (s.value as UserDto).id
+      participantUserIds: new Set<string>(
+        formValues.selectedUsers.map((s: LookupItem) => (s.value as UserDto).id)
       ),
       isPrivate: isChatTypePrivate,
     };
@@ -581,10 +577,10 @@ export class ChatComponent implements OnInit {
     // Add current user to participantUserIds if chat type is private and user is not trying to create a chat with himself
     if (
       (isChatTypePrivate &&
-        chatObj.participantUserIds[0] !== this.currentUserId) ||
+        !chatObj.participantUserIds.has(this.currentUserId)) ||
       !isChatTypePrivate
     ) {
-      chatObj.participantUserIds.push(this.currentUserId);
+      chatObj.participantUserIds.add(this.currentUserId);
     }
 
     this.chatService
@@ -611,7 +607,7 @@ export class ChatComponent implements OnInit {
                 ? formValues.selectedUsers[0].key + ' (You)'
                 : formValues.selectedUsers[0].key
               : chatObj.name,
-            userIds: chatObj.participantUserIds,
+            userIds: Array.from(chatObj.participantUserIds),
             isPrivate: isChatTypePrivate,
             id: chatGroupId,
             lastMessage: '',
@@ -860,8 +856,6 @@ export class ChatComponent implements OnInit {
     this._chatMessages.mutate((chatMessages) => {
       chatMessages[newChatGroup.id] = [];
     });
-
-    this._changeDetectorRef.detectChanges();
   }
 
   ngOnDestroy() {

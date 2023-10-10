@@ -1,5 +1,5 @@
 export interface CreateChatGroupDto {
   name: string;
-  participantUserIds: string[];
+  participantUserIds: Set<string>;
   isPrivate: boolean;
 }
