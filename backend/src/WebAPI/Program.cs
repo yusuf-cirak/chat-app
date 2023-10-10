@@ -11,16 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<GlobalExceptionHandlerMiddleware>();
 
 // Accept anything from header, accept any method. Only on localhost:4200 and http & https protocols.
-if (builder.Environment.IsDevelopment())
-{
+
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
-    policy.WithOrigins("https://localhost:80","http://localhost:80").AllowAnyMethod().AllowAnyHeader().AllowCredentials()));
-}
-else
-{
-    builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
     policy.SetIsOriginAllowed(_ => true).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
-}
 
 builder.Services.AddResponseCompressionServices(); // From WebAPI\Extensions\ResponseCompressionExtensions.cs
 
