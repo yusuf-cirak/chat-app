@@ -21,7 +21,7 @@ jobs:
             git clone https://github.com/yusuf-cirak/chat-app.git chat-app
             cd chat-app/backend/src/WebAPI
             appsettings_prod_json=$(echo ${{ secrets.APPSETTINGS_PROD }} | base64 --decode)
-            echo appsettings_prod_json > appsettings.Production.json
+            echo "$appsettings_prod_json" > appsettings.Production.json
             cd ../../..
             export MONGO_USERNAME="${{ secrets.MONGO_USERNAME }}"
             export MONGO_PASSWORD="${{ secrets.MONGO_PASSWORD }}"
