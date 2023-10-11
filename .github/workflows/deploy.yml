@@ -17,7 +17,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            rm -rf chat-app && git clone https://github.com/yusuf-cirak/chat-app.git && cd chat-app/backend/src/WebAPI && echo "${{ secrets.APPSETTINGS_PROD }}" > appsettings.Production.json && cd ../../../.. &&
+            rm -rf chat-app && git clone https://github.com/yusuf-cirak/chat-app.git && cd chat-app/backend/src/WebAPI && echo "${{ secrets.APPSETTINGS_PROD }}" > appsettings.Production.json && cd ../../../..
             export MONGO_USERNAME="${{ secrets.MONGO_USERNAME }}"
             export MONGO_PASSWORD="${{ secrets.MONGO_PASSWORD }}"
             export MONGO_PORTS="${{ secrets.MONGO_PORTS }}"
