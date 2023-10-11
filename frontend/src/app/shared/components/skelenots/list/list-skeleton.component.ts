@@ -7,7 +7,7 @@ import { Component, Input } from '@angular/core';
   imports: [NgFor],
   template: `<div
     role="status"
-    class="w-full space-y-1 border-gray-200 divide-y divide-gray-200 rounded shadow animate-pulse dark:divide-gray-700 px-5 pt-1 dark:border-gray-700"
+    class="w-full space-y-1 border-gray-200 divide-y divide-gray-200 rounded shadow animate-pulse dark:divide-gray-300 px-5 pt-1 dark:border-gray-500"
   >
     <div
       class="flex items-center justify-between hover:cursor-pointer"
@@ -15,7 +15,7 @@ import { Component, Input } from '@angular/core';
     >
       <div class="flex items-center mt-4 space-x-3">
         <svg
-          class="w-12 h-12 text-gray-200 dark:text-gray-700"
+          class="w-12 h-12 text-gray-200 dark:text-gray-300"
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           fill="currentColor"
@@ -27,9 +27,9 @@ import { Component, Input } from '@angular/core';
         </svg>
         <div>
           <div
-            class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-32 mb-2"
+            class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-200 w-32 mb-2"
           ></div>
-          <div class="w-48 h-2 bg-gray-200 rounded-full dark:bg-gray-700"></div>
+          <div class="w-48 h-2 bg-gray-200 rounded-full dark:bg-gray-200"></div>
         </div>
       </div>
     </div>
