@@ -25,4 +25,5 @@ jobs:
             export MONGO_USERNAME="${{ secrets.MONGO_USERNAME }}"
             export MONGO_PASSWORD="${{ secrets.MONGO_PASSWORD }}"
             export MONGO_PORTS="${{ secrets.MONGO_PORTS }}"
+            export ASPNETCORE_ENVIRONMENT="Production"
             bash start.sh
