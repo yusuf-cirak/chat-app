@@ -6,6 +6,14 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+html {
+  height: --webkit-fill-available;
+}
+
+body {
+  height: --webkit-fill-available;
+}
+
 .chat-grid {
   display: grid;
   grid-template-columns: 15fr 75fr 10fr;
