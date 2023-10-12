@@ -266,6 +266,9 @@
           <div
             id="chat-user-profile-header"
             class="w-full min-h-[7%] bg-wp-panel-background flex flex-col justify-center items-center"
+            [ngClass]="{
+              'sticky': layoutService.isMobile(),
+            }"
           >
             <div
               class="user-photo-header w-full h-[100%] bg-wp-panel-background grid"
