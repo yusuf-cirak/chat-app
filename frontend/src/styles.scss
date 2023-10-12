@@ -15,6 +15,7 @@ body {
   width: -webkit-fill-available;
   height: -webkit-fill-available;
   overflow-y: hidden;
+  background-color: #d1d7db;
 }
 
 .chat-grid {
@@ -150,10 +151,8 @@ pre {
 /* Some basic CSS overrides */
 body {
   line-height: 1.5;
-  min-height: 100vh;
   font-family: "Outfit", sans-serif;
   color: #2d232e;
-  background-color: #c8c0bd;
   position: relative;
 }
 
