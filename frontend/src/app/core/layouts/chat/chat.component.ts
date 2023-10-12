@@ -731,6 +731,9 @@ export class ChatComponent implements OnInit {
 
   private focusChatInput() {
     setTimeout(() => {
+      if (!this.layoutService.isDesktop()) {
+        return;
+      }
       const chatInputRef =
         (this.chatMessageInputRef.nativeElement as HTMLDivElement) || null;
 
