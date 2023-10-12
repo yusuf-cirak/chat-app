@@ -7,9 +7,9 @@ import { catchError, map, of } from 'rxjs';
 export const authPageGuard: CanActivateFn = () => {
   const router = inject(Router);
 
-  const routeState = router.getCurrentNavigation()?.extras.state;
+  const routeData = router.routerState.snapshot.root.data;
 
-  if (routeState && routeState['skipGuard']) {
+  if (routeData && routeData['skipGuard']) {
     return true;
   }
 
