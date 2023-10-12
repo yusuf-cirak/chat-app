@@ -2,6 +2,7 @@
   <div class="flex flex-col items-center w-full h-full">
     <!-- Green background -->
     <section
+      *ngIf="layoutService.isDesktop()"
       id="landing-header"
       class="w-full h-[8%] sm:h-[30%] bg-wp-green items-center justify-center absolute"
     ></section>
@@ -21,8 +22,10 @@
         id="sidebar-container"
         class="w-[32%] h-full bg-white flex flex-col"
         [ngClass]="{
-        'w-screen': layoutService.isMobile() && selectedChat.index === -1,
-      }"
+          'w-screen': layoutService.isMobile() && selectedChat.index === -1,
+          sticky: layoutService.isMobile(),
+          'top-0': layoutService.isMobile()
+        }"
       >
         <!-- User Profile Header -->
         <div
@@ -267,7 +270,8 @@
             id="chat-user-profile-header"
             class="w-full min-h-[7%] bg-wp-panel-background flex flex-col justify-center items-center"
             [ngClass]="{
-              'sticky': layoutService.isMobile(),
+              sticky: layoutService.isMobile(),
+              'top-0': layoutService.isMobile()
             }"
           >
             <div

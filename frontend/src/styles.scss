@@ -7,10 +7,12 @@
 @import "tailwindcss/utilities";
 
 html {
+  width: -webkit-fill-available;
   height: -webkit-fill-available;
 }
 
 body {
+  width: -webkit-fill-available;
   height: -webkit-fill-available;
   overflow-y: hidden;
 }
