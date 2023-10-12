@@ -257,7 +257,7 @@ export class ChatComponent implements OnInit {
   onDocumentClick(event: MouseEvent) {
     if (
       this.showMenu &&
-      !this.showMenuRef.nativeElement.contains(event.target)
+      !this.showMenuRef?.nativeElement?.contains(event.target)
     ) {
       this.showMenu = false;
     }
