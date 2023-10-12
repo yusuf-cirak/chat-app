@@ -786,7 +786,7 @@ export class ChatComponent implements OnInit {
   logout() {
     this.tokenService.removeTokens();
     this.authService.setUser(null!);
-    this._router.navigate(['/login'], { state: { skipGuard: true } });
+    this._router.navigate(['/login']);
   }
 
   filterChatGroups(searchInput: string) {

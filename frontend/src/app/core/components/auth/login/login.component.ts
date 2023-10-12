@@ -73,7 +73,7 @@ export class LoginComponent {
             ...currentUser!,
             lastUpdateDate: new Date(Date.now()),
           });
-          this.router.navigateByUrl('/chat', { state: { skipGuard: true } });
+          this.router.navigateByUrl('/chat');
         },
         error: (error) => {
           this.toastrService.error(
