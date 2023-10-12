@@ -34,6 +34,7 @@ import { ListSkeletonComponent } from 'src/app/shared/components/skelenots/list/
 import { AudioService } from '../../services/audio.service';
 import { CreateChatGroupDto } from '../../dtos/create-chat-group-dto';
 import { CreateHubChatGroupDto } from '../../dtos/create-hub-chat-group-dto';
+import { LayoutService } from '../../services/layout.service';
 
 interface SidebarChatGroup {
   id: string;
@@ -125,6 +126,7 @@ export class ChatComponent implements OnInit {
   private readonly audioService = inject(AudioService);
   private readonly chatHub = inject(ChatHub);
 
+  readonly layoutService = inject(LayoutService);
   readonly cloudinaryBaseUrl = this.imageService.cloudinaryBaseUrl;
 
   currentUser$ = this.authService.getUserAsObservable();
@@ -627,9 +629,13 @@ export class ChatComponent implements OnInit {
 
           const { lastMessage, unreadMessageCount, userIds, ...chatGroupDto } =
             newChatGroup;
-
+          //
+          debugger;
           const users = newChatGroup.userIds.map((userId) => {
-            const user = this.chatUsers[userId];
+            const user =
+              userId !== this.currentUserId
+                ? this.chatUsers[userId]
+                : this.authService.getUserValue();
             return {
               id: userId,
               userName: user.userName,

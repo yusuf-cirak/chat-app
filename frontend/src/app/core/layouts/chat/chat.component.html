@@ -9,10 +9,21 @@
     <!-- Chat -->
     <section
       id="chat"
-      class="relative w-[85%] h-[90%] top-[5%] flex items-start justify-start bg-slate-600"
+      class="relative w-[85%] h-[90%] sm:top-[5%] flex items-start justify-start bg-slate-600"
+      [ngClass]="{
+        'w-screen': layoutService.isMobile(),
+        'h-screen': layoutService.isMobile()
+      }"
     >
       <!-- Sidebar Chat Container -->
-      <div id="sidebar-container" class="w-[32%] h-full bg-white flex flex-col">
+      <div
+        *ngIf="layoutService.isMobile() ? selectedChat.index === -1 : true"
+        id="sidebar-container"
+        class="w-[32%] h-full bg-white flex flex-col"
+        [ngClass]="{
+        'w-screen': layoutService.isMobile() && selectedChat.index === -1,
+      }"
+      >
         <!-- User Profile Header -->
         <div
           id="user-profile-header"
@@ -239,8 +250,12 @@
       </div>
       <!-- Chat Container -->
       <div
+        *ngIf="layoutService.isMobile() ? selectedChat.index > -1 : true"
         id="chatbox-container"
         class="w-[68%] h-[100%] flex flex-col bg-wp-panel-background"
+        [ngClass]="{
+          'w-full': layoutService.isMobile() && selectedChat.index > -1,
+        }"
       >
         <!-- Chat Header -->
         <div
@@ -262,38 +277,53 @@
                 <div
                   class="profile-detail-picture flex flex-col items-center justify-center w-full h-full gap-6"
                 >
-                  <span
-                    class="w-[40px] h-[40px] flex"
-                    [ngClass]="{
+                  <div
+                    class="flex flex-row w-min items-center justify-center gap-3"
+                  >
+                    <span
+                      id="back-button"
+                      *ngIf="layoutService.isMobile()"
+                      class="w-8 h-8"
+                      (click)="selectedChat.index = -1; chatSearchInput.set('')"
+                    >
+                      <img
+                        src="../../../../assets/images/back-button.png"
+                        alt="Back Button"
+                      />
+                    </span>
+                    <span
+                      class="w-[40px] h-[40px] flex"
+                      [ngClass]="{
                     'profile-picture-group': !selectedChat.isPrivate,
                   }"
-                    (click)="!selectedChat.isPrivate && imageInput.click()"
-                  >
-                    <img
-                      [src]="
-                        !selectedChat.profileImageUrl
-                          ? '../../../../assets/images/noPic.svg'
-                          : cloudinaryBaseUrl + selectedChat.profileImageUrl
-                      "
-                      alt="Profile Picture"
-                      class="rounded-3xl"
-                    />
-                    <img
-                      src="../../../../assets/images/camera.svg"
-                      class="w-3 h-3 self-center relative right-[1.6rem] profile-picture-upload"
-                      *ngIf="!selectedChat.isPrivate"
-                    />
-                    <input
-                      #imageInput
-                      type="file"
-                      hidden
-                      accept="image/*"
-                      (click)="$any($event).target.files = null"
-                      (change)="
-                        uploadChatGroupImage($any($event).target.files[0])
-                      "
-                    />
-                  </span>
+                      (click)="!selectedChat.isPrivate && imageInput.click()"
+                    >
+                      <img
+                        [src]="
+                          !selectedChat.profileImageUrl
+                            ? '../../../../assets/images/noPic.svg'
+                            : cloudinaryBaseUrl + selectedChat.profileImageUrl
+                        "
+                        alt="Profile Picture"
+                        class="rounded-3xl"
+                      />
+                      <img
+                        src="../../../../assets/images/camera.svg"
+                        class="w-3 h-3 self-center relative right-[1.6rem] profile-picture-upload"
+                        *ngIf="!selectedChat.isPrivate"
+                      />
+                      <input
+                        #imageInput
+                        type="file"
+                        hidden
+                        accept="image/*"
+                        (click)="$any($event).target.files = null"
+                        (change)="
+                          uploadChatGroupImage($any($event).target.files[0])
+                        "
+                      />
+                    </span>
+                  </div>
                 </div>
 
                 <div class="profile-info flex flex-col justify-center pl-2">
@@ -329,9 +359,10 @@
           <div id="messages" class="w-full h-[85%] wp-bg-image">
             <div
               id="messages-wrapper"
-              class="flex flex-col overflow-y-scroll w-full h-full max-h-[auto] py-4 pt-16 px-12 gap-y-4"
+              class="flex flex-col overflow-y-scroll w-full h-full max-h-[auto] py-4 px-12 pt-16 gap-y-4"
               #messagesWrapperRef
               [ngClass]="{
+                'px-3': layoutService.isMobile(),
                 'justify-end': chatMessages[selectedChat.id]?.length
                   ? chatMessages[selectedChat.id].length <= 12
                   : true
@@ -489,6 +520,9 @@
             <div
               id="chat-emoji"
               class="flex flex-row w-[10%] justify-evenly items-center hover:cursor-pointer gap-2"
+              [ngClass]="{
+                'w-[20%]': layoutService.isMobile(),
+              }"
             >
               <span id="emoji" class="w-[25px] h-[25px] flex">
                 <img
@@ -509,10 +543,17 @@
               autofocus
               (change)="chatMessageInput.set($any($event.target).value)"
               [value]="chatMessageInput()"
+              [ngClass]="{
+                'w-[70%]': layoutService.isMobile(),
+              }"
             />
             <div
               id="chat-send"
-              class="flex flex-row w-[6%] h-full justify-center items-center hover:cursor-pointer"
+              class="flex flex-row h-full justify-center items-center hover:cursor-pointer"
+              [ngClass]="{
+                'w-[10%]': layoutService.isMobile(),
+                'w-[6%]': layoutService.isDesktop()
+              }"
               (click)="
                 sendMessage(
                   chatMessageInput(),
