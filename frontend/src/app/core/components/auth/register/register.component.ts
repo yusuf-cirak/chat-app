@@ -64,7 +64,7 @@ export class RegisterComponent {
             ...currentUser!,
             lastUpdateDate: new Date(Date.now()),
           });
-          this.router.navigateByUrl('/chat');
+          this.router.navigateByUrl('/chat', { state: { skipGuard: true } });
         },
         error: (error) => {
           this.toastrService.error(

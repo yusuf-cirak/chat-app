@@ -4,7 +4,15 @@ import { TokenService } from '../services/token.service';
 import { AuthService } from '../services/auth.service';
 import { catchError, map, of } from 'rxjs';
 
-export const authGuard: CanActivateFn = (route, state) => {
+export const authGuard: CanActivateFn = () => {
+  const router = inject(Router);
+
+  const routeState = router.getCurrentNavigation()?.extras.state;
+
+  if (routeState && routeState['skipGuard']) {
+    return true;
+  }
+
   const authService = inject(AuthService);
 
   if (authService.getUserValue()) {
@@ -12,8 +20,6 @@ export const authGuard: CanActivateFn = (route, state) => {
   }
 
   const tokenService = inject(TokenService);
-
-  const router = inject(Router);
 
   const accessToken = tokenService.accesToken;
 
