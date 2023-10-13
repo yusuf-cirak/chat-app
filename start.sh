@@ -5,4 +5,4 @@ export DB_VOLUME_PATH="${DB_VOLUME_PATH:-/data/db}"
 
 export ASPNETCORE_ENVIRONMENT="${ASPNETCORE_ENVIRONMENT:-Development}"
 
-docker compose up --force-recreate --build -d && docker container restart nginx
+docker compose up --force-recreate --build -d && docker container restart nginx && docker ps
