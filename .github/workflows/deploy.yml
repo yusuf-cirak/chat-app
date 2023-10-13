@@ -26,5 +26,6 @@ jobs:
             export MONGO_USERNAME="${{ secrets.MONGO_USERNAME }}"
             export MONGO_PASSWORD="${{ secrets.MONGO_PASSWORD }}"
             export MONGO_PORTS="${{ secrets.MONGO_PORTS }}"
+            export DB_VOLUME_PATH = "${{ secrets.DB_VOLUME_PATH }}"
             export ASPNETCORE_ENVIRONMENT="Production"
             bash start.sh
