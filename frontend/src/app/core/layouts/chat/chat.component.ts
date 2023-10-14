@@ -1,7 +1,14 @@
 import { ImageService } from './../../services/image.service';
 import { MessageDto } from './../../dtos/chat-group-messages-dto';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AsyncPipe, DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import {
+  AsyncPipe,
+  DatePipe,
+  NgClass,
+  NgFor,
+  NgIf,
+  NgStyle,
+} from '@angular/common';
 import {
   Component,
   DestroyRef,
@@ -101,6 +108,7 @@ type CreateChatForm = {
     NgIf,
     NgFor,
     NgClass,
+    NgStyle,
     AsyncPipe,
     DatePipe,
     InputComponent,
@@ -227,6 +235,8 @@ export class ChatComponent implements OnInit {
     return this._suggestions();
   }
 
+  isKeyboardOpen = false;
+
   chatSearchInput = signal('');
 
   // Input states
@@ -261,6 +271,23 @@ export class ChatComponent implements OnInit {
     ) {
       this.showMenu = false;
     }
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onWindowResize() {
+    this.adjustStyles();
+  }
+
+  @HostListener('window:keyboardDidShow', ['$event'])
+  onKeyboardShow() {
+    this.isKeyboardOpen = true;
+    this.adjustStyles();
+  }
+
+  @HostListener('window:keyboardDidHide', ['$event'])
+  onKeyboardHide() {
+    this.isKeyboardOpen = false;
+    this.adjustStyles();
   }
 
   ngOnInit() {
@@ -875,6 +902,20 @@ export class ChatComponent implements OnInit {
     this._chatMessages.mutate((chatMessages) => {
       chatMessages[newChatGroup.id] = [];
     });
+  }
+
+  private adjustStyles() {
+    const inputElement = this.chatMessageInputRef
+      .nativeElement as HTMLDivElement;
+    if (inputElement) {
+      if (this.isKeyboardOpen) {
+        // Adjust your styles when the keyboard is open
+        inputElement.style.marginBottom = '10rem'; // Example adjustment
+      } else {
+        // Restore the default styles when the keyboard is closed
+        inputElement.style.marginBottom = '0';
+      }
+    }
   }
 
   ngOnDestroy() {

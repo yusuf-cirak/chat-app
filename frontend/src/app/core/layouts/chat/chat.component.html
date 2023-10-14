@@ -30,7 +30,8 @@
           id="user-profile-header"
           class="w-full min-h-[7%] bg-wp-panel-background border-r-wp-panel-r-border border-r flex items-center justify-between px-4"
           [ngClass]="{
-            'sticky': layoutService.isMobile() ,
+            sticky: layoutService.isMobile(),
+            'top-0': layoutService.isMobile()
           }"
         >
           <span
@@ -267,7 +268,8 @@
             id="chat-user-profile-header"
             class="w-full h-[7%] bg-wp-panel-background flex flex-col justify-center items-center"
             [ngClass]="{
-              'sticky': layoutService.isMobile(),
+              'top-0': layoutService.isMobile(),
+              sticky: layoutService.isMobile()
             }"
           >
             <div
