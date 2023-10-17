@@ -31,15 +31,11 @@ ChatApp includes the following features:
 ## Usage
 
 1. Register and log in by providing user name and password.
-![register](https://im4.ezgif.com/tmp/ezgif-4-0f7909cf86.gif)
-
 2. Create private or public chat groups with searching users by their user name.
-![create-group](https://im4.ezgif.com/tmp/ezgif-4-b6501fc28c.gif)
 4. Upload a profile picture for you or your chat group if you like.
-![upload-picture](https://im4.ezgif.com/tmp/ezgif-4-6c38e15c06.gif)
-
 5. Begin chatting on your desktop or mobile device!
-![chat](https://im4.ezgif.com/tmp/ezgif-4-9e37a94a57.gif)
 
 ## Tech Stack
-![Tech Stack](https://skillicons.dev/icons?i=dotnet,ts,angular,docker,nginx,githubactions&perline=6)
+![Tech Stack](https://skillicons.dev/icons?i=dotnet,ts,angular,docker,githubactions&perline=6)
+
+If you wish to see my nginx configurations, click [here](https://github.com/yusuf-cirak/yusufcirak.net-nginx).
