@@ -38,4 +38,4 @@ ChatApp includes the following features:
 ## Tech Stack
 ![Tech Stack](https://skillicons.dev/icons?i=dotnet,ts,angular,docker,githubactions&perline=6)
 
-If you wish to see my nginx configurations, click [here](https://github.com/yusuf-cirak/yusufcirak.net-nginx).
+If you wish to see my nginx configurations, click <a href="https://github.com/yusuf-cirak/yusufcirak.net-nginx" target="_blank">here</a>.
