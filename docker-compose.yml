@@ -19,6 +19,7 @@ services:
   backend:
     container_name: backend
     restart: unless-stopped
+    mem_limit: 128m
     build:
       context: ./backend/src
       dockerfile: Dockerfile
