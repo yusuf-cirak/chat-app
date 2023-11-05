@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.ElasticSearch.Models;
+﻿namespace ElasticSearch.Models;
 
 public sealed class ElasticSearchGetModel<T>
 {

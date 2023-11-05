@@ -1,17 +1,18 @@
-﻿using Elasticsearch.Net;
-using Infrastructure.ElasticSearch.Config;
-using Infrastructure.ElasticSearch.Index;
-using Infrastructure.ElasticSearch.Models;
-using Infrastructure.ElasticSearch.Response;
-using Infrastructure.ElasticSearch.SearchParameters;
+﻿using System.Text;
+using ElasticSearch.Config;
+using ElasticSearch.Index;
+using ElasticSearch.Models;
+using Elasticsearch.Net;
+using ElasticSearch.Response;
+using ElasticSearch.SearchParameters;
 using Microsoft.Extensions.Configuration;
 using Nest;
 using Nest.JsonNetSerializer;
 using Newtonsoft.Json;
 
-namespace Infrastructure.ElasticSearch;
+namespace ElasticSearch;
 
-public sealed class ElasticSearchManager : IElasticSearch
+public sealed class ElasticSearchManager : IElasticSearchManager
 {
     private readonly ConnectionSettings _connectionSettings;
 
@@ -29,9 +30,10 @@ public sealed class ElasticSearchManager : IElasticSearch
                 new JsonNetSerializer(
                     builtInSerializer,
                     connectionSettings,
-                    jsonSerializerSettingsFactory: () => new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }
+                    jsonSerializerSettingsFactory: () => new JsonSerializerSettings
+                        { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }
                 )
-        ).BasicAuthentication(settings.UserName,settings.Password);
+        ).BasicAuthentication(settings.UserName, settings.Password);
     }
 
     public IReadOnlyDictionary<IndexName, IndexState> GetIndexList()
@@ -45,11 +47,15 @@ public sealed class ElasticSearchManager : IElasticSearch
         ElasticClient elasticClient = GetElasticClient(indexName);
         BulkResponse? response = await elasticClient.BulkAsync(a => a.Index(indexName).IndexMany(items));
 
-        return new ElasticSearchResult();
+        return new ElasticSearchResult(response.IsValid,
+            message: response.IsValid ? $"'{indexName}' created successfully." : response.ServerError.Error.Reason);
     }
 
-    public async Task<IElasticSearchResult> CreateNewIndexAsync(IndexModel indexModel)
+    public async Task<IElasticSearchResult> CreateNewIndexAsync(Action<IndexModel> indexModelAction)
     {
+        var indexModel = new IndexModel();
+        indexModelAction(indexModel);
+
         ElasticClient elasticClient = GetElasticClient(indexModel.IndexName);
         if (elasticClient.Indices.Exists(indexModel.IndexName).Exists)
             return new ElasticSearchResult(success: false, message: "Index already exists");
@@ -57,23 +63,34 @@ public sealed class ElasticSearchManager : IElasticSearch
         CreateIndexResponse? response = await elasticClient.Indices.CreateAsync(
             indexModel.IndexName,
             selector: se =>
-                se.Settings(a => a.NumberOfReplicas(indexModel.NumberOfReplicas).NumberOfShards(indexModel.NumberOfShards))
+                se.Settings(a =>
+                        a.NumberOfReplicas(indexModel.NumberOfReplicas).NumberOfShards(indexModel.NumberOfShards))
                     .Aliases(x => x.Alias(indexModel.AliasName))
         );
 
-        return new ElasticSearchResult(response.IsValid, message: response.IsValid ? "Success" : response.ServerError.Error.Reason);
+        return new ElasticSearchResult(response.IsValid,
+            message: response.IsValid ? "Success" : response.ServerError.Error.Reason);
     }
 
-    public async Task<IElasticSearchResult> DeleteByElasticIdAsync(ElasticSearchModel model)
+    public async Task<IElasticSearchResult> DeleteByElasticIdAsync(Action<ElasticSearchModel> searchModelAction)
     {
+        var model = new ElasticSearchModel();
+        searchModelAction(model);
+
         ElasticClient elasticClient = GetElasticClient(model.IndexName);
-        DeleteResponse? response = await elasticClient.DeleteAsync<object>(model.ElasticId, selector: x => x.Index(model.IndexName));
-        return new ElasticSearchResult(response.IsValid, message: response.IsValid ? "Success" : response.ServerError.Error.Reason);
+        DeleteResponse? response =
+            await elasticClient.DeleteAsync<object>(model.ElasticId, selector: x => x.Index(model.IndexName));
+        return new ElasticSearchResult(response.IsValid,
+            message: response.IsValid ? "Success" : response.ServerError.Error.Reason);
     }
 
-    public async Task<List<ElasticSearchGetModel<T>>> GetAllSearch<T>(SearchParameter parameters)
+    public async Task<IEnumerable<ElasticSearchGetModel<T>>> GetAllSearch<T>(
+        Action<SearchParameter> searchParametersAction)
         where T : class
     {
+        var parameters = new SearchParameter();
+        searchParametersAction(parameters);
+
         Type type = typeof(T);
 
         ElasticClient elasticClient = GetElasticClient(parameters.IndexName);
@@ -81,27 +98,37 @@ public sealed class ElasticSearchManager : IElasticSearch
             s => s.Index(Indices.Index(parameters.IndexName)).From(parameters.From).Size(parameters.Size)
         );
 
-        var list = searchResponse.Hits.Select(x => new ElasticSearchGetModel<T> { ElasticId = x.Id, Item = x.Source }).ToList();
+        var enumerableResult = searchResponse.Hits.Select(x => new ElasticSearchGetModel<T>
+            { ElasticId = x.Id, Item = x.Source });
 
-        return list;
+        return enumerableResult;
     }
 
-    public async Task<List<ElasticSearchGetModel<T>>> GetSearchByField<T>(SearchByFieldParameters fieldParameters)
+    public async Task<IEnumerable<ElasticSearchGetModel<T>>> GetSearchByField<T>(
+        Action<SearchByFieldParameters> fieldParametersAction)
         where T : class
     {
+        var fieldParameters = new SearchByFieldParameters();
+        fieldParametersAction(fieldParameters);
+
         ElasticClient elasticClient = GetElasticClient(fieldParameters.IndexName);
         ISearchResponse<T>? searchResponse = await elasticClient.SearchAsync<T>(
             s => s.Index(fieldParameters.IndexName).From(fieldParameters.From).Size(fieldParameters.Size)
         );
 
-        var list = searchResponse.Hits.Select(x => new ElasticSearchGetModel<T> { ElasticId = x.Id, Item = x.Source }).ToList();
+        var enumerableResult = searchResponse.Hits.Select(x => new ElasticSearchGetModel<T>
+            { ElasticId = x.Id, Item = x.Source });
 
-        return list;
+        return enumerableResult;
     }
 
-    public async Task<List<ElasticSearchGetModel<T>>> GetSearchBySimpleQueryString<T>(SearchByQueryParameters queryParameters)
+    public async Task<IEnumerable<ElasticSearchGetModel<T>>> GetSearchBySimpleQueryString<T>(
+        Action<SearchByQueryParameters> queryParamsAction)
         where T : class
     {
+        var queryParameters = new SearchByQueryParameters();
+        queryParamsAction(queryParameters);
+
         ElasticClient elasticClient = GetElasticClient(queryParameters.IndexName);
         ISearchResponse<T>? searchResponse = await elasticClient.SearchAsync<T>(
             s =>
@@ -131,13 +158,17 @@ public sealed class ElasticSearchManager : IElasticSearch
                     )
         );
 
-        var list = searchResponse.Hits.Select(x => new ElasticSearchGetModel<T> { ElasticId = x.Id, Item = x.Source }).ToList();
+        var enumerableResult = searchResponse.Hits.Select(x => new ElasticSearchGetModel<T>
+            { ElasticId = x.Id, Item = x.Source });
 
-        return list;
+        return enumerableResult;
     }
 
-    public async Task<IElasticSearchResult> InsertAsync(ElasticSearchInsertUpdateModel model)
+    public async Task<IElasticSearchResult> InsertAsync(Action<ElasticSearchInsertUpdateModel> modelAction)
     {
+        var model = new ElasticSearchInsertUpdateModel();
+        modelAction(model);
+
         ElasticClient elasticClient = GetElasticClient(model.IndexName);
 
         IndexResponse? response = await elasticClient.IndexAsync(
@@ -145,17 +176,47 @@ public sealed class ElasticSearchManager : IElasticSearch
             selector: i => i.Index(model.IndexName).Id(model.ElasticId).Refresh(Refresh.True)
         );
 
-        return new ElasticSearchResult(response.IsValid, message: response.IsValid ? "Success" : response.ServerError.Error.Reason);
+        return new ElasticSearchResult(response.IsValid,
+            message: response.IsValid ? "Success" : response.ServerError.Error.Reason);
     }
 
-    public async Task<IElasticSearchResult> UpdateByElasticIdAsync(ElasticSearchInsertUpdateModel model)
+    public async Task<IElasticSearchResult> UpdateByElasticIdAsync(Action<ElasticSearchInsertUpdateModel> modelAction)
     {
+        var model = new ElasticSearchInsertUpdateModel();
+        modelAction(model);
+
         ElasticClient elasticClient = GetElasticClient(model.IndexName);
         UpdateResponse<object>? response = await elasticClient.UpdateAsync<object>(
             model.ElasticId,
             selector: u => u.Index(model.IndexName).Doc(model.Item)
         );
-        return new ElasticSearchResult(response.IsValid, message: response.IsValid ? "Success" : response.ServerError.Error.Reason);
+        return new ElasticSearchResult(response.IsValid,
+            message: response.IsValid ? "Success" : response.ServerError.Error.Reason);
+    }
+
+    public async Task<IElasticSearchResult> PatchDocumentAsync(Action<ElasticSearchPatchModel> modelAction)
+    {
+        var model = new ElasticSearchPatchModel();
+        modelAction(model);
+
+        var elasticClient = GetElasticClient(model.IndexName);
+
+        var scriptSb = new StringBuilder();
+        var paramsDict = new Dictionary<string, object>();
+
+        foreach (var (key, value) in model.KeyValues)
+        {
+            scriptSb.AppendLine($"ctx._source.{key} = params.{key};");
+            paramsDict.Add(key, value);
+        }
+
+        UpdateResponse<object>? response = await elasticClient.UpdateAsync<object>(
+            model.ElasticId,
+            u => u.Index(model.IndexName)
+                .Script(descriptor => descriptor.Source(scriptSb.ToString()).Params(paramsDict)));
+
+        return new ElasticSearchResult(response.IsValid,
+            message: response.IsValid ? "Success" : response.ServerError.Error.Reason);
     }
 
     private ElasticClient GetElasticClient(string indexName)

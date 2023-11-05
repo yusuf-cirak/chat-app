@@ -1,6 +1,6 @@
-﻿namespace Infrastructure.ElasticSearch.SearchParameters;
+﻿namespace ElasticSearch.SearchParameters;
 
-public class SearchByQueryParameters : SearchParameter
+public sealed class SearchByQueryParameters : SearchParameter
 {
     public string QueryName { get; set; }
     public string Query { get; set; }

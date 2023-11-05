@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.ElasticSearch.Index;
+﻿namespace ElasticSearch.Index;
 
 public sealed class IndexModel
 {

@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.ElasticSearch.Response;
+﻿namespace ElasticSearch.Response;
 
 public sealed class ElasticSearchResult : IElasticSearchResult //todo: refactor
 {

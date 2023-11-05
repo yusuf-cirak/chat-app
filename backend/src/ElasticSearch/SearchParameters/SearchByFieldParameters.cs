@@ -1,4 +1,5 @@
-﻿namespace Infrastructure.ElasticSearch.SearchParameters;
+﻿
+namespace ElasticSearch.SearchParameters;
 
 public sealed class SearchByFieldParameters : SearchParameter
 {

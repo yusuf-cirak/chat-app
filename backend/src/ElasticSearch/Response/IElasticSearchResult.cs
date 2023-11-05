@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.ElasticSearch.Response;
+﻿namespace ElasticSearch.Response;
 
 public interface IElasticSearchResult
 {

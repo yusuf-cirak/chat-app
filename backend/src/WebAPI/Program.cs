@@ -3,6 +3,7 @@ using HealthChecks.UI.Client;
 using Infrastructure;
 using Infrastructure.SignalR.Hubs;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using WebAPI.Endpoints;
 using WebAPI.Extensions;
 using WebAPI.Infrastructure.Middlewares;
 
@@ -65,6 +66,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// app.MapAuthEndpoints();
+// app.MapChatGroupEndpoints();
+// app.MapMessageEnpoints();
+// app.MapUserEnpoints();
 
 app.MapHub<ChatHub>("/_chat");
 

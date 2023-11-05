@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.ElasticSearch.Config;
+﻿namespace ElasticSearch.Config;
 
 public sealed class ElasticSearchConfig
 {

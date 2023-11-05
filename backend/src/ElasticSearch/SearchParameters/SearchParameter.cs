@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.ElasticSearch.SearchParameters;
+﻿namespace ElasticSearch.SearchParameters;
 
 public class SearchParameter
 {

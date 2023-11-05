@@ -9,6 +9,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Application\Application.csproj" />
       <ProjectReference Include="..\Domain\Domain.csproj" />
+      <ProjectReference Include="..\ElasticSearch\ElasticSearch.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -29,6 +30,7 @@
 
     <ItemGroup>
       <Folder Include="Helpers\" />
+      <Folder Include="Logging\" />
     </ItemGroup>
 
 </Project>

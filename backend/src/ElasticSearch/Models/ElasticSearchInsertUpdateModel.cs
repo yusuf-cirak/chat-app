@@ -1,10 +1,15 @@
 ﻿using Nest;
 
-namespace Infrastructure.ElasticSearch.Models;
+namespace ElasticSearch.Models;
 
 public sealed class ElasticSearchInsertUpdateModel : ElasticSearchModel
 {
     public object Item { get; set; }
+
+    public ElasticSearchInsertUpdateModel()
+    {
+        
+    }
 
     public ElasticSearchInsertUpdateModel(object item)
     {
