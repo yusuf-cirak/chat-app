@@ -33,7 +33,7 @@ public sealed class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavior
         {
             string requestName = typeof(TRequest).Name;
 
-            _logger.LogWarning("Request: {Name} ({ElapsedMilliseconds} milliseconds)",
+            _logger.LogWarning("Request: {Name} -  ({ElapsedMilliseconds} milliseconds)",
                 requestName, elapsedMilliseconds);
         }
 

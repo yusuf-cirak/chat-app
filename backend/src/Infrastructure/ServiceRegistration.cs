@@ -3,7 +3,6 @@ using Application.Abstractions.Services;
 using Application.Abstractions.Services.Chat;
 using Application.Abstractions.Services.Image;
 using CloudinaryDotNet;
-using Domain.Entities;
 using ElasticSearch;
 using Infrastructure.Dtos;
 using Infrastructure.Helpers.Hashing;
@@ -13,7 +12,6 @@ using Infrastructure.Services.Chat;
 using Infrastructure.Services.Image;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Driver;
 
 namespace Infrastructure;
 
@@ -45,16 +43,25 @@ public static class ServiceRegistration
         // {
         //     new SeedDataGenerator().GenerateAndPersist(mongoService);
         // }
-
+        
+        
+        // Set logging configurations
+        
+    }
+    
+    
+    public static void CreateElasticIndexes(this IServiceCollection services)
+    {
         var elasticSearchManager = services.BuildServiceProvider().GetRequiredService<IElasticSearchManager>();
 
         // Create users index for elastic search. Its okay if it already exists.
-        var createUserIndexResult = elasticSearchManager.CreateNewIndexAsync(indexModel =>
+        elasticSearchManager.CreateNewIndexAsync(indexModel =>
         {
             indexModel.IndexName = "users";
             indexModel.AliasName = "search";
             indexModel.NumberOfReplicas = 1;
             indexModel.NumberOfShards = 1;
         }).GetAwaiter().GetResult();
+        
     }
 }

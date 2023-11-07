@@ -1,6 +1,8 @@
 ﻿using Application.Abstractions.Security;
+using Application.Common.Extensions;
 using Application.Features.Users.Dtos;
 using ElasticSearch;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace Application.Features.Users.Queries.GetByName;
@@ -23,11 +25,16 @@ public sealed class GetUsersByNameQueryHandler : IRequestHandler<GetUsersByNameQ
 {
     private readonly IMongoService _mongoService;
     private readonly IElasticSearchManager _elasticSearchManager;
+    private readonly ILogger<GetUsersByNameQueryRequest> _logger;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public GetUsersByNameQueryHandler(IMongoService mongoService, IElasticSearchManager elasticSearchManager)
+    public GetUsersByNameQueryHandler(IMongoService mongoService, IElasticSearchManager elasticSearchManager,
+        ILogger<GetUsersByNameQueryRequest> logger, IHttpContextAccessor httpContextAccessor)
     {
         _mongoService = mongoService;
         _elasticSearchManager = elasticSearchManager;
+        _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<List<GetUserDto>> Handle(GetUsersByNameQueryRequest request, CancellationToken cancellationToken)
@@ -47,6 +54,13 @@ public sealed class GetUsersByNameQueryHandler : IRequestHandler<GetUsersByNameQ
             searchModel.IndexName = "users";
             searchModel.Size = 5;
         })).Select(hit => hit.Item).ToList();
+
+        _logger.LogInformation("{RequestName} - {UserCount} of users retrieved for {UserId} {Username}",
+            nameof(GetUsersByNameQueryRequest),
+            users.Count,
+            _httpContextAccessor.HttpContext.User.GetUserId(),
+            _httpContextAccessor.HttpContext.User.GetUsername()
+        );
 
         return users;
     }

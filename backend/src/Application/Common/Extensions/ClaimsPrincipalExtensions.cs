@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace Infrastructure.Extensions;
+namespace Application.Common.Extensions;
 
 public static class ClaimsPrincipalExtensions
 {
@@ -14,4 +14,7 @@ public static class ClaimsPrincipalExtensions
 
     public static string GetUserId(this ClaimsPrincipal claimsPrincipal) =>
         claimsPrincipal?.Claims(ClaimTypes.NameIdentifier)?.Single()!;
+    
+    public static string GetUsername(this ClaimsPrincipal claimsPrincipal) =>
+        claimsPrincipal?.Claims(ClaimTypes.Name)?.Single()!;
 }

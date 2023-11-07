@@ -3,11 +3,15 @@ using HealthChecks.UI.Client;
 using Infrastructure;
 using Infrastructure.SignalR.Hubs;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using WebAPI.Endpoints;
 using WebAPI.Extensions;
 using WebAPI.Infrastructure.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.ConfigureLogging();
+
+// Create required elastic services before app starts, if they don't exist.
+builder.Services.CreateElasticIndexes();
 
 builder.Services.AddScoped<GlobalExceptionHandlerMiddleware>();
 
@@ -40,6 +44,8 @@ builder.Services.AddSwaggerGenServices(); // From WebAPI\Extensions\SwaggerExten
 builder.Services.AddSignalR();
 
 var app = builder.Build();
+
+app.UseLogging();
 
 app.UseResponseCompression();
 
