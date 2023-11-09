@@ -31,15 +31,18 @@ jobs:
 
             changed_files=$(git diff --name-only HEAD^ HEAD)
             echo "Changed files: $changed_files"
-            if echo "$changed_files" | grep -q "^elasticsearch/"; then
+
+            if [ "${{vars.BUILD_ELASTIC_ANYWAY}}" -eq "1" ] || echo "$changed_files" | grep -q "^elasticsearch/"; then
               echo "Changes detected in the elasticsearch folder. Building and running elasticsearch."
+
               # Set environment variable
               export ELASTIC_PASSWORD="${{secrets.ELASTIC_PASSWORD}}"
-              export KIBANA_PASSWORD="$${{secrets.KIBANA_PASSWORD}}"
+              export KIBANA_PASSWORD="${{secrets.KIBANA_PASSWORD}}"
               export DEVOPS_USER_PASSWORD="${{secrets.DEVOPS_USER_PASSWORD}}"
 
               bash start-elastic.sh
             fi
+
 
 
             # Start the app
