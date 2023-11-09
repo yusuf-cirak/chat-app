@@ -1,0 +1,136 @@
+version: "3.9"
+
+name: chat-app
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - ${MONGO_PORTS}
+    networks:
+      - chat-app
+
+  backend:
+    container_name: backend
+    restart: unless-stopped
+    mem_limit: 128m
+    build:
+      context: ./backend/src
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+    depends_on:
+      - mongodb
+    networks:
+      - chat-app
+
+  frontend:
+    container_name: frontend
+    restart: unless-stopped
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    networks:
+      - chat-app
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.1
+    container_name: elasticsearch
+    environment:
+      - cluster.name=es-docker-cluster
+      - discovery.type=single-node
+      - bootstrap.memory_lock=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - http.host=0.0.0.0
+      - transport.host=127.0.0.1
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=$ELASTIC_PASSWORD
+      - KIBANA_PASSWORD=$KIBANA_PASSWORD
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      interval: 15s
+      timeout: 30s
+      retries: 10
+      test: curl -s http://elasticsearch:9200/_cluster/health | grep -vq '"status":"red"' -c
+    ports:
+      - "9200:9200"
+
+  set_elasticsearch_users:
+    image: alpine:latest
+    container_name: set_elasticsearch_users
+    environment:
+      - ELASTIC_PASSWORD=$ELASTIC_PASSWORD
+      - KIBANA_PASSWORD=$KIBANA_PASSWORD
+      - DEVOPS_USER_PASSWORD=$DEVOPS_USER_PASSWORD
+    command: >
+      sh -c "
+      apk add --no-cache curl;
+      echo 'Setting kibana_system user password';
+      until curl -s -XPOST -u elastic:$ELASTIC_PASSWORD -H 'Content-Type: application/json' http://elasticsearch:9200/_security/user/kibana_system/_password -d '{\"password\":\"$KIBANA_PASSWORD\"}' | grep -q '^{}'; do
+      sleep 5;
+      done;
+      echo 'Password set successfully!';
+      echo 'Adding devops user to elasticsearch';
+      curl -s -XPOST -u elastic:$ELASTIC_PASSWORD -H 'Content-Type: application/json' "http://elasticsearch:9200/_security/user/devops"  -d '{
+      \"password\": \"'$DEVOPS_USER_PASSWORD'\",
+      \"roles\": [\"superuser\"]}'
+      "
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:8.9.1
+    volumes:
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+    healthcheck:
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      test: curl --write-out 'HTTP %{http_code}' --silent --output /dev/null http://kibana:5601/api/status
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      set_elasticsearch_users:
+        condition: service_started
+
+  filebeat:
+    container_name: filebeat
+    image: docker.elastic.co/beats/filebeat:8.9.1
+    user: root
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
+    command: ["filebeat", "-e", "-strict.perms=false"]
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
+
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - chat-app
+
+networks:
+  chat-app:
+    driver: bridge
+    name: chat-app

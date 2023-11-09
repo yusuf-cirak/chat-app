@@ -1,5 +1,7 @@
 ﻿using Application.Abstractions.Security;
+using Application.Common.Extensions;
 using Application.Features.ChatGroups.Rules;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -12,11 +14,16 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
 {
     private readonly IMongoService _mongoService;
     private readonly ChatGroupBusinessRules _chatGroupBusinessRules;
+    private readonly ILogger<CreateChatGroupCommandRequest> _logger;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public CreateChatGroupCommandHandler(IMongoService mongoService, ChatGroupBusinessRules chatGroupBusinessRules)
+    public CreateChatGroupCommandHandler(IMongoService mongoService, ChatGroupBusinessRules chatGroupBusinessRules,
+        ILogger<CreateChatGroupCommandRequest> logger, IHttpContextAccessor httpContextAccessor)
     {
         _mongoService = mongoService;
         _chatGroupBusinessRules = chatGroupBusinessRules;
+        _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<string> Handle(CreateChatGroupCommandRequest request, CancellationToken cancellationToken)
@@ -30,6 +37,11 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
 
             if (!string.IsNullOrEmpty(chatGroupId))
             {
+                _logger.LogInformation("{RequestName} - Private chat group already exists for {UserId} {Username}",
+                    nameof(CreateChatGroupCommandRequest),
+                    _httpContextAccessor.HttpContext.User.GetUserId(),
+                    _httpContextAccessor.HttpContext.User.GetUsername()
+                );
                 return chatGroupId;
             }
 
@@ -46,7 +58,9 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
     {
         var userChatGroupProjection = Builders<ChatGroup>.Projection.Expression(cg => cg.Id);
 
-        var filter = Builders<ChatGroup>.Filter.Where(cg => cg.IsPrivate) & Builders<ChatGroup>.Filter.All(u => u.UserIds, participantUserIds) & Builders<ChatGroup>.Filter.Size(u => u.UserIds, participantUserIds.Count);
+        var filter = Builders<ChatGroup>.Filter.Where(cg => cg.IsPrivate) &
+                     Builders<ChatGroup>.Filter.All(u => u.UserIds, participantUserIds) &
+                     Builders<ChatGroup>.Filter.Size(u => u.UserIds, participantUserIds.Count);
 
 
         var existingChatGroupId = await _mongoService.GetCollection<ChatGroup>()
@@ -65,6 +79,12 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
         await _mongoService.GetCollection<ChatGroup>()
             .InsertOneAsync(newChatGroup, cancellationToken: cancellationToken);
 
+        _logger.LogInformation("{RequestName} - {UserId} {Username} created a chat group",
+            nameof(CreateChatGroupCommandRequest),
+            _httpContextAccessor.HttpContext.User.GetUserId(),
+            _httpContextAccessor.HttpContext.User.GetUsername()
+        );
+
         return newChatGroup.Id;
     }
 
@@ -75,6 +95,11 @@ public sealed class CreateChatGroupCommandHandler : IRequestHandler<CreateChatGr
 
         await _mongoService.GetCollection<ChatGroup>()
             .InsertOneAsync(newChatGroup, cancellationToken: cancellationToken);
+
+        _logger.LogInformation("{RequestName} - {UserId} {Username} created a chat group",
+            nameof(CreateChatGroupCommandRequest),
+            _httpContextAccessor.HttpContext.User.GetUserId(),
+            _httpContextAccessor.HttpContext.User.GetUsername());
 
         return newChatGroup.Id;
     }

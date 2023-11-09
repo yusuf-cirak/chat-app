@@ -1,7 +1,6 @@
 ﻿using Application.Abstractions.Services.Chat;
-using Application.Features.ChatGroups.Dtos;
+using Application.Common.Extensions;
 using Infrastructure.Dtos.Hub;
-using Infrastructure.Extensions;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Infrastructure.SignalR.Hubs;

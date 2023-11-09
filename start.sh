@@ -5,4 +5,14 @@ export DB_VOLUME_PATH="${DB_VOLUME_PATH:-/data/db}"
 
 export ASPNETCORE_ENVIRONMENT="${ASPNETCORE_ENVIRONMENT:-Development}"
 
-docker compose up --force-recreate --build -d && docker container restart nginx && docker ps
+if [ "$1" = "production" ] ; then
+    echo "Starting with production environment"
+    docker compose up --build --force-recreate -d && docker container restart nginx
+
+else
+    echo "Starting with development environment"
+    docker compose -f docker-compose-local.yml up --force-recreate --build -d
+
+fi
+
+#docker rm -f set_elasticsearch_users

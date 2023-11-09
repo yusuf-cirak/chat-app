@@ -8,6 +8,8 @@ using WebAPI.Infrastructure.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.ConfigureLogging();
+
 builder.Services.AddScoped<GlobalExceptionHandlerMiddleware>();
 
 // Accept anything from header, accept any method. Only on localhost:4200 and http & https protocols.
@@ -22,6 +24,9 @@ builder.Services.AddHealthCheckServices(builder.Configuration); // From WebAPI\E
 builder.Services.AddApplicationServices(); // From Application\ServiceRegistration.cs
 
 builder.Services.AddInfrastructureServices(builder.Configuration); // From Infrastructure\ServiceRegistration.cs
+
+// Create required elastic services before app starts, if they don't exist.
+builder.Services.CreateElasticIndexes();
 
 builder.Services.AddJwtAuthenticationServices(builder.Configuration); // From WebAPI\Extensions\JwtBearerExtensions.cs
 
@@ -39,6 +44,8 @@ builder.Services.AddSwaggerGenServices(); // From WebAPI\Extensions\SwaggerExten
 builder.Services.AddSignalR();
 
 var app = builder.Build();
+
+app.UseLogging();
 
 app.UseResponseCompression();
 
@@ -65,6 +72,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// app.MapAuthEndpoints();
+// app.MapChatGroupEndpoints();
+// app.MapMessageEnpoints();
+// app.MapUserEnpoints();
 
 app.MapHub<ChatHub>("/_chat");
 

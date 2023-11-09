@@ -73,7 +73,9 @@ export class LoginComponent {
             ...currentUser!,
             lastUpdateDate: new Date(Date.now()),
           });
-          this.router.navigateByUrl('/chat');
+          this.router.navigateByUrl('/chat', {
+            state: { SkipInterceptor: true },
+          });
         },
         error: (error) => {
           this.toastrService.error(
