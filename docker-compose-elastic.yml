@@ -1,5 +1,5 @@
 version: "3.9"
-name: fibadata_elasticsearch
+name: chat-app-elasticsearch
 services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.9.1
@@ -26,6 +26,8 @@ services:
       test: curl -s http://localhost:9200/_cluster/health | grep -vq '"status":"red"' -c
     ports:
       - "9200:9200"
+    networks:
+      - chat-app
 
   set_elasticsearch_users:
     image: alpine:latest
@@ -46,10 +48,13 @@ services:
       curl -s -XPOST -u elastic:$ELASTIC_PASSWORD -H 'Content-Type: application/json' "http://elasticsearch:9200/_security/user/devops"  -d '{
       \"password\": \"'$DEVOPS_USER_PASSWORD'\",
       \"roles\": [\"superuser\"]}'
+      exit 0;
       "
     depends_on:
       elasticsearch:
         condition: service_healthy
+      networks:
+        - chat-app
 
   kibana:
     container_name: kibana
@@ -68,16 +73,10 @@ services:
         condition: service_healthy
       set_elasticsearch_users:
         condition: service_started
+    networks:
+      - chat-app
 
-  filebeat:
-    container_name: filebeat
-    image: docker.elastic.co/beats/filebeat:8.9.1
-    user: root
-    volumes:
-      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
-    command: ["filebeat", "-e", "-strict.perms=false"]
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-      kibana:
-        condition: service_healthy
+networks:
+  chat-app:
+    name: chat-app
+    driver: bridge
