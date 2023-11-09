@@ -53,8 +53,8 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-      networks:
-        - chat-app
+    networks:
+      - chat-app
 
   kibana:
     container_name: kibana
@@ -80,3 +80,4 @@ networks:
   chat-app:
     name: chat-app
     driver: bridge
+    external: true

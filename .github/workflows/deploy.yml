@@ -28,4 +28,19 @@ jobs:
             export MONGO_PORTS="${{ secrets.MONGO_PORTS }}"
             export DB_VOLUME_PATH = "${{ secrets.DB_VOLUME_PATH }}"
             export ASPNETCORE_ENVIRONMENT="Production"
-            bash start.sh
+
+            changed_files=$(git diff --name-only HEAD^ HEAD)
+            echo "Changed files: $changed_files"
+            if echo "$changed_files" | grep -q "^elasticsearch/"; then
+              echo "Changes detected in the elasticsearch folder. Building and running elasticsearch."
+              # Set environment variable
+              export ELASTIC_PASSWORD="${{secrets.ELASTIC_PASSWORD}}"
+              export KIBANA_PASSWORD="$${{secrets.KIBANA_PASSWORD}}"
+              export DEVOPS_USER_PASSWORD="${{secrets.DEVOPS_USER_PASSWORD}}"
+
+              bash start-elastic.sh
+            fi
+
+
+            # Start the app
+            bash start.sh production
