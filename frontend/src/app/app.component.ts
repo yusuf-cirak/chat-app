@@ -1,8 +1,10 @@
 import { Component, inject } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { TokenService } from './core/services/token.service';
 import { AuthService } from './core/services/auth.service';
+import { filter } from 'rxjs';
 
+declare var gtag: any;
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -14,6 +16,19 @@ export class AppComponent {
 
   private readonly tokenService = inject(TokenService);
   private readonly authService = inject(AuthService);
+
+  constructor(router: Router) {
+    const navEvents = router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+    );
+    navEvents.subscribe({
+      next: (event: NavigationEnd) => {
+        gtag('config', 'G-L4ZXTH0ZXK', {
+          page_path: event.urlAfterRedirects,
+        });
+      },
+    });
+  }
 
   ngOnInit() {
     const accessToken = this.tokenService.accesToken;
