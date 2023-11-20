@@ -84,10 +84,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "ChatApp:build:production"
+              "buildTarget": "ChatApp:build:production"
             },
             "development": {
-              "browserTarget": "ChatApp:build:development"
+              "buildTarget": "ChatApp:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -95,7 +95,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "ChatApp:build"
+            "buildTarget": "ChatApp:build"
           }
         },
         "test": {

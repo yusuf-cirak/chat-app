@@ -435,10 +435,11 @@ export class ChatComponent implements OnInit {
           if (chatGroupIndex === -1) {
             return;
           }
-          this._sidebarChatGroups.mutate((groups) => {
+          this._sidebarChatGroups.update((groups) => {
             groups[chatGroupIndex].lastMessage = message.body;
+            return groups;
           });
-          this._chatMessages.mutate((messages) => {
+          this._chatMessages.update((messages) => {
             if (messages[chatGroupId] === undefined) {
               messages[chatGroupId] = [];
             }
@@ -449,11 +450,14 @@ export class ChatComponent implements OnInit {
               date: new Date(message.sentAt),
               isMe: false,
             });
+
+            return messages;
           });
 
           if (this.selectedChat.id !== chatGroupId) {
-            this._sidebarChatGroups.mutate((groups) => {
+            this._sidebarChatGroups.update((groups) => {
               groups[chatGroupIndex].unreadMessageCount++;
+              return groups;
             });
           } else {
             this.scrollToBottom();
@@ -494,11 +498,9 @@ export class ChatComponent implements OnInit {
       index,
       ...group,
     });
-    this._sidebarChatGroups.mutate((groups) => {
+    this._sidebarChatGroups.update((groups) => {
       groups[index].unreadMessageCount = 0;
-    });
-    this._sidebarChatGroups.mutate((groups) => {
-      groups[index].unreadMessageCount = 0;
+      return groups;
     });
     this.chatMessageInput.set('');
     this.focusChatInput();
@@ -535,13 +537,15 @@ export class ChatComponent implements OnInit {
               value: user,
             }));
             this._suggestions.set(suggestions);
-            this._chatUsers.mutate((chatUsers) => {
+            this._chatUsers.update((chatUsers) => {
               usersResult.forEach((user) => {
                 chatUsers[user.id] = {
                   userName: user.userName,
                   profileImageUrl: user.profileImageUrl,
                 };
               });
+
+              return chatUsers;
             });
           }
         });
@@ -713,13 +717,15 @@ export class ChatComponent implements OnInit {
           // Send message to hub, server will handle the rest
           this.chatHub.invokeMessageSend(messageDto, recipientUserIds);
 
-          this._sidebarChatGroups.mutate((groups) => {
+          this._sidebarChatGroups.update((groups) => {
             groups[index].lastMessage = groups[index].isPrivate
               ? message
               : `You: ${message}`;
+
+            return groups;
           });
 
-          this._chatMessages.mutate((messages) => {
+          this._chatMessages.update((messages) => {
             if (messages[chatId] === undefined) {
               messages[chatId] = [];
             }
@@ -730,6 +736,8 @@ export class ChatComponent implements OnInit {
               date: new Date(),
               isMe: true,
             });
+
+            return messages;
           });
 
           this.chatMessageInput.set('');
@@ -868,12 +876,14 @@ export class ChatComponent implements OnInit {
       .uploadChatGroupImage({ file: picture, chatGroupId: selectedChatGroupId })
       .subscribe({
         next: (publicImageId) => {
-          this._selectedChat.mutate((selectedChat) => {
+          this._selectedChat.update((selectedChat) => {
             selectedChat.profileImageUrl = publicImageId;
+            return selectedChat;
           });
-          this._sidebarChatGroups.mutate((groups) => {
+          this._sidebarChatGroups.update((groups) => {
             groups.find((g) => g.id === selectedChatGroupId)!.profileImageUrl =
               publicImageId;
+            return groups;
           });
         },
         error: (err) => {
@@ -887,17 +897,16 @@ export class ChatComponent implements OnInit {
 
   private insertNewGroupToChatStates(newChatGroup: SidebarChatGroup) {
     const previousChatGroupsLength = this._sidebarChatGroups().length;
-    this._sidebarChatGroups.mutate((groups) => {
-      groups.push(newChatGroup);
-    });
+    this._sidebarChatGroups.update((groups) => [...groups, newChatGroup]);
 
     // If user has filtered chat groups, we need to filter the new chat group as well
     if (previousChatGroupsLength !== this._filteredChatGroups().length) {
       this.filterChatGroups(this.chatSearchInput());
     }
 
-    this._chatMessages.mutate((chatMessages) => {
+    this._chatMessages.update((chatMessages) => {
       chatMessages[newChatGroup.id] = [];
+      return chatMessages;
     });
   }
 
