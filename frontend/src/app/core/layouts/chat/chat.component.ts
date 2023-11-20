@@ -253,6 +253,9 @@ export class ChatComponent implements OnInit {
   @ViewChild('chatUserProfileHeaderRef')
   private chatUserProfileHeaderRef!: ElementRef;
 
+  @ViewChild('chatInputContainerRef')
+  private chatInputContainerRef!: ElementRef;
+
   // Event listeners
   @HostListener('document:keyup.enter', ['$event'])
   onEnter() {
@@ -280,10 +283,13 @@ export class ChatComponent implements OnInit {
   onWindowResize() {
     // Set chat message input height to visual viewport height on mobile
     if (this.layoutService.isMobile()) {
-      const visualViewport = window.visualViewport as VisualViewport;
+      // Set header to the top of the viewport
+      this.chatUserProfileHeaderRef.nativeElement.style.position = 'fixed';
+      this.chatUserProfileHeaderRef.nativeElement.style.top = '0';
 
-      this.chatMessageInputRef.nativeElement.style.height = `${visualViewport.height}px`;
-      this.chatUserProfileHeaderRef.nativeElement.style.top = `${visualViewport.offsetTop}px`;
+      // Set chat input to the bottom of the viewport
+      this.chatInputContainerRef.nativeElement.style.position = 'fixed';
+      this.chatInputContainerRef.nativeElement.style.bottom = '0';
     }
   }
 
