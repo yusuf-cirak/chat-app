@@ -250,6 +250,9 @@ export class ChatComponent implements OnInit {
 
   @ViewChild('showMenuRef') private showMenuRef!: ElementRef;
 
+  @ViewChild('chatUserProfileHeaderRef')
+  private chatUserProfileHeaderRef!: ElementRef;
+
   // Event listeners
   @HostListener('document:keyup.enter', ['$event'])
   onEnter() {
@@ -275,19 +278,13 @@ export class ChatComponent implements OnInit {
 
   @HostListener('window:resize', ['$event'])
   onWindowResize() {
-    this.adjustStyles();
-  }
+    // Set chat message input height to visual viewport height on mobile
+    if (this.layoutService.isMobile()) {
+      const visualViewport = window.visualViewport as VisualViewport;
 
-  @HostListener('window:keyboardDidShow', ['$event'])
-  onKeyboardShow() {
-    this.isKeyboardOpen = true;
-    this.adjustStyles();
-  }
-
-  @HostListener('window:keyboardDidHide', ['$event'])
-  onKeyboardHide() {
-    this.isKeyboardOpen = false;
-    this.adjustStyles();
+      this.chatMessageInputRef.nativeElement.style.height = `${visualViewport.height}px`;
+      this.chatUserProfileHeaderRef.nativeElement.style.top = `${visualViewport.offsetTop}px`;
+    }
   }
 
   ngOnInit() {
@@ -902,20 +899,6 @@ export class ChatComponent implements OnInit {
     this._chatMessages.mutate((chatMessages) => {
       chatMessages[newChatGroup.id] = [];
     });
-  }
-
-  private adjustStyles() {
-    const inputElement = this.chatMessageInputRef
-      .nativeElement as HTMLDivElement;
-    if (inputElement) {
-      if (this.isKeyboardOpen) {
-        // Adjust your styles when the keyboard is open
-        inputElement.style.marginBottom = '10rem'; // Example adjustment
-      } else {
-        // Restore the default styles when the keyboard is closed
-        inputElement.style.marginBottom = '0';
-      }
-    }
   }
 
   ngOnDestroy() {

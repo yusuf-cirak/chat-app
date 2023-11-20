@@ -265,6 +265,7 @@
         <!-- Chat Header -->
         <div id="user-chat" class="h-full" *ngIf="selectedChat.index > -1">
           <div
+            #chatUserProfileHeaderRef
             id="chat-user-profile-header"
             class="w-full h-[7%] bg-wp-panel-background flex flex-col justify-center items-center"
             [ngClass]="{
