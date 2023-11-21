@@ -281,16 +281,12 @@ export class ChatComponent implements OnInit {
 
   @HostListener('window:resize', ['$event'])
   onWindowResize() {
-    // Set chat message input height to visual viewport height on mobile
-    if (this.layoutService.isMobile()) {
-      // Set header to the top of the viewport
-      this.chatUserProfileHeaderRef.nativeElement.style.position = 'fixed';
-      this.chatUserProfileHeaderRef.nativeElement.style.top = '0';
+    this.adjustHeaderAndInputContainerHeight();
+  }
 
-      // Set chat input to the bottom of the viewport
-      this.chatInputContainerRef.nativeElement.style.position = 'fixed';
-      this.chatInputContainerRef.nativeElement.style.bottom = '0';
-    }
+  @HostListener('window:scroll', ['$event'])
+  onWindowScroll() {
+    this.adjustHeaderAndInputContainerHeight();
   }
 
   ngOnInit() {
@@ -914,6 +910,19 @@ export class ChatComponent implements OnInit {
       chatMessages[newChatGroup.id] = [];
       return chatMessages;
     });
+  }
+
+  adjustHeaderAndInputContainerHeight() {
+    // Set chat message input height to visual viewport height on mobile
+    if (this.layoutService.isMobile()) {
+      // Set header to the top of the viewport
+      this.chatUserProfileHeaderRef.nativeElement.style.position = 'fixed';
+      this.chatUserProfileHeaderRef.nativeElement.style.top = '0';
+
+      // Set chat input to the bottom of the viewport
+      this.chatInputContainerRef.nativeElement.style.position = 'fixed';
+      this.chatInputContainerRef.nativeElement.style.bottom = '0';
+    }
   }
 
   ngOnDestroy() {
