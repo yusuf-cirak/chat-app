@@ -922,7 +922,7 @@ export class ChatComponent implements OnInit {
       // Set chat input to the bottom of the viewport
       this.chatInputContainerRef.nativeElement.style.position = 'fixed';
       this.chatInputContainerRef.nativeElement.style.bottom = '0';
-      this.chatInputContainerRef.nativeElement.style.heigh = '%8';
+      this.chatInputContainerRef.nativeElement.style.height = '%8';
     }
   }
 
