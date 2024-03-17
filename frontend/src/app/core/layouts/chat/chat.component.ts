@@ -19,6 +19,7 @@ import {
   WritableSignal,
   inject,
   signal,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { debounceTime, filter, forkJoin, switchMap } from 'rxjs';
 import { InputComponent } from 'src/app/shared/components/input/input.component';
@@ -130,6 +131,7 @@ export class ChatComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly imageService = inject(ImageService);
   private readonly toastrService = inject(ToastrService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   private readonly audioService = inject(AudioService);
   private readonly chatHub = inject(ChatHub);
@@ -464,6 +466,7 @@ export class ChatComponent implements OnInit {
           } else {
             this.scrollToBottom();
           }
+          this.cdr.detectChanges();
           this.audioService.playNewMessageAudio();
         },
       });
@@ -490,6 +493,7 @@ export class ChatComponent implements OnInit {
           };
 
           this.insertNewGroupToChatStates(newChatGroup);
+          this.cdr.detectChanges();
           this.audioService.playNewMessageAudio();
         },
       });
@@ -752,7 +756,7 @@ export class ChatComponent implements OnInit {
   private scrollToBottom() {
     setTimeout(() => {
       const messageContainerRef =
-        (this.messagesWrapperRef.nativeElement as HTMLDivElement) || null;
+        (this.messagesWrapperRef?.nativeElement as HTMLDivElement) || null;
 
       if (messageContainerRef) {
         messageContainerRef.scrollTo({
@@ -829,7 +833,7 @@ export class ChatComponent implements OnInit {
   logout() {
     this.tokenService.removeTokens();
     this.authService.setUser(null!);
-    this._router.navigate(['/login']);
+    this._router.navigate(['/login'], { state: { SkipInterceptor: true } });
   }
 
   filterChatGroups(searchInput: string) {
