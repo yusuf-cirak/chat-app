@@ -8,6 +8,7 @@ WORKDIR /app
 COPY . .
 WORKDIR /app/WebAPI
 
+# To ensure that nuget.org DNS resolved.
 RUN curl https://api.nuget.org/v3/index.json -k
 
 RUN dotnet restore
