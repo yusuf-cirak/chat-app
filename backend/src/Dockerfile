@@ -7,6 +7,9 @@ WORKDIR /app
 # Copy the remaining source code and build the application
 COPY . .
 WORKDIR /app/WebAPI
+
+RUN curl https://api.nuget.org/v3/index.json -k
+
 RUN dotnet restore
 
 RUN dotnet publish -c Release --output ../out
