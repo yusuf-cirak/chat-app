@@ -25,7 +25,7 @@
     "jwt-decode": "^3.1.2",
     "ngx-toastr": "^17.0.2",
     "rxjs": "~7.8.1",
-    "tslib": "^2.6.2",
+    "tslib": "^2.8.1",
     "zone.js": "~0.14.2"
   },
   "devDependencies": {
