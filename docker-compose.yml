@@ -2,20 +2,6 @@ version: "3.9"
 
 name: chat-app
 services:
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb
-    restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-    volumes:
-      - ${DB_VOLUME_PATH}:/data/db
-    ports:
-      - ${MONGO_PORTS}
-    networks:
-      - chat-app
-
   backend:
     container_name: backend
     restart: unless-stopped
@@ -25,10 +11,9 @@ services:
       dockerfile: Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-    depends_on:
-      - mongodb
     networks:
       - chat-app
+      - coolify
 
   frontend:
     container_name: frontend
@@ -43,3 +28,5 @@ networks:
   chat-app:
     driver: bridge
     name: chat-app
+  coolify:
+    external: true
